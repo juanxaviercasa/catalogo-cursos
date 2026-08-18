@@ -103,9 +103,9 @@ export const dubbingSetup: DubbingSetup = {
   ],
   providers: [
     { id: "local-stack", label: "Ruta local compuesta", tier: "free", recommended: false, description: "Transcripción, traducción y voz en tu propio equipo. Sin coste por minuto, con más instalación y revisión manual." },
-    { id: "elevenlabs", label: "ElevenLabs Dubbing", tier: "optional-paid", recommended: true, description: "La vía más rápida para cursos grabados: integra doblaje de vídeo, conservación de fondo y pista en español como trabajo asíncrono." },
-    { id: "azure-speech", label: "Azure Speech", tier: "optional-paid", recommended: false, description: "Alternativa para una futura escucha traducida de baja latencia; requiere integrar traducción y síntesis de voz." },
     { id: "google-cloud", label: "Google Cloud Speech + TTS", tier: "optional-paid", recommended: false, description: "Cadena modular de transcripción, traducción y voces neuronales con cuota inicial gratuita de síntesis en ciertos modelos." },
+    { id: "azure-speech", label: "Azure Speech", tier: "optional-paid", recommended: false, description: "Alternativa para una futura escucha traducida de baja latencia; requiere integrar traducción y síntesis de voz." },
+    { id: "elevenlabs", label: "ElevenLabs Dubbing", tier: "optional-paid", recommended: false, description: "Alternativa de pago para cursos grabados: integra doblaje de vídeo y conservación de fondo como trabajo asíncrono." },
   ],
   placeholders: [
     { key: "DUBBING_PROVIDER_MODE", purpose: "Selecciona el proveedor de doblaje.", example: "local-stack | elevenlabs | azure-speech | google-cloud" },

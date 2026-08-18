@@ -57,13 +57,13 @@ La preparación es un **trabajo asíncrono**. En la primera solicitud se muestra
 | Enfoque | Ventajas | Limitaciones | Uso recomendado |
 |---|---|---|---|
 | Local: faster-whisper + Argos Translate + Piper + FFmpeg | Sin coste por minuto de API; control de datos; funciona con un equipo propio. | El equipo debe permanecer encendido; requiere instalación, potencia de cómputo y revisión humana de calidad. | Pilotos, biblioteca pequeña y aprendizaje técnico. |
-| ElevenLabs Dubbing | API de doblaje directo de audio/vídeo, detección de varios hablantes, preservación de fondo y soporte de inglés/español. | Servicio de pago por minutos; su flujo de doblaje automático es asíncrono y la versión v2 sigue en alpha. | **Recomendación para lanzar rápido** cursos pregrabados. |
-| Azure Speech Translation + TTS | Traducción de voz a voz con salida sintetizada de baja latencia; adecuado para interacción o flujos en directo. | Requiere combinar servicios y controlar costes de transcripción/traducción/síntesis. | Futuro modo de interpretación o traducción de audio más inmediata. |
 | Google Cloud STT + Translate + TTS | Voces neuronales, síntesis de audio extensa y cuota gratuita de TTS para ciertas voces. | Es una cadena de varios servicios; exige implementar sincronización y mezcla. | Alternativa modular con coste inicial bajo. |
+| Azure Speech Translation + TTS | Traducción de voz a voz con salida sintetizada de baja latencia; adecuado para interacción o flujos en directo. | Requiere combinar servicios y controlar costes de transcripción/traducción/síntesis. | Futuro modo de interpretación o traducción de audio más inmediata. |
+| ElevenLabs Dubbing | API de doblaje directo de audio/vídeo, detección de varios hablantes, preservación de fondo y soporte de inglés/español. | Servicio de pago por minutos; su flujo de doblaje automático es asíncrono y la versión v2 sigue en alpha. | Alternativa opcional cuando la ruta local no alcance la calidad o velocidad necesarias. |
 
 ### Recomendación práctica
 
-Para la primera versión en producción, utilizar **ElevenLabs Dubbing** como opción de pago por su operación integral y su capacidad de conservar la emoción y el audio de fondo. Para la alternativa gratuita, mantener la ruta local compuesta. Para una experiencia futura de baja latencia, evaluar Azure Speech. ElevenLabs documenta que su API admite doblaje de vídeo y audio, incluyendo inglés y español, pero también especifica que el doblaje en tiempo real no está disponible; por tanto, no debe prometerse como traducción instantánea de un vídeo ya iniciado.[1]
+La primera prueba debe usar la **ruta local gratuita** para validar la calidad de transcripción, traducción y voz en el curso piloto. Las APIs externas se activan únicamente si se necesita mayor velocidad, calidad consistente o automatización a escala. Google Cloud y Azure quedan como alternativas modulares opcionales; **ElevenLabs queda como última opción opcional**, útil para un doblaje integral de cursos grabados si se acepta su coste. ElevenLabs documenta que su API admite doblaje de vídeo y audio, incluyendo inglés y español, pero también especifica que el doblaje en tiempo real no está disponible; por tanto, no debe prometerse como traducción instantánea de un vídeo ya iniciado.[1]
 
 ## Contratos y secretos pendientes
 

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { completeZipImport, createZipImport, failZipImport, getModuleProgressByUserId, getZipImportByZipId, getZipImportsWithVideos, restartZipImport, setModuleProgress } from "./db";
+import { completeZipImport, createZipImport, failZipImport, getMediaTracks, getModuleProgressByUserId, getZipImportByZipId, getZipImportsWithVideos, restartZipImport, setModuleProgress } from "./db";
 import { DubbingSetupSchema, dubbingSetup, DriveCatalogSchema, getContentType, VideoProcessingSetupSchema, videoProcessingSetup, type DriveCourse } from "../shared/learning";
 import { extractPublicDriveZip } from "./zipImport";
 
@@ -11,6 +11,7 @@ const CATALOG_PATH = "/manus-storage/drive_courses_inventory_8a9ad92a.json";
 let catalogCache: DriveCourse[] | null = null;
 const extractedVideoSchema = z.object({ id: z.number(), title: z.string(), storageUrl: z.string(), mimeType: z.string(), sizeBytes: z.number(), sortOrder: z.number() });
 const zipImportSchema = z.object({ id: z.number(), zipId: z.string(), courseId: z.string(), sourceName: z.string(), sourceBytes: z.number().nullable(), status: z.enum(["processing", "ready", "failed"]), errorMessage: z.string().nullable(), videos: z.array(extractedVideoSchema) });
+const mediaTrackSchema = z.object({ id: z.number(), extractedVideoId: z.number(), language: z.string(), kind: z.enum(["dubbed_video", "captions"]), label: z.string(), storageUrl: z.string(), mimeType: z.string(), provider: z.string() });
 
 async function loadCatalog(origin: string): Promise<DriveCourse[]> {
   if (catalogCache) return catalogCache;
@@ -66,6 +67,10 @@ export const appRouter = router({
         errorMessage: item.errorMessage,
         videos: item.videos.map((video) => ({ id: video.id, title: video.title, storageUrl: video.storageUrl, mimeType: video.mimeType, sizeBytes: video.sizeBytes, sortOrder: video.sortOrder })),
       }));
+    }),
+    mediaTracks: publicProcedure.output(z.array(mediaTrackSchema)).query(async () => {
+      const tracks = await getMediaTracks();
+      return tracks.map((track) => ({ id: track.id, extractedVideoId: track.extractedVideoId, language: track.language, kind: track.kind, label: track.label, storageUrl: track.storageUrl, mimeType: track.mimeType, provider: track.provider }));
     }),
     videoProcessingSetup: publicProcedure.output(VideoProcessingSetupSchema).query(() => videoProcessingSetup),
     dubbingSetup: publicProcedure.output(DubbingSetupSchema).query(() => dubbingSetup),

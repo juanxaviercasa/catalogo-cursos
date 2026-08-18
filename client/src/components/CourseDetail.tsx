@@ -1,5 +1,6 @@
 import type { CourseMeta, LearningRoute } from "@shared/courseMeta";
 import { getContentType, orderedModules, type DriveCourse, type DriveItem } from "@shared/learning";
+import { getSpanishMediaTracks, type MediaTrack } from "@shared/mediaTracks";
 import { AlertTriangle, ArrowLeft, AudioLines, Check, CheckCircle2, ExternalLink, FileArchive, FileText, FolderOpen, Loader2, Play, PlayCircle, Server } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ProgressRing } from "./ProgressRing";
@@ -17,7 +18,15 @@ const moduleIcon = (item: DriveItem) => {
 type ImportedVideo = { id: number; title: string; storageUrl: string; mimeType: string; sizeBytes: number; sortOrder: number };
 type ZipImport = { zipId: string; status: "processing" | "ready" | "failed"; errorMessage: string | null; videos: ImportedVideo[] };
 
-export function CourseDetail({ course, meta, route, completedIds, onBack, onToggle, canTrack, onLogin, zipImports, canImportZip, isImportingZip, onPrepareZip, videoProcessingSetup, dubbingSetup }: {
+function PreparedVideoPlayer({ video, tracks }: { video: ImportedVideo; tracks: MediaTrack[] }) {
+  const { dubbedVideo: spanishVideo, captions: spanishCaptions } = getSpanishMediaTracks(video.id, tracks);
+  const [language, setLanguage] = useState<"original" | "es">(spanishVideo ? "es" : "original");
+  const isSpanish = language === "es" && Boolean(spanishVideo);
+  const source = isSpanish ? spanishVideo!.storageUrl : video.storageUrl;
+  return <article className="prepared-video-card"><div className="prepared-video-card-head"><h3>{video.title}</h3>{spanishVideo && <div className="audio-selector" aria-label={`Idioma de audio para ${video.title}`}><button className={!isSpanish ? "audio-selector--selected" : ""} onClick={() => setLanguage("original")}>Original · inglés</button><button className={isSpanish ? "audio-selector--selected" : ""} onClick={() => setLanguage("es")}>Español</button></div>}</div><p className={isSpanish ? "audio-track-label audio-track-label--es" : "audio-track-label"}><AudioLines size={13} /> {isSpanish ? "Audio español generado localmente" : "Audio original en inglés"}</p><video key={source} controls preload="metadata" src={source}>{isSpanish && spanishCaptions && <track kind="subtitles" srcLang="es" label="Español" src={spanishCaptions.storageUrl} default />}</video>{isSpanish && spanishCaptions && <p className="subtitle-status">Subtítulos en español incluidos.</p>}</article>;
+}
+
+export function CourseDetail({ course, meta, route, completedIds, onBack, onToggle, canTrack, onLogin, zipImports, mediaTracks, canImportZip, isImportingZip, onPrepareZip, videoProcessingSetup, dubbingSetup }: {
   course: DriveCourse;
   meta: CourseMeta;
   route: LearningRoute;
@@ -27,6 +36,7 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
   canTrack: boolean;
   onLogin: () => void;
   zipImports: ZipImport[];
+  mediaTracks: MediaTrack[];
   canImportZip: boolean;
   isImportingZip: boolean;
   onPrepareZip: (zipId: string) => void;
@@ -80,7 +90,7 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
       </section>}
 
       {pilotZip && <VideoProcessingPanel setup={videoProcessingSetup} />}
-      {pilotZip && <DubbingPanel setup={dubbingSetup} />}
+      {pilotZip && <DubbingPanel setup={dubbingSetup} isPilotReady={Boolean(pilotImport?.videos.some((video) => getSpanishMediaTracks(video.id, mediaTracks).dubbedVideo))} />}
 
       {activeVideo && (
         <section className="video-player-panel" aria-label={`Reproduciendo ${activeVideo.name}`}>
@@ -115,7 +125,7 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
           })}
         </div>
       </section>
-      {preparedVideos && <section className="prepared-video-panel"><div className="video-panel-head"><div><span>VÍDEOS PREPARADOS</span><h2>Reproducir desde la plataforma</h2></div><button onClick={() => setPreparedVideos(null)}>Cerrar</button></div><p>Estos vídeos se importaron una vez desde el ZIP original de Drive y ahora se sirven desde el almacenamiento gestionado de la plataforma.</p><div className="audio-availability audio-availability--dark"><AudioLines size={15} /><span><b>Audio disponible: original · inglés.</b> No hay una pista española generada todavía.</span></div><div className="prepared-video-list">{preparedVideos.map((video) => <article key={video.id}><h3>{video.title}</h3><video controls preload="metadata" src={video.storageUrl} /></article>)}</div></section>}
+      {preparedVideos && <section className="prepared-video-panel"><div className="video-panel-head"><div><span>VÍDEOS PREPARADOS</span><h2>Reproducir desde la plataforma</h2></div><button onClick={() => setPreparedVideos(null)}>Cerrar</button></div><p>Estos vídeos se importaron una vez desde el ZIP original de Drive y ahora se sirven desde el almacenamiento gestionado de la plataforma.</p><div className="prepared-video-list">{preparedVideos.map((video) => <PreparedVideoPlayer key={video.id} video={video} tracks={mediaTracks.filter((track) => track.extractedVideoId === video.id)} />)}</div></section>}
       {!canTrack && <aside className="tracking-note"><CheckCircle2 size={18} /><span>Inicia sesión para marcar módulos como vistos y guardar tu progreso entre sesiones.</span><button onClick={onLogin}>Iniciar sesión</button></aside>}
     </section>
   );

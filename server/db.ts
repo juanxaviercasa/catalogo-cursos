@@ -1,6 +1,6 @@
 import { asc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { extractedVideos, InsertUser, moduleProgress, users, zipImports } from "../drizzle/schema";
+import { extractedVideos, InsertUser, mediaTracks, moduleProgress, users, zipImports } from "../drizzle/schema";
 import type { ExtractedVideo as ImportedVideo } from "./zipImport";
 import { ENV } from './_core/env';
 
@@ -117,6 +117,12 @@ export async function getZipImportsWithVideos() {
   const imports = await db.select().from(zipImports);
   const videos = await db.select().from(extractedVideos).orderBy(asc(extractedVideos.sortOrder));
   return imports.map((item) => ({ ...item, videos: videos.filter((video) => video.zipImportId === item.id) }));
+}
+
+export async function getMediaTracks() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(mediaTracks);
 }
 
 export async function getZipImportByZipId(zipId: string) {

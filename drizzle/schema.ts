@@ -66,11 +66,27 @@ export const extractedVideos = mysqlTable("extracted_videos", {
   uniqueIndex("extracted_videos_import_path_unique").on(table.zipImportId, table.sourcePath),
 ]);
 
+export const mediaTracks = mysqlTable("media_tracks", {
+  id: int("id").autoincrement().primaryKey(),
+  extractedVideoId: int("extractedVideoId").notNull().references(() => extractedVideos.id, { onDelete: "cascade" }),
+  language: varchar("language", { length: 16 }).notNull(),
+  kind: mysqlEnum("kind", ["dubbed_video", "captions"]).notNull(),
+  label: varchar("label", { length: 128 }).notNull(),
+  storageKey: varchar("storageKey", { length: 1024 }).notNull(),
+  storageUrl: varchar("storageUrl", { length: 1200 }).notNull(),
+  mimeType: varchar("mimeType", { length: 128 }).notNull(),
+  provider: varchar("provider", { length: 64 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex("media_tracks_video_language_kind_unique").on(table.extractedVideoId, table.language, table.kind),
+]);
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type ModuleProgress = typeof moduleProgress.$inferSelect;
 export type InsertModuleProgress = typeof moduleProgress.$inferInsert;
 export type ZipImport = typeof zipImports.$inferSelect;
 export type ExtractedVideo = typeof extractedVideos.$inferSelect;
+export type MediaTrack = typeof mediaTracks.$inferSelect;
 
 // TODO: Add your tables here
