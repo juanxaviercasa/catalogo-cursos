@@ -34,6 +34,9 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
   const modules = useMemo(() => orderedModules(course.children), [course.children]);
   const completed = modules.filter((item) => completedIds.has(item.id)).length;
   const progress = modules.length ? Math.round((completed / modules.length) * 100) : 0;
+  const zipModules = modules.filter((item) => getContentType(item) === "zip");
+  const pilotZip = zipModules[0];
+  const pilotImport = pilotZip ? zipImports.find((record) => record.zipId === pilotZip.id) : undefined;
 
   return (
     <section className="course-detail-shell">
@@ -62,6 +65,16 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
         <article className="drive-brief"><span>ORIGEN DEL CURSO</span><a href={course.webViewLink} target="_blank" rel="noreferrer">Abrir carpeta en Drive <ExternalLink size={15} /></a></article>
       </div>
 
+      {pilotZip && <section className={`zip-import-hero zip-import-hero--${pilotImport?.status ?? "idle"}`}>
+        <div className="zip-import-icon"><FileArchive size={23} /></div>
+        <div className="zip-import-copy"><span>VÍDEOS DENTRO DE ZIP</span><h2>Prepáralos aquí, no en Google Drive.</h2><p>El archivo original se mantiene comprimido en Drive. Esta acción lo lee una sola vez, extrae únicamente los vídeos compatibles y los deja listos para reproducir desde esta plataforma.</p></div>
+        <div className="zip-import-actions">
+          {pilotImport?.status === "ready" ? <button className="zip-primary-action" onClick={() => setPreparedVideos(pilotImport.videos)}><Server size={16} /> Ver {pilotImport.videos.length} vídeos listos</button> : pilotImport?.status === "processing" ? <div className="zip-processing"><Loader2 className="animate-spin" size={18} /><span>Importando vídeos…<small>No cierres esta página.</small></span></div> : canImportZip ? <button className="zip-primary-action" disabled={isImportingZip} onClick={() => onPrepareZip(pilotZip.id)}>{isImportingZip ? <Loader2 className="animate-spin" size={16} /> : <Server size={16} />} {pilotImport?.status === "failed" ? "Reintentar preparación" : "Preparar vídeos en la plataforma"}</button> : <button className="zip-primary-action" onClick={onLogin}><Server size={16} /> Iniciar sesión para preparar</button>}
+          <a href={pilotZip.webViewLink} target="_blank" rel="noreferrer">Ver original en Drive <ExternalLink size={14} /></a>
+          {pilotImport?.status === "failed" && <p className="zip-import-failure">La última preparación no terminó: {pilotImport.errorMessage}</p>}
+        </div>
+      </section>}
+
       {activeVideo && (
         <section className="video-player-panel" aria-label={`Reproduciendo ${activeVideo.name}`}>
           <div className="video-panel-head"><div><span>REPRODUCIENDO EN DRIVE</span><h2>{activeVideo.name.replace(/\.(mp4|ts)$/i, "")}</h2></div><button onClick={() => setActiveVideo(null)}>Cerrar</button></div>
@@ -89,7 +102,7 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
                   {contentType === "video" && <button className="watch-button" onClick={() => setActiveVideo(item)}><Play size={14} /> Ver aquí</button>}
                   <a href={item.webViewLink} target="_blank" rel="noreferrer">Ir al contenido <ExternalLink size={15} /></a>
                 </div>
-                {contentType === "zip" && <div className="zip-note"><AlertTriangle size={15} /><span><b>Archivo ZIP.</b> Google Drive conserva el original comprimido. {importRecord?.status === "ready" ? "Los vídeos preparados ya se sirven desde esta plataforma y el ZIP no se vuelve a consultar para reproducirlos." : "Abre el enlace “Ir al contenido” para gestionarlo desde Drive o prepara sus vídeos desde la plataforma."}</span>{importRecord?.status === "ready" ? <button className="prepared-button" onClick={() => setPreparedVideos(importRecord.videos)}><Server size={14} /> Ver vídeos preparados ({importRecord.videos.length})</button> : importRecord?.status === "processing" ? <span className="import-status"><Loader2 className="animate-spin" size={14} /> Preparando vídeos…</span> : canImportZip ? <button className="prepared-button" disabled={isImportingZip} onClick={() => onPrepareZip(item.id)}>{isImportingZip ? <Loader2 className="animate-spin" size={14} /> : <Server size={14} />} Preparar vídeos</button> : null}{importRecord?.status === "failed" && <span className="import-error">{importRecord.errorMessage}</span>}</div>}
+                {contentType === "zip" && <div className="zip-note"><AlertTriangle size={15} /><span><b>Archivo ZIP original.</b> “Ir al contenido” abre Drive y no descomprime el archivo. {importRecord?.status === "ready" ? "Sus vídeos ya fueron preparados y se reproducen desde la plataforma." : "Usa la acción destacada “Preparar vídeos en la plataforma” situada arriba."}</span>{importRecord?.status === "ready" ? <button className="prepared-button" onClick={() => setPreparedVideos(importRecord.videos)}><Server size={14} /> Ver vídeos listos</button> : null}</div>}
               </article>
             );
           })}

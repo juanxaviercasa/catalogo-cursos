@@ -25,4 +25,7 @@
 - [x] Implementar una interfaz de importación, estado y reproducción de contenidos extraídos.
 - [ ] Validar la importación con un ZIP real y documentar el comportamiento operativo y las limitaciones.
 - [ ] Importar como piloto el ZIP público “01 – Welcome to your new life (YouTube Success)” y conservar el archivo original sin cambios.
-- [ ] Mostrar en la interfaz cuándo un vídeo ya fue preparado y servido desde la plataforma en lugar de Google Drive.
+- [x] Mostrar en la interfaz cuándo un vídeo ya fue preparado y servido desde la plataforma en lugar de Google Drive.
+- [x] Corregir la ambigüedad entre “Ir al contenido” en Drive y la acción de preparar vídeos en la plataforma.
+- [x] Añadir estados de importación visibles y persistentes para que el usuario pueda comprobar si el ZIP se está procesando, falló o quedó listo.
+- [ ] Confirmar el resultado real del ZIP piloto antes de volver a pedir interacción al usuario.
