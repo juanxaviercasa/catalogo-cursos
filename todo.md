@@ -20,12 +20,25 @@
 - [x] Mostrar accesos directos a cursos en progreso y completados en la barra lateral.
 - [x] Tipar explícitamente la respuesta del catálogo y eliminar conversiones manuales en el cliente.
 - [x] Comparar los enfoques de importación de ZIP desde Google Drive y documentar sus límites de tamaño, permisos y coste.
-- [ ] Confirmar la autorización de Google Drive y seleccionar un curso ZIP inicial para la prueba controlada.
+- [x] Confirmar la autorización de Google Drive y seleccionar un curso ZIP inicial para la prueba controlada.
 - [x] Diseñar una importación bajo demanda que preserve el ZIP original y extraiga únicamente vídeos reproducibles a almacenamiento gestionado.
 - [x] Implementar una interfaz de importación, estado y reproducción de contenidos extraídos.
-- [ ] Validar la importación con un ZIP real y documentar el comportamiento operativo y las limitaciones.
-- [ ] Importar como piloto el ZIP público “01 – Welcome to your new life (YouTube Success)” y conservar el archivo original sin cambios.
+- [x] Validar la importación con un ZIP real y documentar el comportamiento operativo y las limitaciones.
+- [x] Importar como piloto el ZIP público “01 – Welcome to your new life (YouTube Success)” y conservar el archivo original sin cambios.
 - [x] Mostrar en la interfaz cuándo un vídeo ya fue preparado y servido desde la plataforma en lugar de Google Drive.
 - [x] Corregir la ambigüedad entre “Ir al contenido” en Drive y la acción de preparar vídeos en la plataforma.
 - [x] Añadir estados de importación visibles y persistentes para que el usuario pueda comprobar si el ZIP se está procesando, falló o quedó listo.
-- [ ] Confirmar el resultado real del ZIP piloto antes de volver a pedir interacción al usuario.
+- [x] Confirmar el resultado real del ZIP piloto antes de volver a pedir interacción al usuario.
+- [x] Investigar el error persistido que dejó inválida la importación del ZIP piloto y corregir su causa raíz.
+- [x] Mostrar un mensaje de error comprensible con una acción de recuperación cuando falle la importación.
+- [x] Sustituir la carga por flujo no admitida por una carga de cada vídeo con límite de memoria y formatos reproducibles en navegador.
+- [ ] Definir y aplicar la estrategia para convertir los vídeos MKV del ZIP piloto a MP4/WebM reproducible en navegador.
+- [x] Documentar el acceso público actual de Drive, los formatos y límites del importador, y el tratamiento pendiente de MKV.
+- [x] Diseñar el contrato de trabajo entre la plataforma y el procesador persistente de vídeo, sin depender de memoria ni almacenamiento local del navegador.
+- [ ] Preparar el procesador de conversión para conservar MP4/WebM válidos y transformar únicamente formatos no compatibles a MP4.
+- [ ] Añadir estados de cola, conversión y disponibilidad para los vídeos transformados.
+- [ ] Convertir y verificar los cinco vídeos MKV del ZIP piloto con reproducción MP4 desde almacenamiento gestionado.
+- [x] Documentar la configuración necesaria para publicar el sitio con el almacenamiento de vídeos separado del hosting web.
+- [x] Definir una configuración de proveedor de conversión con valores placeholder y sin secretos embebidos.
+- [x] Añadir una interfaz de configuración que explique la ruta gratuita local y proveedores de pago opcionales.
+- [x] Crear una documentación de integración que indique los datos necesarios para activar el procesamiento de MKV en el futuro.

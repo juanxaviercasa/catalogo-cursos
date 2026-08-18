@@ -17,8 +17,63 @@ export const DriveCourseSchema = z.object({
 
 export const DriveCatalogSchema = z.array(DriveCourseSchema);
 
+export const VideoProcessingSetupSchema = z.object({
+  status: z.literal("placeholder"),
+  workerStatus: z.literal("not_configured"),
+  storage: z.object({
+    provider: z.literal("managed-object-storage"),
+    description: z.string(),
+  }),
+  providers: z.array(z.object({
+    id: z.enum(["local-worker", "persistent-worker", "managed-provider"]),
+    label: z.string(),
+    tier: z.enum(["free", "optional-paid"]),
+    description: z.string(),
+    requirement: z.string(),
+  })),
+  placeholders: z.array(z.object({ key: z.string(), purpose: z.string(), example: z.string() })),
+});
+
 export type DriveItem = z.infer<typeof DriveItemSchema>;
 export type DriveCourse = z.infer<typeof DriveCourseSchema>;
+export type VideoProcessingSetup = z.infer<typeof VideoProcessingSetupSchema>;
+
+export const videoProcessingSetup: VideoProcessingSetup = {
+  status: "placeholder",
+  workerStatus: "not_configured",
+  storage: {
+    provider: "managed-object-storage",
+    description: "Los vídeos listos se guardan fuera del navegador y se sirven por URL firmada desde el almacenamiento gestionado del sitio.",
+  },
+  providers: [
+    {
+      id: "local-worker",
+      label: "Tu propio equipo",
+      tier: "free",
+      description: "Ejecuta la conversión con FFmpeg en tu ordenador cuando lo tengas encendido; conserva MP4/WebM y transforma únicamente formatos no compatibles.",
+      requirement: "Instalar FFmpeg y completar la URL del trabajador y el secreto compartido.",
+    },
+    {
+      id: "persistent-worker",
+      label: "Máquina de procesamiento persistente",
+      tier: "optional-paid",
+      description: "Convierte en segundo plano aunque tu ordenador esté apagado, adecuada para varios cursos o bibliotecas grandes.",
+      requirement: "Conectar una máquina con FFmpeg y completar la URL del trabajador y el secreto compartido.",
+    },
+    {
+      id: "managed-provider",
+      label: "Servicio gestionado de conversión",
+      tier: "optional-paid",
+      description: "Externaliza la conversión a un proveedor compatible mediante API, manteniendo la web y los vídeos separados.",
+      requirement: "Seleccionar proveedor y añadir sus credenciales en la configuración segura del proyecto.",
+    },
+  ],
+  placeholders: [
+    { key: "VIDEO_PROCESSOR_URL", purpose: "URL HTTPS del servicio que ejecuta la conversión.", example: "https://REEMPLAZAR-PROCESADOR.example/process" },
+    { key: "VIDEO_PROCESSOR_SHARED_SECRET", purpose: "Autentica las solicitudes entre la plataforma y el procesador.", example: "REEMPLAZAR_CON_UN_SECRETO_LARGO" },
+    { key: "VIDEO_PROCESSOR_MODE", purpose: "Selecciona el proveedor activo.", example: "local-worker | persistent-worker | managed-provider" },
+  ],
+};
 
 export type ContentType = "video" | "zip" | "pdf" | "folder" | "other";
 

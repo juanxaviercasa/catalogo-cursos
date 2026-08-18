@@ -24,6 +24,7 @@ export default function Home() {
   const catalogQuery = trpc.learning.catalog.useQuery(undefined, { retry: 1 });
   const progressQuery = trpc.learning.progress.useQuery(undefined, { retry: false });
   const zipImportsQuery = trpc.learning.zipImports.useQuery();
+  const videoProcessingSetupQuery = trpc.learning.videoProcessingSetup.useQuery();
   const setModuleProgress = trpc.learning.setModuleProgress.useMutation({ onSuccess: () => utils.learning.progress.invalidate() });
   const prepareZip = trpc.learning.prepareZip.useMutation({ onSuccess: () => { utils.learning.zipImports.invalidate(); toast.success("Los vídeos del ZIP ya están preparados para reproducirse desde la plataforma."); }, onError: (error) => toast.error(error.message) });
   const [search, setSearch] = useState("");
@@ -67,7 +68,7 @@ export default function Home() {
 
   if (selected) {
     const route = learningRoutes.find((item) => item.id === selected.meta.routeId)!;
-    return <CourseDetail course={selected.course} meta={selected.meta} route={route} completedIds={completedIds} onBack={() => setLocation("/")} onToggle={(moduleId, completed) => toggleModule(selected.course.id, moduleId, completed)} canTrack={isAuthenticated} onLogin={startLogin} zipImports={zipImportsQuery.data ?? []} canImportZip={user?.role === "admin"} isImportingZip={prepareZip.isPending} onPrepareZip={(zipId) => prepareZip.mutate({ zipId, courseId: selected.course.id })} />;
+    return <CourseDetail course={selected.course} meta={selected.meta} route={route} completedIds={completedIds} onBack={() => setLocation("/")} onToggle={(moduleId, completed) => toggleModule(selected.course.id, moduleId, completed)} canTrack={isAuthenticated} onLogin={startLogin} zipImports={zipImportsQuery.data ?? []} canImportZip={user?.role === "admin"} isImportingZip={prepareZip.isPending} onPrepareZip={(zipId) => prepareZip.mutate({ zipId, courseId: selected.course.id })} videoProcessingSetup={videoProcessingSetupQuery.data ?? { status: "placeholder", workerStatus: "not_configured", storage: { provider: "managed-object-storage", description: "Configuración cargando…" }, providers: [], placeholders: [] }} />;
   }
 
   return (

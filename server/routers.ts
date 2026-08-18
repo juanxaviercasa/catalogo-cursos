@@ -4,7 +4,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { completeZipImport, createZipImport, failZipImport, getModuleProgressByUserId, getZipImportByZipId, getZipImportsWithVideos, restartZipImport, setModuleProgress } from "./db";
-import { DriveCatalogSchema, getContentType, type DriveCourse } from "../shared/learning";
+import { DriveCatalogSchema, getContentType, VideoProcessingSetupSchema, videoProcessingSetup, type DriveCourse } from "../shared/learning";
 import { extractPublicDriveZip } from "./zipImport";
 
 const CATALOG_PATH = "/manus-storage/drive_courses_inventory_8a9ad92a.json";
@@ -67,6 +67,7 @@ export const appRouter = router({
         videos: item.videos.map((video) => ({ id: video.id, title: video.title, storageUrl: video.storageUrl, mimeType: video.mimeType, sizeBytes: video.sizeBytes, sortOrder: video.sortOrder })),
       }));
     }),
+    videoProcessingSetup: publicProcedure.output(VideoProcessingSetupSchema).query(() => videoProcessingSetup),
     prepareZip: adminProcedure.input(z.object({ zipId: z.string().min(1).max(128), courseId: z.string().min(1).max(128) })).output(zipImportSchema).mutation(async ({ ctx, input }) => {
       const host = ctx.req.get("host");
       const catalog = await loadCatalog(host ? `${ctx.req.protocol}://${host}` : "http://localhost:3000");

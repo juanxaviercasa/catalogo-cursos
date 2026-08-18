@@ -11,6 +11,7 @@ describe("controles de extracción ZIP", () => {
   it("reconoce solo formatos de vídeo permitidos y mantiene límites explícitos", () => {
     expect(videoType("leccion.MP4")).toBe("video/mp4");
     expect(videoType("clase.webm")).toBe("video/webm");
+    expect(videoType("clase.mkv")).toBe("video/x-matroska");
     expect(videoType("ejecutable.exe")).toBeNull();
     expect(zipImportLimits.maxZipBytes).toBe(350 * 1024 * 1024);
     expect(zipImportLimits.maxVideoCount).toBe(30);
