@@ -18,8 +18,16 @@ export const DriveCourseSchema = z.object({
 export const DriveCatalogSchema = z.array(DriveCourseSchema);
 
 export const VideoProcessingSetupSchema = z.object({
-  status: z.literal("placeholder"),
-  workerStatus: z.literal("not_configured"),
+  status: z.enum(["placeholder", "pilot_ready"]),
+  workerStatus: z.enum(["not_configured", "pilot_complete", "configured"]),
+  activeMode: z.enum(["local-worker", "persistent-worker"]).nullable(),
+  availability: z.object({
+    queued: z.number().int().nonnegative(),
+    processing: z.number().int().nonnegative(),
+    ready: z.number().int().nonnegative(),
+    failed: z.number().int().nonnegative(),
+    transcoded: z.number().int().nonnegative(),
+  }),
   storage: z.object({
     provider: z.literal("managed-object-storage"),
     description: z.string(),
@@ -57,6 +65,8 @@ export type DubbingSetup = z.infer<typeof DubbingSetupSchema>;
 export const videoProcessingSetup: VideoProcessingSetup = {
   status: "placeholder",
   workerStatus: "not_configured",
+  activeMode: null,
+  availability: { queued: 0, processing: 0, ready: 0, failed: 0, transcoded: 0 },
   storage: {
     provider: "managed-object-storage",
     description: "Los vídeos listos se guardan fuera del navegador y se sirven por URL firmada desde el almacenamiento gestionado del sitio.",

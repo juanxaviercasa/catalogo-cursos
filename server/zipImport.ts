@@ -19,11 +19,15 @@ const VIDEO_TYPES: Record<string, string> = {
 export type ExtractedVideo = {
   sourcePath: string;
   title: string;
-  storageKey: string;
-  storageUrl: string;
-  mimeType: string;
-  sizeBytes: number;
+  sourceMimeType: string;
+  storageKey: string | null;
+  storageUrl: string | null;
+  mimeType: string | null;
+  sizeBytes: number | null;
   sortOrder: number;
+  processingStatus: "queued" | "processing" | "ready" | "failed";
+  processingMessage: string | null;
+  wasTranscoded: boolean;
 };
 
 export function archiveEntryName(path: string) {
@@ -41,7 +45,7 @@ function safeStorageName(path: string) {
   return path.replaceAll(/[^a-zA-Z0-9._-]+/g, "-").replaceAll(/-+/g, "-").slice(-170);
 }
 
-function canPlayInBrowser(mimeType: string) {
+export function canPlayInBrowser(mimeType: string) {
   return mimeType === "video/mp4" || mimeType === "video/webm";
 }
 
@@ -121,10 +125,28 @@ export async function extractPublicDriveZip(input: { zipId: string; sourceName: 
         const mimeType = path ? videoType(path) : null;
         const uncompressedSize = Number(entry.uncompressedSize ?? 0);
 
-        if (!path || entry.fileName.endsWith("/") || !mimeType || !canPlayInBrowser(mimeType)) return next();
+        if (!path || entry.fileName.endsWith("/") || !mimeType) return next();
         if (videos.length >= MAX_VIDEO_COUNT) return fail(new Error("El ZIP supera el límite de 30 vídeos por importación."));
         if (!uncompressedSize || uncompressedSize > MAX_VIDEO_BYTES || totalVideoBytes + uncompressedSize > MAX_TOTAL_VIDEO_BYTES) {
           return fail(new Error("Uno de los vídeos supera el límite seguro de la importación."));
+        }
+
+        if (!canPlayInBrowser(mimeType)) {
+          totalVideoBytes += uncompressedSize;
+          videos.push({
+            sourcePath: path,
+            title: path.split("/").pop()?.replace(/\.(mp4|webm|mov|m4v|mkv)$/i, "") ?? path,
+            sourceMimeType: mimeType,
+            storageKey: null,
+            storageUrl: null,
+            mimeType: null,
+            sizeBytes: uncompressedSize,
+            sortOrder: videos.length + 1,
+            processingStatus: "queued",
+            processingMessage: "Pendiente de conversión a MP4 compatible.",
+            wasTranscoded: false,
+          });
+          return next();
         }
 
         openEntryStream(archive, entry).then(async (stream) => {
@@ -134,11 +156,15 @@ export async function extractPublicDriveZip(input: { zipId: string; sourceName: 
           videos.push({
             sourcePath: path,
             title: path.split("/").pop()?.replace(/\.(mp4|webm|mov|m4v|mkv)$/i, "") ?? path,
+            sourceMimeType: mimeType,
             storageKey: stored.key,
             storageUrl: stored.url,
             mimeType,
             sizeBytes: uncompressedSize,
             sortOrder: videos.length + 1,
+            processingStatus: "ready",
+            processingMessage: null,
+            wasTranscoded: false,
           });
           next();
         }).catch(fail);

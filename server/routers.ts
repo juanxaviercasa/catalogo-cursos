@@ -6,12 +6,47 @@ import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_
 import { completeZipImport, createZipImport, failZipImport, getMediaTracks, getModuleProgressByUserId, getZipImportByZipId, getZipImportsWithVideos, restartZipImport, setModuleProgress } from "./db";
 import { DubbingSetupSchema, dubbingSetup, DriveCatalogSchema, getContentType, VideoProcessingSetupSchema, videoProcessingSetup, type DriveCourse } from "../shared/learning";
 import { extractPublicDriveZip } from "./zipImport";
+import { dispatchQueuedVideos } from "./videoProcessorDispatch";
 
 const CATALOG_PATH = "/manus-storage/drive_courses_inventory_8a9ad92a.json";
 let catalogCache: DriveCourse[] | null = null;
-const extractedVideoSchema = z.object({ id: z.number(), title: z.string(), storageUrl: z.string(), mimeType: z.string(), sizeBytes: z.number(), sortOrder: z.number() });
+const extractedVideoSchema = z.object({ id: z.number(), title: z.string(), storageUrl: z.string().nullable(), sourceMimeType: z.string(), mimeType: z.string().nullable(), sizeBytes: z.number().nullable(), sortOrder: z.number(), processingStatus: z.enum(["queued", "processing", "ready", "failed"]), processingMessage: z.string().nullable(), wasTranscoded: z.boolean() });
 const zipImportSchema = z.object({ id: z.number(), zipId: z.string(), courseId: z.string(), sourceName: z.string(), sourceBytes: z.number().nullable(), status: z.enum(["processing", "ready", "failed"]), errorMessage: z.string().nullable(), videos: z.array(extractedVideoSchema) });
 const mediaTrackSchema = z.object({ id: z.number(), extractedVideoId: z.number(), language: z.string(), kind: z.enum(["dubbed_video", "captions"]), label: z.string(), storageUrl: z.string(), mimeType: z.string(), provider: z.string() });
+
+function serializeImportedVideo(video: Awaited<ReturnType<typeof getZipImportsWithVideos>>[number]["videos"][number]) {
+  return {
+    id: video.id,
+    title: video.title,
+    storageUrl: video.storageUrl,
+    sourceMimeType: video.sourceMimeType,
+    mimeType: video.mimeType,
+    sizeBytes: video.sizeBytes,
+    sortOrder: video.sortOrder,
+    processingStatus: video.processingStatus,
+    processingMessage: video.processingMessage,
+    wasTranscoded: video.wasTranscoded,
+  };
+}
+
+async function getCurrentVideoProcessingSetup() {
+  const imports = await getZipImportsWithVideos();
+  const availability = { queued: 0, processing: 0, ready: 0, failed: 0, transcoded: 0 };
+  for (const video of imports.flatMap((item) => item.videos)) {
+    availability[video.processingStatus] += 1;
+    if (video.wasTranscoded && video.processingStatus === "ready") availability.transcoded += 1;
+  }
+  const pilotComplete = availability.transcoded > 0;
+  const configuredMode: "local-worker" | "persistent-worker" | null = process.env.VIDEO_PROCESSOR_MODE === "local-worker" || process.env.VIDEO_PROCESSOR_MODE === "persistent-worker" ? process.env.VIDEO_PROCESSOR_MODE : null;
+  const hasConfiguredWorker = Boolean(configuredMode && process.env.VIDEO_PROCESSOR_URL && process.env.VIDEO_PROCESSOR_SHARED_SECRET);
+  return {
+    ...videoProcessingSetup,
+    status: pilotComplete ? "pilot_ready" as const : "placeholder" as const,
+    workerStatus: hasConfiguredWorker ? "configured" as const : pilotComplete ? "pilot_complete" as const : "not_configured" as const,
+    activeMode: hasConfiguredWorker ? configuredMode : null,
+    availability,
+  };
+}
 
 async function loadCatalog(origin: string): Promise<DriveCourse[]> {
   if (catalogCache) return catalogCache;
@@ -65,14 +100,14 @@ export const appRouter = router({
         sourceBytes: item.sourceBytes,
         status: item.status,
         errorMessage: item.errorMessage,
-        videos: item.videos.map((video) => ({ id: video.id, title: video.title, storageUrl: video.storageUrl, mimeType: video.mimeType, sizeBytes: video.sizeBytes, sortOrder: video.sortOrder })),
+        videos: item.videos.map(serializeImportedVideo),
       }));
     }),
     mediaTracks: publicProcedure.output(z.array(mediaTrackSchema)).query(async () => {
       const tracks = await getMediaTracks();
       return tracks.map((track) => ({ id: track.id, extractedVideoId: track.extractedVideoId, language: track.language, kind: track.kind, label: track.label, storageUrl: track.storageUrl, mimeType: track.mimeType, provider: track.provider }));
     }),
-    videoProcessingSetup: publicProcedure.output(VideoProcessingSetupSchema).query(() => videoProcessingSetup),
+    videoProcessingSetup: publicProcedure.output(VideoProcessingSetupSchema).query(() => getCurrentVideoProcessingSetup()),
     dubbingSetup: publicProcedure.output(DubbingSetupSchema).query(() => dubbingSetup),
     prepareZip: adminProcedure.input(z.object({ zipId: z.string().min(1).max(128), courseId: z.string().min(1).max(128) })).output(zipImportSchema).mutation(async ({ ctx, input }) => {
       const host = ctx.req.get("host");
@@ -85,7 +120,7 @@ export const appRouter = router({
       if (existing?.status === "ready") {
         const allImports = await getZipImportsWithVideos();
         const imported = allImports.find((item) => item.id === existing.id)!;
-        return { ...imported, videos: imported.videos.map((video) => ({ id: video.id, title: video.title, storageUrl: video.storageUrl, mimeType: video.mimeType, sizeBytes: video.sizeBytes, sortOrder: video.sortOrder })) };
+        return { ...imported, videos: imported.videos.map(serializeImportedVideo) };
       }
       if (existing?.status === "processing") throw new Error("Este ZIP ya se está preparando. Espera a que finalice antes de reintentarlo.");
 
@@ -96,7 +131,8 @@ export const appRouter = router({
         await completeZipImport({ importId: importRecord.id, sourceBytes: extracted.sourceBytes, videos: extracted.videos });
         const allImports = await getZipImportsWithVideos();
         const imported = allImports.find((item) => item.id === importRecord.id)!;
-        return { ...imported, videos: imported.videos.map((video) => ({ id: video.id, title: video.title, storageUrl: video.storageUrl, mimeType: video.mimeType, sizeBytes: video.sizeBytes, sortOrder: video.sortOrder })) };
+        await dispatchQueuedVideos(imported.videos.filter((video) => video.processingStatus === "queued").map((video) => ({ id: video.id, sourcePath: video.sourcePath })));
+        return { ...imported, videos: imported.videos.map(serializeImportedVideo) };
       } catch (error) {
         const message = error instanceof Error ? error.message : "La importación falló.";
         await failZipImport(importRecord.id, message);

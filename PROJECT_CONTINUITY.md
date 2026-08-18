@@ -10,8 +10,9 @@ La plataforma convierte una carpeta de Google Drive en una biblioteca de **19 cu
 | Progreso | Operativo | El progreso por módulo, curso y ruta se guarda por usuario en la base de datos. |
 | Vídeos disponibles en Drive | Operativo | Los MP4 compatibles se pueden visualizar mediante el visor embebido de Drive. |
 | Importación de ZIP | Operativo para formatos web | El ZIP original no se modifica; MP4/WebM compatibles se copian al almacenamiento gestionado para reproducción desde la plataforma. |
-| ZIP piloto | Validado parcialmente | `01-Welcome friends.mp4` se importó y responde desde almacenamiento gestionado. Los MKV quedan pendientes de conversión. |
-| Conversión y doblaje | Preparado como placeholder | No hay proveedor, credenciales ni trabajador configurado aún. |
+| ZIP piloto | Operativo | Seis vídeos reproducibles: un MP4 original y cinco MKV convertidos a MP4 en almacenamiento gestionado. |
+| Conversión de formatos | Operativa y seleccionable | MP4/WebM se conservan; los formatos incompatibles se encolan y pueden procesarse en equipo propio o servicio persistente. |
+| Doblaje inglés→español | Piloto operativo | El primer módulo tiene MP4 doblado, subtítulos VTT y selector de idioma. |
 
 ## Arquitectura vigente
 
@@ -34,7 +35,7 @@ La primera importación descarga el ZIP público una única vez desde Drive, val
 | Escenario | Tratamiento actual | Siguiente paso |
 |---|---|---|
 | MP4/WebM | Se preserva y se sube directamente al almacenamiento gestionado. | Mantener este comportamiento. |
-| MKV/MOV/M4V | Se detecta, pero no se muestra como pista reproducible. | Convertir a MP4 en un trabajador externo. |
+| MKV/MOV/M4V | Se registra como `queued` con su ruta dentro del ZIP. | El trabajador seleccionado lo recupera, convierte y publica como MP4. |
 | ZIP mayor de 350 MB | Se rechaza para proteger la aplicación. | Ajustar el límite solo con capacidad de procesamiento suficiente. |
 | Archivo privado de Drive | No se puede leer con el enlace público actual. | Activar una integración de Drive de solo lectura. |
 
@@ -77,6 +78,10 @@ Los valores se deben añadir exclusivamente a la configuración segura del servi
 | `DUBBING_PROVIDER_MODE` | `local`, `elevenlabs` o `azure`. |
 | `DUBBING_PROVIDER_API_KEY` | Clave del proveedor elegido. |
 | `DUBBING_WEBHOOK_SECRET` | Verifica resultados asíncronos del proveedor. |
+
+## Continuación fuera de este entorno
+
+La guía completa para mover el proyecto, escoger entre equipo propio o servicio persistente y operar el procesador está en [`MIGRATION_AND_VIDEO_WORKERS.md`](./MIGRATION_AND_VIDEO_WORKERS.md). Incluye archivos de configuración de ejemplo, la plantilla de servicio Linux y las comprobaciones de reproducción.
 
 ## Modelo de datos propuesto para la siguiente fase
 

@@ -1,0 +1,18 @@
+[Unit]
+Description=Procesador persistente de vídeo para Ruta de Aprendizaje Drive
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=REEMPLAZAR_USUARIO
+WorkingDirectory=/opt/curso-drive-aprendizaje
+EnvironmentFile=/etc/curso-drive/video-processor.env
+ExecStart=/usr/bin/pnpm processor:service
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

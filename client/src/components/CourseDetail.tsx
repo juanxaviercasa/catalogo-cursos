@@ -15,10 +15,15 @@ const moduleIcon = (item: DriveItem) => {
   return <FolderOpen size={18} />;
 };
 
-type ImportedVideo = { id: number; title: string; storageUrl: string; mimeType: string; sizeBytes: number; sortOrder: number };
+type ImportedVideo = { id: number; title: string; storageUrl: string | null; sourceMimeType: string; mimeType: string | null; sizeBytes: number | null; sortOrder: number; processingStatus: "queued" | "processing" | "ready" | "failed"; processingMessage: string | null; wasTranscoded: boolean };
+type ReadyImportedVideo = ImportedVideo & { storageUrl: string; mimeType: string; sizeBytes: number; processingStatus: "ready" };
 type ZipImport = { zipId: string; status: "processing" | "ready" | "failed"; errorMessage: string | null; videos: ImportedVideo[] };
 
-function PreparedVideoPlayer({ video, tracks }: { video: ImportedVideo; tracks: MediaTrack[] }) {
+function isReadyVideo(video: ImportedVideo): video is ReadyImportedVideo {
+  return video.processingStatus === "ready" && Boolean(video.storageUrl && video.mimeType && video.sizeBytes !== null);
+}
+
+function PreparedVideoPlayer({ video, tracks }: { video: ReadyImportedVideo; tracks: MediaTrack[] }) {
   const { dubbedVideo: spanishVideo, captions: spanishCaptions } = getSpanishMediaTracks(video.id, tracks);
   const [language, setLanguage] = useState<"original" | "es">(spanishVideo ? "es" : "original");
   const isSpanish = language === "es" && Boolean(spanishVideo);
@@ -44,13 +49,16 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
   dubbingSetup: import("@shared/learning").DubbingSetup;
 }) {
   const [activeVideo, setActiveVideo] = useState<DriveItem | null>(null);
-  const [preparedVideos, setPreparedVideos] = useState<ImportedVideo[] | null>(null);
+  const [preparedVideos, setPreparedVideos] = useState<ReadyImportedVideo[] | null>(null);
   const modules = useMemo(() => orderedModules(course.children), [course.children]);
   const completed = modules.filter((item) => completedIds.has(item.id)).length;
   const progress = modules.length ? Math.round((completed / modules.length) * 100) : 0;
   const zipModules = modules.filter((item) => getContentType(item) === "zip");
   const pilotZip = zipModules[0];
   const pilotImport = pilotZip ? zipImports.find((record) => record.zipId === pilotZip.id) : undefined;
+  const readyPilotVideos = (pilotImport?.videos ?? []).filter(isReadyVideo);
+  const pendingPilotVideos = (pilotImport?.videos ?? []).filter((video) => video.processingStatus === "queued" || video.processingStatus === "processing");
+  const failedPilotVideos = (pilotImport?.videos ?? []).filter((video) => video.processingStatus === "failed");
 
   return (
     <section className="course-detail-shell">
@@ -83,10 +91,16 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
         <div className="zip-import-icon"><FileArchive size={23} /></div>
         <div className="zip-import-copy"><span>VÍDEOS DENTRO DE ZIP</span><h2>Prepáralos aquí, no en Google Drive.</h2><p>El archivo original se mantiene comprimido en Drive. Esta acción lo lee una sola vez, extrae únicamente los vídeos compatibles y los deja listos para reproducir desde esta plataforma.</p></div>
         <div className="zip-import-actions">
-          {pilotImport?.status === "ready" ? <button className="zip-primary-action" onClick={() => setPreparedVideos(pilotImport.videos)}><Server size={16} /> Ver {pilotImport.videos.length} vídeos listos</button> : pilotImport?.status === "processing" ? <div className="zip-processing"><Loader2 className="animate-spin" size={18} /><span>Importando vídeos…<small>No cierres esta página.</small></span></div> : canImportZip ? <button className="zip-primary-action" disabled={isImportingZip} onClick={() => onPrepareZip(pilotZip.id)}>{isImportingZip ? <Loader2 className="animate-spin" size={16} /> : <Server size={16} />} {pilotImport?.status === "failed" ? "Reintentar preparación" : "Preparar vídeos en la plataforma"}</button> : <button className="zip-primary-action" onClick={onLogin}><Server size={16} /> Iniciar sesión para preparar</button>}
+          {pilotImport?.status === "ready" && readyPilotVideos.length ? <button className="zip-primary-action" onClick={() => setPreparedVideos(readyPilotVideos)}><Server size={16} /> Ver {readyPilotVideos.length} vídeos listos</button> : pilotImport?.status === "ready" && pendingPilotVideos.length ? <div className="zip-processing"><Loader2 className="animate-spin" size={18} /><span>Convirtiendo {pendingPilotVideos.length} vídeos…<small>{pendingPilotVideos[0]?.processingMessage ?? "El resultado aparecerá aquí al quedar listo."}</small></span></div> : pilotImport?.status === "processing" ? <div className="zip-processing"><Loader2 className="animate-spin" size={18} /><span>Importando vídeos…<small>No cierres esta página.</small></span></div> : canImportZip ? <button className="zip-primary-action" disabled={isImportingZip} onClick={() => onPrepareZip(pilotZip.id)}>{isImportingZip ? <Loader2 className="animate-spin" size={16} /> : <Server size={16} />} {pilotImport?.status === "failed" ? "Reintentar preparación" : "Preparar vídeos en la plataforma"}</button> : <button className="zip-primary-action" onClick={onLogin}><Server size={16} /> Iniciar sesión para preparar</button>}
           <a href={pilotZip.webViewLink} target="_blank" rel="noreferrer">Ver original en Drive <ExternalLink size={14} /></a>
           {pilotImport?.status === "failed" && <p className="zip-import-failure">La última preparación no terminó: {pilotImport.errorMessage}</p>}
+          {failedPilotVideos.length > 0 && <p className="zip-import-failure">{failedPilotVideos.length} vídeo(s) requieren revisión: {failedPilotVideos[0]?.processingMessage ?? "La conversión no terminó."}</p>}
         </div>
+      </section>}
+
+      {(pendingPilotVideos.length > 0 || failedPilotVideos.length > 0) && <section className="zip-video-status-panel" aria-labelledby="zip-video-status-title">
+        <div><span>COLA DE CONVERSIÓN</span><h2 id="zip-video-status-title">Estado de cada vídeo pendiente</h2></div>
+        <ul>{[...pendingPilotVideos, ...failedPilotVideos].map((video) => <li key={video.id} className={`zip-video-status zip-video-status--${video.processingStatus}`}><div><b>{video.title}</b><small>{video.processingMessage ?? "Sin detalle adicional."}</small></div><span>{video.processingStatus === "queued" ? "En cola" : video.processingStatus === "processing" ? "Convirtiendo" : "Requiere revisión"}</span></li>)}</ul>
       </section>}
 
       {pilotZip && <VideoProcessingPanel setup={videoProcessingSetup} />}
@@ -119,7 +133,7 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
                   {contentType === "video" && <button className="watch-button" onClick={() => setActiveVideo(item)}><Play size={14} /> Ver aquí</button>}
                   <a href={item.webViewLink} target="_blank" rel="noreferrer">Ir al contenido <ExternalLink size={15} /></a>
                 </div>
-                {contentType === "zip" && <div className="zip-note"><AlertTriangle size={15} /><span><b>Archivo ZIP original.</b> “Ir al contenido” abre Drive y no descomprime el archivo. {importRecord?.status === "ready" ? "Sus vídeos ya fueron preparados y se reproducen desde la plataforma." : "Usa la acción destacada “Preparar vídeos en la plataforma” situada arriba."}</span>{importRecord?.status === "ready" ? <button className="prepared-button" onClick={() => setPreparedVideos(importRecord.videos)}><Server size={14} /> Ver vídeos listos</button> : null}</div>}
+                {contentType === "zip" && <div className="zip-note"><AlertTriangle size={15} /><span><b>Archivo ZIP original.</b> “Ir al contenido” abre Drive y no descomprime el archivo. {importRecord?.status === "ready" ? `${importRecord.videos.filter(isReadyVideo).length} vídeos ya fueron preparados y se reproducen desde la plataforma.${importRecord.videos.some((video) => video.processingStatus === "queued" || video.processingStatus === "processing") ? " Otros siguen en conversión." : ""}` : "Usa la acción destacada “Preparar vídeos en la plataforma” situada arriba."}</span>{importRecord?.status === "ready" ? <button className="prepared-button" onClick={() => setPreparedVideos(importRecord.videos.filter(isReadyVideo))}><Server size={14} /> Ver vídeos listos</button> : null}</div>}
               </article>
             );
           })}

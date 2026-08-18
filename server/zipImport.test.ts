@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { archiveEntryName, videoType, zipImportLimits } from "./zipImport";
+import { archiveEntryName, canPlayInBrowser, videoType, zipImportLimits } from "./zipImport";
 
 describe("controles de extracción ZIP", () => {
   it("acepta únicamente rutas de archivo seguras", () => {
@@ -13,6 +13,9 @@ describe("controles de extracción ZIP", () => {
     expect(videoType("clase.webm")).toBe("video/webm");
     expect(videoType("clase.mkv")).toBe("video/x-matroska");
     expect(videoType("ejecutable.exe")).toBeNull();
+    expect(canPlayInBrowser("video/mp4")).toBe(true);
+    expect(canPlayInBrowser("video/webm")).toBe(true);
+    expect(canPlayInBrowser("video/x-matroska")).toBe(false);
     expect(zipImportLimits.maxZipBytes).toBe(350 * 1024 * 1024);
     expect(zipImportLimits.maxVideoCount).toBe(30);
   });

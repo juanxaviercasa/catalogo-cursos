@@ -132,6 +132,42 @@ export async function getZipImportByZipId(zipId: string) {
   return result[0];
 }
 
+export async function getZipImportById(importId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(zipImports).where(eq(zipImports.id, importId)).limit(1);
+  return result[0];
+}
+
+export async function getExtractedVideoById(videoId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(extractedVideos).where(eq(extractedVideos.id, videoId)).limit(1);
+  return result[0];
+}
+
+export async function setExtractedVideoProcessingStatus(input: {
+  videoId: number;
+  status: "queued" | "processing" | "ready" | "failed";
+  message?: string | null;
+  storage?: { key: string; url: string; mimeType: string; sizeBytes: number };
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible.");
+  if (input.status === "ready" && !input.storage) throw new Error("Un vídeo listo debe incluir el MP4 almacenado.");
+
+  await db.update(extractedVideos).set({
+    processingStatus: input.status,
+    processingMessage: input.message ?? null,
+    storageKey: input.storage?.key,
+    storageUrl: input.storage?.url,
+    mimeType: input.storage?.mimeType,
+    sizeBytes: input.storage?.sizeBytes,
+    wasTranscoded: input.status === "ready" ? true : undefined,
+    processedAt: input.status === "ready" ? new Date() : null,
+  }).where(eq(extractedVideos.id, input.videoId));
+}
+
 export async function createZipImport(input: { zipId: string; courseId: string; sourceName: string; importedByUserId: number }) {
   const db = await getDb();
   if (!db) throw new Error("La base de datos no está disponible.");

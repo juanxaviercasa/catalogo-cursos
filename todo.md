@@ -35,9 +35,9 @@
 - [x] Definir y aplicar la estrategia para convertir los vídeos MKV del ZIP piloto a MP4/WebM reproducible en navegador (diferida hasta configurar un proveedor; placeholders y contrato listos).
 - [x] Documentar el acceso público actual de Drive, los formatos y límites del importador, y el tratamiento pendiente de MKV.
 - [x] Diseñar el contrato de trabajo entre la plataforma y el procesador persistente de vídeo, sin depender de memoria ni almacenamiento local del navegador.
-- [ ] Preparar el procesador de conversión para conservar MP4/WebM válidos y transformar únicamente formatos no compatibles a MP4 (pendiente de configurar un proveedor o trabajador).
-- [ ] Añadir estados de cola, conversión y disponibilidad para los vídeos transformados (pendiente de un procesador real; el placeholder `not_configured` ya es visible).
-- [ ] Convertir y verificar los cinco vídeos MKV del ZIP piloto con reproducción MP4 desde almacenamiento gestionado (pendiente de activar el proveedor seleccionado).
+- [x] Preparar el procesador de conversión para conservar MP4/WebM válidos y transformar únicamente formatos no compatibles a MP4 (trabajador local gratuito validado con FFprobe y FFmpeg).
+- [x] Añadir estados de cola, conversión y disponibilidad para los vídeos transformados (campos persistidos `queued`, `processing`, `ready` y `failed`; el piloto muestra su disponibilidad real).
+- [x] Convertir y verificar los cinco vídeos MKV del ZIP piloto con reproducción MP4 desde almacenamiento gestionado (cinco MP4 publicados y seis reproductores validados en navegador).
 - [x] Documentar la configuración necesaria para publicar el sitio con el almacenamiento de vídeos separado del hosting web.
 - [x] Definir una configuración de proveedor de conversión con valores placeholder y sin secretos embebidos.
 - [x] Añadir una interfaz de configuración que explique la ruta gratuita local y proveedores de pago opcionales.
@@ -67,3 +67,16 @@
 - [x] Ajustar el proceso de doblaje para limitar cambios de velocidad perceptibles entre segmentos.
 - [x] Mostrar una guía visible para activar subtítulos españoles en el reproductor del vídeo piloto.
 - [x] Comprobar la entrega web del vídeo doblado y documentar si las pausas restantes se deben a red o a la pista de audio refinada.
+- [x] Integrar el trabajador local de vídeo en el flujo de importación para conservar MP4/WebM compatibles y enviar únicamente formatos incompatibles a conversión.
+- [x] Implementar transiciones persistidas `queued` → `processing` → `ready` o `failed`, con mensajes por vídeo y visibilidad de los elementos no listos.
+- [x] Conectar los trabajos incompatibles a una fuente procesable persistida y a una acción automática de conversión tras la importación del ZIP.
+- [x] Mostrar una lista individual de vídeos en cola, conversión o fallo con su estado y mensaje, y validar ese ciclo desde una importación real.
+- [x] Conectar `prepareZip` a un disparo automático configurado del trabajador externo para los vídeos incompatibles en cola y documentar su operación segura.
+- [x] Añadir una verificación E2E del estado individual `queued` y la recuperación posterior a `ready` sin depender de una manipulación manual de la interfaz.
+- [x] Crear una prueba integrada del ciclo `queued` → `ready` que invoque el trabajador sobre una fuente ZIP autorizada sin preparar manualmente el estado desde la interfaz.
+- [ ] Configurar y validar un trabajador externo accesible por HTTPS para que `prepareZip` dispare automáticamente los MKV en cola durante una importación nueva.
+- [x] Añadir selección explícita entre ejecución gratuita en equipo propio y servicio persistente independiente para el procesador de vídeo.
+- [x] Preparar archivos de configuración y arranque reproducibles para ambas rutas, sin secretos embebidos.
+- [x] Documentar la migración del proyecto y del trabajador de vídeo a otro entorno, incluidos almacenamiento, base de datos, secretos y dominio.
+- [ ] Registrar `https://github.com/juanxaviercasa/catalogo-cursos.git` como repositorio de continuidad en la documentación.
+- [ ] Sincronizar la versión actual del proyecto con el repositorio GitHub de continuidad indicado por el usuario.
