@@ -34,9 +34,25 @@ export const VideoProcessingSetupSchema = z.object({
   placeholders: z.array(z.object({ key: z.string(), purpose: z.string(), example: z.string() })),
 });
 
+export const DubbingSetupSchema = z.object({
+  status: z.literal("placeholder"),
+  sourceLanguage: z.literal("en"),
+  targetLanguage: z.literal("es"),
+  pipeline: z.array(z.object({ step: z.string(), output: z.string() })),
+  providers: z.array(z.object({
+    id: z.enum(["local-stack", "elevenlabs", "azure-speech", "google-cloud"]),
+    label: z.string(),
+    tier: z.enum(["free", "optional-paid"]),
+    recommended: z.boolean(),
+    description: z.string(),
+  })),
+  placeholders: z.array(z.object({ key: z.string(), purpose: z.string(), example: z.string() })),
+});
+
 export type DriveItem = z.infer<typeof DriveItemSchema>;
 export type DriveCourse = z.infer<typeof DriveCourseSchema>;
 export type VideoProcessingSetup = z.infer<typeof VideoProcessingSetupSchema>;
+export type DubbingSetup = z.infer<typeof DubbingSetupSchema>;
 
 export const videoProcessingSetup: VideoProcessingSetup = {
   status: "placeholder",
@@ -72,6 +88,29 @@ export const videoProcessingSetup: VideoProcessingSetup = {
     { key: "VIDEO_PROCESSOR_URL", purpose: "URL HTTPS del servicio que ejecuta la conversión.", example: "https://REEMPLAZAR-PROCESADOR.example/process" },
     { key: "VIDEO_PROCESSOR_SHARED_SECRET", purpose: "Autentica las solicitudes entre la plataforma y el procesador.", example: "REEMPLAZAR_CON_UN_SECRETO_LARGO" },
     { key: "VIDEO_PROCESSOR_MODE", purpose: "Selecciona el proveedor activo.", example: "local-worker | persistent-worker | managed-provider" },
+  ],
+};
+
+export const dubbingSetup: DubbingSetup = {
+  status: "placeholder",
+  sourceLanguage: "en",
+  targetLanguage: "es",
+  pipeline: [
+    { step: "Analizar y transcribir", output: "Guion inglés con marcas de tiempo" },
+    { step: "Traducir", output: "Guion español revisable" },
+    { step: "Sintetizar voz neural", output: "Fragmentos de audio español" },
+    { step: "Sincronizar y publicar", output: "Pista española y subtítulos" },
+  ],
+  providers: [
+    { id: "local-stack", label: "Ruta local compuesta", tier: "free", recommended: false, description: "Transcripción, traducción y voz en tu propio equipo. Sin coste por minuto, con más instalación y revisión manual." },
+    { id: "elevenlabs", label: "ElevenLabs Dubbing", tier: "optional-paid", recommended: true, description: "La vía más rápida para cursos grabados: integra doblaje de vídeo, conservación de fondo y pista en español como trabajo asíncrono." },
+    { id: "azure-speech", label: "Azure Speech", tier: "optional-paid", recommended: false, description: "Alternativa para una futura escucha traducida de baja latencia; requiere integrar traducción y síntesis de voz." },
+    { id: "google-cloud", label: "Google Cloud Speech + TTS", tier: "optional-paid", recommended: false, description: "Cadena modular de transcripción, traducción y voces neuronales con cuota inicial gratuita de síntesis en ciertos modelos." },
+  ],
+  placeholders: [
+    { key: "DUBBING_PROVIDER_MODE", purpose: "Selecciona el proveedor de doblaje.", example: "local-stack | elevenlabs | azure-speech | google-cloud" },
+    { key: "DUBBING_PROVIDER_API_KEY", purpose: "Clave privada del proveedor seleccionado.", example: "REEMPLAZAR_CON_LA_CLAVE_DEL_PROVEEDOR" },
+    { key: "DUBBING_WEBHOOK_SECRET", purpose: "Verifica los resultados asíncronos de procesamiento.", example: "REEMPLAZAR_CON_UN_SECRETO_LARGO" },
   ],
 };
 

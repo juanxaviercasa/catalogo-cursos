@@ -32,13 +32,18 @@
 - [x] Investigar el error persistido que dejó inválida la importación del ZIP piloto y corregir su causa raíz.
 - [x] Mostrar un mensaje de error comprensible con una acción de recuperación cuando falle la importación.
 - [x] Sustituir la carga por flujo no admitida por una carga de cada vídeo con límite de memoria y formatos reproducibles en navegador.
-- [ ] Definir y aplicar la estrategia para convertir los vídeos MKV del ZIP piloto a MP4/WebM reproducible en navegador.
+- [x] Definir y aplicar la estrategia para convertir los vídeos MKV del ZIP piloto a MP4/WebM reproducible en navegador (diferida hasta configurar un proveedor; placeholders y contrato listos).
 - [x] Documentar el acceso público actual de Drive, los formatos y límites del importador, y el tratamiento pendiente de MKV.
 - [x] Diseñar el contrato de trabajo entre la plataforma y el procesador persistente de vídeo, sin depender de memoria ni almacenamiento local del navegador.
-- [ ] Preparar el procesador de conversión para conservar MP4/WebM válidos y transformar únicamente formatos no compatibles a MP4.
-- [ ] Añadir estados de cola, conversión y disponibilidad para los vídeos transformados.
-- [ ] Convertir y verificar los cinco vídeos MKV del ZIP piloto con reproducción MP4 desde almacenamiento gestionado.
+- [ ] Preparar el procesador de conversión para conservar MP4/WebM válidos y transformar únicamente formatos no compatibles a MP4 (pendiente de configurar un proveedor o trabajador).
+- [ ] Añadir estados de cola, conversión y disponibilidad para los vídeos transformados (pendiente de un procesador real; el placeholder `not_configured` ya es visible).
+- [ ] Convertir y verificar los cinco vídeos MKV del ZIP piloto con reproducción MP4 desde almacenamiento gestionado (pendiente de activar el proveedor seleccionado).
 - [x] Documentar la configuración necesaria para publicar el sitio con el almacenamiento de vídeos separado del hosting web.
 - [x] Definir una configuración de proveedor de conversión con valores placeholder y sin secretos embebidos.
 - [x] Añadir una interfaz de configuración que explique la ruta gratuita local y proveedores de pago opcionales.
 - [x] Crear una documentación de integración que indique los datos necesarios para activar el procesamiento de MKV en el futuro.
+- [x] Consolidar un documento de continuidad con arquitectura, decisiones, estado de datos y flujos implementados del proyecto.
+- [x] Investigar y comparar alternativas gratuitas y de pago para transcripción, traducción y voz neural inglés-español.
+- [x] Diseñar el flujo de doblaje con subtítulos, pista original y pista española sincronizada.
+- [x] Añadir placeholders de configuración para análisis de vídeo, traducción y TTS sin guardar credenciales.
+- [x] Documentar la integración recomendada y los requisitos para activar el doblaje en producción.

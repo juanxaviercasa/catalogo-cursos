@@ -4,6 +4,7 @@ import { AlertTriangle, ArrowLeft, Check, CheckCircle2, ExternalLink, FileArchiv
 import { useMemo, useState } from "react";
 import { ProgressRing } from "./ProgressRing";
 import { VideoProcessingPanel } from "./VideoProcessingPanel";
+import { DubbingPanel } from "./DubbingPanel";
 
 const moduleIcon = (item: DriveItem) => {
   const type = getContentType(item);
@@ -16,7 +17,7 @@ const moduleIcon = (item: DriveItem) => {
 type ImportedVideo = { id: number; title: string; storageUrl: string; mimeType: string; sizeBytes: number; sortOrder: number };
 type ZipImport = { zipId: string; status: "processing" | "ready" | "failed"; errorMessage: string | null; videos: ImportedVideo[] };
 
-export function CourseDetail({ course, meta, route, completedIds, onBack, onToggle, canTrack, onLogin, zipImports, canImportZip, isImportingZip, onPrepareZip, videoProcessingSetup }: {
+export function CourseDetail({ course, meta, route, completedIds, onBack, onToggle, canTrack, onLogin, zipImports, canImportZip, isImportingZip, onPrepareZip, videoProcessingSetup, dubbingSetup }: {
   course: DriveCourse;
   meta: CourseMeta;
   route: LearningRoute;
@@ -30,6 +31,7 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
   isImportingZip: boolean;
   onPrepareZip: (zipId: string) => void;
   videoProcessingSetup: import("@shared/learning").VideoProcessingSetup;
+  dubbingSetup: import("@shared/learning").DubbingSetup;
 }) {
   const [activeVideo, setActiveVideo] = useState<DriveItem | null>(null);
   const [preparedVideos, setPreparedVideos] = useState<ImportedVideo[] | null>(null);
@@ -78,6 +80,7 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
       </section>}
 
       {pilotZip && <VideoProcessingPanel setup={videoProcessingSetup} />}
+      {pilotZip && <DubbingPanel setup={dubbingSetup} />}
 
       {activeVideo && (
         <section className="video-player-panel" aria-label={`Reproduciendo ${activeVideo.name}`}>

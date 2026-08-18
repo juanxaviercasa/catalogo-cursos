@@ -1,0 +1,12 @@
+import type { DubbingSetup } from "@shared/learning";
+import { AudioLines, Captions, CheckCircle2, ChevronRight, KeyRound, Languages, Sparkles } from "lucide-react";
+
+export function DubbingPanel({ setup }: { setup: DubbingSetup }) {
+  return <section className="dubbing-placeholder" aria-labelledby="dubbing-placeholder-title">
+    <div className="dubbing-head"><div className="dubbing-icon"><AudioLines size={21} /></div><div><span>ANÁLISIS Y DOBLAJE · PLACEHOLDER</span><h2 id="dubbing-placeholder-title">Escucha en español, conserva el original.</h2><p>La futura pista española se genera fuera del navegador y se sincroniza con el vídeo. Mientras se prepara, el usuario conserva el audio original y puede usar subtítulos en español.</p></div></div>
+    <div className="dubbing-pipeline">{setup.pipeline.map((stage, index) => <div className="dubbing-stage" key={stage.step}><b>{String(index + 1).padStart(2, "0")}</b><span>{stage.step}</span><small>{stage.output}</small>{index < setup.pipeline.length - 1 && <ChevronRight className="dubbing-arrow" size={15} />}</div>)}</div>
+    <div className="dubbing-provider-grid">{setup.providers.map((provider) => <article className={`dubbing-provider dubbing-provider--${provider.tier} ${provider.recommended ? "dubbing-provider--recommended" : ""}`} key={provider.id}><div><span>{provider.tier === "free" ? "RUTA GRATUITA" : "OPCIONAL"}</span>{provider.recommended && <em><Sparkles size={11} /> RECOMENDADA</em>}</div><h3>{provider.label}</h3><p>{provider.description}</p></article>)}</div>
+    <div className="dubbing-controls"><div className="dubbing-track-preview"><Languages size={16} /><span>Idiomas iniciales</span><b>Inglés <ChevronRight size={13} /> Español</b></div><div className="dubbing-track-preview"><Captions size={16} /><span>Resultado en el reproductor</span><b>Original · Español · Subtítulos</b></div></div>
+    <div className="dubbing-keys"><div><KeyRound size={16} /><span>Integración por completar</span></div><p>Los secretos se añaden después en el servidor; no se guardan claves ni se envía información al navegador.</p><div>{setup.placeholders.map((field) => <code title={field.purpose} key={field.key}>{field.key}<small>{field.example}</small></code>)}</div><p className="dubbing-rights"><CheckCircle2 size={14} /> La traducción debe revisarse y utilizarse únicamente cuando se tenga derecho a adaptar el contenido.</p></div>
+  </section>;
+}
