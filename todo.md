@@ -47,3 +47,6 @@
 - [x] Diseñar el flujo de doblaje con subtítulos, pista original y pista española sincronizada.
 - [x] Añadir placeholders de configuración para análisis de vídeo, traducción y TTS sin guardar credenciales.
 - [x] Documentar la integración recomendada y los requisitos para activar el doblaje en producción.
+- [x] Convertir los paneles de procesamiento y doblaje en estados explícitamente no interactivos mientras no haya proveedor configurado.
+- [x] Mostrar de forma visible que el audio actual del vídeo preparado está disponible solo en idioma original.
+- [x] Eliminar etiquetas y acciones que puedan sugerir erróneamente que la traducción al español ya está activa.

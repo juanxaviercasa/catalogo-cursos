@@ -1,6 +1,6 @@
 import type { CourseMeta, LearningRoute } from "@shared/courseMeta";
 import { getContentType, orderedModules, type DriveCourse, type DriveItem } from "@shared/learning";
-import { AlertTriangle, ArrowLeft, Check, CheckCircle2, ExternalLink, FileArchive, FileText, FolderOpen, Loader2, Play, PlayCircle, Server } from "lucide-react";
+import { AlertTriangle, ArrowLeft, AudioLines, Check, CheckCircle2, ExternalLink, FileArchive, FileText, FolderOpen, Loader2, Play, PlayCircle, Server } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ProgressRing } from "./ProgressRing";
 import { VideoProcessingPanel } from "./VideoProcessingPanel";
@@ -86,7 +86,7 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
         <section className="video-player-panel" aria-label={`Reproduciendo ${activeVideo.name}`}>
           <div className="video-panel-head"><div><span>REPRODUCIENDO EN DRIVE</span><h2>{activeVideo.name.replace(/\.(mp4|ts)$/i, "")}</h2></div><button onClick={() => setActiveVideo(null)}>Cerrar</button></div>
           <div className="drive-video-frame"><iframe src={`https://drive.google.com/file/d/${activeVideo.id}/preview`} title={`Vídeo: ${activeVideo.name}`} allow="autoplay; fullscreen" allowFullScreen /></div>
-          <div className="video-panel-footer"><p>El vídeo se reproduce desde Google Drive; no se aloja una copia en esta plataforma.</p><a href={activeVideo.webViewLink} target="_blank" rel="noreferrer">Ir al contenido <ExternalLink size={15} /></a></div>
+          <div className="video-panel-footer"><p>El vídeo se reproduce desde Google Drive; no se aloja una copia en esta plataforma.</p><a href={activeVideo.webViewLink} target="_blank" rel="noreferrer">Ir al contenido <ExternalLink size={15} /></a></div><div className="audio-availability"><AudioLines size={15} /><span><b>Audio disponible: original.</b> La traducción y la voz española aún no están activas para este vídeo.</span></div>
         </section>
       )}
 
@@ -115,7 +115,7 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
           })}
         </div>
       </section>
-      {preparedVideos && <section className="prepared-video-panel"><div className="video-panel-head"><div><span>VÍDEOS PREPARADOS</span><h2>Reproducir desde la plataforma</h2></div><button onClick={() => setPreparedVideos(null)}>Cerrar</button></div><p>Estos vídeos se importaron una vez desde el ZIP original de Drive y ahora se sirven desde el almacenamiento gestionado de la plataforma.</p><div className="prepared-video-list">{preparedVideos.map((video) => <article key={video.id}><h3>{video.title}</h3><video controls preload="metadata" src={video.storageUrl} /></article>)}</div></section>}
+      {preparedVideos && <section className="prepared-video-panel"><div className="video-panel-head"><div><span>VÍDEOS PREPARADOS</span><h2>Reproducir desde la plataforma</h2></div><button onClick={() => setPreparedVideos(null)}>Cerrar</button></div><p>Estos vídeos se importaron una vez desde el ZIP original de Drive y ahora se sirven desde el almacenamiento gestionado de la plataforma.</p><div className="audio-availability audio-availability--dark"><AudioLines size={15} /><span><b>Audio disponible: original · inglés.</b> No hay una pista española generada todavía.</span></div><div className="prepared-video-list">{preparedVideos.map((video) => <article key={video.id}><h3>{video.title}</h3><video controls preload="metadata" src={video.storageUrl} /></article>)}</div></section>}
       {!canTrack && <aside className="tracking-note"><CheckCircle2 size={18} /><span>Inicia sesión para marcar módulos como vistos y guardar tu progreso entre sesiones.</span><button onClick={onLogin}>Iniciar sesión</button></aside>}
     </section>
   );
