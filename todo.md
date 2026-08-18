@@ -78,5 +78,5 @@
 - [x] Añadir selección explícita entre ejecución gratuita en equipo propio y servicio persistente independiente para el procesador de vídeo.
 - [x] Preparar archivos de configuración y arranque reproducibles para ambas rutas, sin secretos embebidos.
 - [x] Documentar la migración del proyecto y del trabajador de vídeo a otro entorno, incluidos almacenamiento, base de datos, secretos y dominio.
-- [ ] Registrar `https://github.com/juanxaviercasa/catalogo-cursos.git` como repositorio de continuidad en la documentación.
-- [ ] Sincronizar la versión actual del proyecto con el repositorio GitHub de continuidad indicado por el usuario.
+- [x] Registrar `https://github.com/juanxaviercasa/catalogo-cursos.git` como repositorio de continuidad en la documentación.
+- [x] Sincronizar la versión actual del proyecto con el repositorio GitHub de continuidad indicado por el usuario.
