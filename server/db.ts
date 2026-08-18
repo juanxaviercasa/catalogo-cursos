@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, moduleProgress, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -87,6 +87,27 @@ export async function getUserByOpenId(openId: string) {
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
 
   return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getModuleProgressByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(moduleProgress).where(eq(moduleProgress.userId, userId));
+}
+
+export async function setModuleProgress(input: {
+  userId: number;
+  courseId: string;
+  moduleId: string;
+  completed: boolean;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible.");
+
+  const completedAt = input.completed ? new Date() : null;
+  await db.insert(moduleProgress).values({ ...input, completedAt }).onDuplicateKeyUpdate({
+    set: { courseId: input.courseId, completed: input.completed, completedAt },
+  });
 }
 
 // TODO: add feature queries here as your schema grows.

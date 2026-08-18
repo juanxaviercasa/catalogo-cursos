@@ -1,0 +1,21 @@
+# Project TODO
+
+- [x] Definir un modelo de datos con 19 cursos, seis rutas, módulos, tipos de contenido y enlaces públicos de Google Drive.
+- [x] Crear la estructura de base de datos para registrar el progreso de módulos y cursos por usuario.
+- [x] Aplicar la migración de la base de datos y verificar las tablas creadas.
+- [x] Implementar procedimientos tipados para obtener el catálogo y leer/actualizar el progreso autenticado.
+- [x] Diseñar una experiencia visual elegante con navegación lateral, jerarquía editorial y diseño adaptable.
+- [x] Implementar el catálogo con búsqueda y filtros por ruta, tipo de contenido y estado de progreso.
+- [x] Implementar fichas de curso con objetivos, recomendación de inicio, resultado práctico y acceso directo a Drive.
+- [x] Implementar vista de detalle con módulos ordenados, estado de completado y botón exacto “Ir al contenido”.
+- [x] Implementar un reproductor embebido de Google Drive para módulos MP4 compatibles.
+- [x] Implementar avisos explícitos para módulos ZIP con enlace y guía para abrirlos desde Google Drive.
+- [x] Implementar el cálculo de progreso por curso y ruta persistido en la base de datos.
+- [x] Añadir accesos rápidos a cursos en progreso y cursos completados en la barra lateral.
+- [x] Escribir pruebas Vitest de catálogo y progreso.
+- [x] Validar tipos, pruebas y diseño en escritorio y móvil.
+- [ ] Guardar un punto de control con todas las tareas terminadas y entregar la plataforma.
+- [x] Servir el catálogo mediante un procedimiento tRPC tipado en lugar de una carga directa desde el cliente.
+- [x] Mostrar progreso calculado por cada ruta pedagógica a partir de los módulos persistidos.
+- [x] Mostrar accesos directos a cursos en progreso y completados en la barra lateral.
+- [x] Tipar explícitamente la respuesta del catálogo y eliminar conversiones manuales en el cliente.
