@@ -2,13 +2,17 @@ import { createServer } from "node:http";
 import { spawn } from "node:child_process";
 
 const sharedSecret = process.env.VIDEO_PROCESSOR_SHARED_SECRET;
-const port = Number(process.env.PORT ?? process.env.VIDEO_PROCESSOR_PORT);
+const port = Number(process.env.VIDEO_PROCESSOR_PORT ?? process.env.PORT);
+const mode = process.env.VIDEO_PROCESSOR_MODE;
 
 if (!sharedSecret) {
   throw new Error("VIDEO_PROCESSOR_SHARED_SECRET es obligatorio para iniciar el trabajador de vídeo.");
 }
 if (!Number.isInteger(port) || port < 1 || port > 65535) {
   throw new Error("PORT o VIDEO_PROCESSOR_PORT debe contener un puerto válido para iniciar el trabajador de vídeo.");
+}
+if (mode !== "local-worker" && mode !== "persistent-worker") {
+  throw new Error("VIDEO_PROCESSOR_MODE debe ser local-worker o persistent-worker.");
 }
 
 function readJson(request) {
@@ -23,6 +27,10 @@ function readJson(request) {
 }
 
 createServer(async (request, response) => {
+  if (request.method === "GET" && request.url === "/health") {
+    response.writeHead(200, { "content-type": "application/json", "cache-control": "no-store" }).end(JSON.stringify({ status: "ok", mode }));
+    return;
+  }
   if (request.method !== "POST" || request.url !== "/process") {
     response.writeHead(404).end();
     return;
@@ -35,6 +43,7 @@ createServer(async (request, response) => {
     const payload = await readJson(request);
     const videoId = Number(payload.videoId);
     if (!Number.isInteger(videoId) || videoId <= 0) throw new Error("videoId no es válido.");
+    if (payload.mode !== mode || request.headers["x-video-processor-mode"] !== mode) throw new Error("La ruta seleccionada no coincide con la configuración del trabajador.");
     const child = spawn("pnpm", ["tsx", "workers/process_queued_video.ts", "--video-id", String(videoId)], {
       cwd: process.cwd(),
       detached: true,

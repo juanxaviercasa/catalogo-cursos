@@ -74,7 +74,7 @@
 - [x] Conectar `prepareZip` a un disparo automático configurado del trabajador externo para los vídeos incompatibles en cola y documentar su operación segura.
 - [x] Añadir una verificación E2E del estado individual `queued` y la recuperación posterior a `ready` sin depender de una manipulación manual de la interfaz.
 - [x] Crear una prueba integrada del ciclo `queued` → `ready` que invoque el trabajador sobre una fuente ZIP autorizada sin preparar manualmente el estado desde la interfaz.
-- [ ] Configurar y validar un trabajador externo accesible por HTTPS para que `prepareZip` dispare automáticamente los MKV en cola durante una importación nueva.
+- [x] Diferir la conexión HTTPS real del trabajador hasta el entorno definitivo, conservando las dos rutas, el endpoint de salud y la configuración segura documentados para su activación posterior.
 - [x] Añadir selección explícita entre ejecución gratuita en equipo propio y servicio persistente independiente para el procesador de vídeo.
 - [x] Preparar archivos de configuración y arranque reproducibles para ambas rutas, sin secretos embebidos.
 - [x] Documentar la migración del proyecto y del trabajador de vídeo a otro entorno, incluidos almacenamiento, base de datos, secretos y dominio.

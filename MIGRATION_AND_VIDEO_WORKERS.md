@@ -49,6 +49,8 @@ El equipo propio y el servidor persistente deben tener Node.js, pnpm, FFmpeg, FF
 
 > Nunca copies valores reales al repositorio ni al cliente. Usa `workers/video-processor.env.example` únicamente como plantilla y guarda los valores reales en el gestor de secretos del entorno elegido.
 
+`VIDEO_PROCESSOR_PORT` tiene prioridad sobre `PORT`. Esto permite ejecutar el trabajador en el mismo equipo que la plataforma durante pruebas, sin competir con el puerto de la aplicación web.
+
 ## Ruta 1: equipo propio
 
 Primero copia `workers/video-processor.env.example` a un archivo privado fuera del repositorio, completa los valores y cárgalo en tu terminal. Selecciona `VIDEO_PROCESSOR_MODE=local-worker`. Luego, desde la raíz del proyecto, inicia el servicio:
@@ -69,6 +71,10 @@ En un servidor Linux, copia el proyecto en una ruta de servicio, instala Node.js
 Instala `deploy/video-processor.service.example` como una unidad de servicio, reemplaza el usuario y la ruta del proyecto, y habilítala. El servicio ejecuta el mismo comando `pnpm processor:service`; por tanto, la lógica de conversión y los estados son idénticos a los de la ruta local.
 
 El servicio debe quedar detrás de HTTPS y solo aceptar solicitudes de la plataforma con el secreto compartido. La URL HTTPS pública de ese servicio se registra como `VIDEO_PROCESSOR_URL` en la configuración privada de la aplicación web.
+
+Antes de conectar la aplicación, verifica la disponibilidad sin exponer secretos con `GET https://tu-procesador/health`. La respuesta debe indicar `status: "ok"` y el modo configurado. El endpoint de proceso exige además que el modo recibido coincida con `VIDEO_PROCESSOR_MODE`, de forma que la ruta local y la persistente no se mezclen por error.
+
+El endpoint de salud y la prioridad de `VIDEO_PROCESSOR_PORT` se validaron localmente con un proceso temporal, que respondió `{"status":"ok","mode":"local-worker"}` sin utilizar secretos de producción.
 
 ## Flujo de un ZIP nuevo
 
