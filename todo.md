@@ -14,8 +14,15 @@
 - [x] Añadir accesos rápidos a cursos en progreso y cursos completados en la barra lateral.
 - [x] Escribir pruebas Vitest de catálogo y progreso.
 - [x] Validar tipos, pruebas y diseño en escritorio y móvil.
-- [ ] Guardar un punto de control con todas las tareas terminadas y entregar la plataforma.
+- [x] Guardar un punto de control con todas las tareas terminadas y entregar la plataforma.
 - [x] Servir el catálogo mediante un procedimiento tRPC tipado en lugar de una carga directa desde el cliente.
 - [x] Mostrar progreso calculado por cada ruta pedagógica a partir de los módulos persistidos.
 - [x] Mostrar accesos directos a cursos en progreso y completados en la barra lateral.
 - [x] Tipar explícitamente la respuesta del catálogo y eliminar conversiones manuales en el cliente.
+- [x] Comparar los enfoques de importación de ZIP desde Google Drive y documentar sus límites de tamaño, permisos y coste.
+- [ ] Confirmar la autorización de Google Drive y seleccionar un curso ZIP inicial para la prueba controlada.
+- [x] Diseñar una importación bajo demanda que preserve el ZIP original y extraiga únicamente vídeos reproducibles a almacenamiento gestionado.
+- [x] Implementar una interfaz de importación, estado y reproducción de contenidos extraídos.
+- [ ] Validar la importación con un ZIP real y documentar el comportamiento operativo y las limitaciones.
+- [ ] Importar como piloto el ZIP público “01 – Welcome to your new life (YouTube Success)” y conservar el archivo original sin cambios.
+- [ ] Mostrar en la interfaz cuándo un vídeo ya fue preparado y servido desde la plataforma en lugar de Google Drive.

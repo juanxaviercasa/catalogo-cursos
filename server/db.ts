@@ -1,6 +1,7 @@
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, moduleProgress, users } from "../drizzle/schema";
+import { extractedVideos, InsertUser, moduleProgress, users, zipImports } from "../drizzle/schema";
+import type { ExtractedVideo as ImportedVideo } from "./zipImport";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -108,6 +109,51 @@ export async function setModuleProgress(input: {
   await db.insert(moduleProgress).values({ ...input, completedAt }).onDuplicateKeyUpdate({
     set: { courseId: input.courseId, completed: input.completed, completedAt },
   });
+}
+
+export async function getZipImportsWithVideos() {
+  const db = await getDb();
+  if (!db) return [];
+  const imports = await db.select().from(zipImports);
+  const videos = await db.select().from(extractedVideos).orderBy(asc(extractedVideos.sortOrder));
+  return imports.map((item) => ({ ...item, videos: videos.filter((video) => video.zipImportId === item.id) }));
+}
+
+export async function getZipImportByZipId(zipId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(zipImports).where(eq(zipImports.zipId, zipId)).limit(1);
+  return result[0];
+}
+
+export async function createZipImport(input: { zipId: string; courseId: string; sourceName: string; importedByUserId: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible.");
+  await db.insert(zipImports).values(input);
+  const created = await getZipImportByZipId(input.zipId);
+  if (!created) throw new Error("No se pudo registrar la importación.");
+  return created;
+}
+
+export async function completeZipImport(input: { importId: number; sourceBytes: number | null; videos: ImportedVideo[] }) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible.");
+  for (const video of input.videos) {
+    await db.insert(extractedVideos).values({ zipImportId: input.importId, ...video });
+  }
+  await db.update(zipImports).set({ status: "ready", sourceBytes: input.sourceBytes, importedAt: new Date(), errorMessage: null }).where(eq(zipImports.id, input.importId));
+}
+
+export async function failZipImport(importId: number, message: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(zipImports).set({ status: "failed", errorMessage: message.slice(0, 2000) }).where(eq(zipImports.id, importId));
+}
+
+export async function restartZipImport(importId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible.");
+  await db.update(zipImports).set({ status: "processing", errorMessage: null, sourceBytes: null }).where(eq(zipImports.id, importId));
 }
 
 // TODO: add feature queries here as your schema grows.

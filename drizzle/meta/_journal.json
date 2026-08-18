@@ -15,6 +15,13 @@
       "when": 1787013957422,
       "tag": "0001_mysterious_corsair",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1787015605762,
+      "tag": "0002_ambitious_centennial",
+      "breakpoints": true
     }
   ]
 }

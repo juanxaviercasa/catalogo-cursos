@@ -1,6 +1,6 @@
 import type { CourseMeta, LearningRoute } from "@shared/courseMeta";
 import { getContentType, orderedModules, type DriveCourse, type DriveItem } from "@shared/learning";
-import { AlertTriangle, ArrowLeft, Check, CheckCircle2, ExternalLink, FileArchive, FileText, FolderOpen, Play, PlayCircle } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Check, CheckCircle2, ExternalLink, FileArchive, FileText, FolderOpen, Loader2, Play, PlayCircle, Server } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ProgressRing } from "./ProgressRing";
 
@@ -12,7 +12,10 @@ const moduleIcon = (item: DriveItem) => {
   return <FolderOpen size={18} />;
 };
 
-export function CourseDetail({ course, meta, route, completedIds, onBack, onToggle, canTrack, onLogin }: {
+type ImportedVideo = { id: number; title: string; storageUrl: string; mimeType: string; sizeBytes: number; sortOrder: number };
+type ZipImport = { zipId: string; status: "processing" | "ready" | "failed"; errorMessage: string | null; videos: ImportedVideo[] };
+
+export function CourseDetail({ course, meta, route, completedIds, onBack, onToggle, canTrack, onLogin, zipImports, canImportZip, isImportingZip, onPrepareZip }: {
   course: DriveCourse;
   meta: CourseMeta;
   route: LearningRoute;
@@ -21,8 +24,13 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
   onToggle: (moduleId: string, completed: boolean) => void;
   canTrack: boolean;
   onLogin: () => void;
+  zipImports: ZipImport[];
+  canImportZip: boolean;
+  isImportingZip: boolean;
+  onPrepareZip: (zipId: string) => void;
 }) {
   const [activeVideo, setActiveVideo] = useState<DriveItem | null>(null);
+  const [preparedVideos, setPreparedVideos] = useState<ImportedVideo[] | null>(null);
   const modules = useMemo(() => orderedModules(course.children), [course.children]);
   const completed = modules.filter((item) => completedIds.has(item.id)).length;
   const progress = modules.length ? Math.round((completed / modules.length) * 100) : 0;
@@ -68,6 +76,7 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
           {modules.map((item, index) => {
             const contentType = getContentType(item);
             const isComplete = completedIds.has(item.id);
+            const importRecord = zipImports.find((record) => record.zipId === item.id);
             return (
               <article className={`module-row module-row--${contentType}`} key={item.id}>
                 <button className={`module-check ${isComplete ? "module-check--complete" : ""}`} onClick={() => canTrack ? onToggle(item.id, !isComplete) : onLogin()} aria-label={isComplete ? `Marcar ${item.name} como pendiente` : `Marcar ${item.name} como visto`}>
@@ -80,12 +89,13 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
                   {contentType === "video" && <button className="watch-button" onClick={() => setActiveVideo(item)}><Play size={14} /> Ver aquí</button>}
                   <a href={item.webViewLink} target="_blank" rel="noreferrer">Ir al contenido <ExternalLink size={15} /></a>
                 </div>
-                {contentType === "zip" && <div className="zip-note"><AlertTriangle size={15} /><span><b>Archivo ZIP.</b> Google Drive conserva este módulo comprimido. Abre el enlace “Ir al contenido” para verlo o gestionarlo desde Drive; esta plataforma no descarga ni almacena una copia.</span></div>}
+                {contentType === "zip" && <div className="zip-note"><AlertTriangle size={15} /><span><b>Archivo ZIP.</b> Google Drive conserva el original comprimido. {importRecord?.status === "ready" ? "Los vídeos preparados ya se sirven desde esta plataforma y el ZIP no se vuelve a consultar para reproducirlos." : "Abre el enlace “Ir al contenido” para gestionarlo desde Drive o prepara sus vídeos desde la plataforma."}</span>{importRecord?.status === "ready" ? <button className="prepared-button" onClick={() => setPreparedVideos(importRecord.videos)}><Server size={14} /> Ver vídeos preparados ({importRecord.videos.length})</button> : importRecord?.status === "processing" ? <span className="import-status"><Loader2 className="animate-spin" size={14} /> Preparando vídeos…</span> : canImportZip ? <button className="prepared-button" disabled={isImportingZip} onClick={() => onPrepareZip(item.id)}>{isImportingZip ? <Loader2 className="animate-spin" size={14} /> : <Server size={14} />} Preparar vídeos</button> : null}{importRecord?.status === "failed" && <span className="import-error">{importRecord.errorMessage}</span>}</div>}
               </article>
             );
           })}
         </div>
       </section>
+      {preparedVideos && <section className="prepared-video-panel"><div className="video-panel-head"><div><span>VÍDEOS PREPARADOS</span><h2>Reproducir desde la plataforma</h2></div><button onClick={() => setPreparedVideos(null)}>Cerrar</button></div><p>Estos vídeos se importaron una vez desde el ZIP original de Drive y ahora se sirven desde el almacenamiento gestionado de la plataforma.</p><div className="prepared-video-list">{preparedVideos.map((video) => <article key={video.id}><h3>{video.title}</h3><video controls preload="metadata" src={video.storageUrl} /></article>)}</div></section>}
       {!canTrack && <aside className="tracking-note"><CheckCircle2 size={18} /><span>Inicia sesión para marcar módulos como vistos y guardar tu progreso entre sesiones.</span><button onClick={onLogin}>Iniciar sesión</button></aside>}
     </section>
   );

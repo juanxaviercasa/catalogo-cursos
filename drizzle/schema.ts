@@ -35,9 +35,42 @@ export const moduleProgress = mysqlTable("module_progress", {
   uniqueIndex("module_progress_user_module_unique").on(table.userId, table.moduleId),
 ]);
 
+export const zipImports = mysqlTable("zip_imports", {
+  id: int("id").autoincrement().primaryKey(),
+  zipId: varchar("zipId", { length: 128 }).notNull(),
+  courseId: varchar("courseId", { length: 128 }).notNull(),
+  sourceName: varchar("sourceName", { length: 512 }).notNull(),
+  sourceBytes: int("sourceBytes"),
+  status: mysqlEnum("status", ["processing", "ready", "failed"]).notNull().default("processing"),
+  errorMessage: text("errorMessage"),
+  importedByUserId: int("importedByUserId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  importedAt: timestamp("importedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [
+  uniqueIndex("zip_imports_zip_unique").on(table.zipId),
+]);
+
+export const extractedVideos = mysqlTable("extracted_videos", {
+  id: int("id").autoincrement().primaryKey(),
+  zipImportId: int("zipImportId").notNull().references(() => zipImports.id, { onDelete: "cascade" }),
+  sourcePath: varchar("sourcePath", { length: 1024 }).notNull(),
+  title: varchar("title", { length: 512 }).notNull(),
+  storageKey: varchar("storageKey", { length: 1024 }).notNull(),
+  storageUrl: varchar("storageUrl", { length: 1200 }).notNull(),
+  mimeType: varchar("mimeType", { length: 128 }).notNull(),
+  sizeBytes: int("sizeBytes").notNull(),
+  sortOrder: int("sortOrder").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex("extracted_videos_import_path_unique").on(table.zipImportId, table.sourcePath),
+]);
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type ModuleProgress = typeof moduleProgress.$inferSelect;
 export type InsertModuleProgress = typeof moduleProgress.$inferInsert;
+export type ZipImport = typeof zipImports.$inferSelect;
+export type ExtractedVideo = typeof extractedVideos.$inferSelect;
 
 // TODO: Add your tables here

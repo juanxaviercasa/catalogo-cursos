@@ -2,6 +2,7 @@
 // Uploads via Forge Server presigned URL to S3 (PUT direct).
 // Downloads return /manus-storage/{key} paths served via 307 redirect.
 
+import { Readable } from "node:stream";
 import { ENV } from "./_core/env";
 
 function getForgeConfig() {
@@ -68,6 +69,31 @@ export async function storagePut(
     throw new Error(`Storage upload to S3 failed (${uploadResp.status})`);
   }
 
+  return { key, url: `/manus-storage/${key}` };
+}
+
+export async function storagePutStream(
+  relKey: string,
+  data: Readable,
+  contentType = "application/octet-stream",
+): Promise<{ key: string; url: string }> {
+  const { forgeUrl, forgeKey } = getForgeConfig();
+  const key = appendHashSuffix(normalizeKey(relKey));
+  const presignUrl = new URL("v1/storage/presign/put", forgeUrl + "/");
+  presignUrl.searchParams.set("path", key);
+
+  const presignResp = await fetch(presignUrl, { headers: { Authorization: `Bearer ${forgeKey}` } });
+  if (!presignResp.ok) throw new Error(`Storage presign failed (${presignResp.status})`);
+  const { url: s3Url } = (await presignResp.json()) as { url: string };
+  if (!s3Url) throw new Error("Forge returned empty presign URL");
+
+  const uploadResp = await fetch(s3Url, {
+    method: "PUT",
+    headers: { "Content-Type": contentType },
+    body: Readable.toWeb(data) as unknown as BodyInit,
+    duplex: "half",
+  } as RequestInit);
+  if (!uploadResp.ok) throw new Error(`Storage upload to S3 failed (${uploadResp.status})`);
   return { key, url: `/manus-storage/${key}` };
 }
 
