@@ -50,10 +50,10 @@
 - [x] Convertir los paneles de procesamiento y doblaje en estados explícitamente no interactivos mientras no haya proveedor configurado.
 - [x] Mostrar de forma visible que el audio actual del vídeo preparado está disponible solo en idioma original.
 - [x] Eliminar etiquetas y acciones que puedan sugerir erróneamente que la traducción al español ya está activa.
-- [ ] Configurar un proveedor real de transcripción, traducción y voz neural para el doblaje inglés-español.
-- [ ] Generar una pista española sincronizada para el vídeo piloto ya preparado.
-- [ ] Integrar un selector de audio que reproduzca la pista española cuando esté disponible.
-- [ ] Verificar de extremo a extremo que el vídeo piloto se escucha en español desde la plataforma.
+- [x] Configurar un proveedor real de transcripción, traducción y voz neural para el doblaje inglés-español (ruta local gratuita validada).
+- [x] Generar una pista española sincronizada para el vídeo piloto ya preparado.
+- [x] Integrar un selector de audio que reproduzca la pista española cuando esté disponible.
+- [x] Verificar de extremo a extremo que el vídeo piloto se escucha en español desde la plataforma.
 - [x] Priorizar en la interfaz y documentación la ruta gratuita local de doblaje antes de cualquier API de pago.
 - [x] Mover ElevenLabs a la última opción de proveedor, con carácter opcional y reemplazable.
 - [x] Preparar y validar una guía ejecutable de prueba local sin API de pago para transcripción, traducción y voz neural.
@@ -61,5 +61,9 @@
 - [x] Preparar el MP4 piloto con la pista de audio española generada localmente y almacenarlo fuera del navegador.
 - [x] Registrar la pista española y los subtítulos del piloto para que la plataforma pueda seleccionarlos.
 - [x] Añadir un selector de audio funcional que cambie entre original y español en el vídeo piloto.
-- [ ] Verificar el vídeo piloto desde la plataforma con audio español real y subtítulos disponibles.
-- [ ] Abrir el vídeo piloto preparado y comprobar el selector activo de español y el track VTT dentro del reproductor.
+- [x] Verificar el vídeo piloto desde la plataforma con audio español real y subtítulos disponibles.
+- [x] Abrir el vídeo piloto preparado y comprobar el selector activo de español y el track VTT dentro del reproductor.
+- [x] Analizar si las variaciones percibidas provienen del buffer de red o de los ajustes de ritmo del doblaje local.
+- [x] Ajustar el proceso de doblaje para limitar cambios de velocidad perceptibles entre segmentos.
+- [x] Mostrar una guía visible para activar subtítulos españoles en el reproductor del vídeo piloto.
+- [x] Comprobar la entrega web del vídeo doblado y documentar si las pausas restantes se deben a red o a la pista de audio refinada.

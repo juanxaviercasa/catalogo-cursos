@@ -50,6 +50,26 @@ python workers/local_dubbing_pilot.py \
 
 Elige `small` para una primera prueba con menor consumo. Si el resultado necesita mejor precisión, repite el trabajo con un modelo mayor. El proceso puede tardar más que la duración del vídeo en un equipo sin GPU.
 
+El trabajador ya evita ralentizar frases cortas: conserva el ritmo natural y deja una pausa cuando una frase española es más breve que la ventana original. Para corregir un fragmento que la traducción local haya interpretado mal, crea un JSON con el índice de segmento y añádelo a la orden:
+
+```json
+{
+  "9": "Cuantas más notas tomes y más estudies el curso, mejor comprenderás sus fundamentos y principios."
+}
+```
+
+```bash
+python workers/local_dubbing_pilot.py --input "/RUTA/video.mp4" --output "/RUTA/salida-es" --overrides "/RUTA/correcciones.json"
+```
+
+## Comprobación de entrega y ritmo
+
+La prueba del vídeo piloto confirmó que el almacenamiento responde a solicitudes parciales de vídeo (`HTTP 206`), por lo que el reproductor puede empezar a cargar antes de descargar el archivo completo. En la verificación local, el primer megabyte empezó a transferirse en aproximadamente 0,28 segundos. Esto no garantiza la misma velocidad en todas las redes del usuario, pero descarta que la plataforma obligue a descargar el MP4 entero antes de reproducirlo.
+
+La primera pista española tenía una frase ralentizada artificialmente para ocupar su ventana temporal. El trabajador se ajustó para no ralentizar frases cortas: ahora conserva una pausa natural y solo acelera cuando una frase sintetizada excede la ventana original. La versión refinada del piloto utiliza este comportamiento. Si persistieran pausas con una conexión estable, se deben revisar los segmentos marcados por duración y las traducciones antes de publicar.
+
+La prueba interactiva en navegador confirmó que el MP4 refinado carga metadatos completos (`readyState 4`), dura 164,91 segundos —igual que el vídeo original— y adjunta el VTT español como pista predeterminada. También confirmó que el selector cambia de la versión española al vídeo original. Por tanto, una pausa posterior a esta versión puede deberse a la red del espectador o a un segmento concreto que requiera revisión editorial, no a la carga completa obligatoria del archivo.
+
 ## Incorporación al sitio
 
 La prueba local no publica nada automáticamente: primero permite revisar el guion y el audio. Cuando `dubbed-es.mp3` y `subtitles-es.vtt` sean satisfactorios, el siguiente paso será activar el trabajador local autenticado para subirlos al almacenamiento gestionado y asociarlos al módulo. En ese momento el reproductor ofrecerá `Original`, `Español` y `Subtítulos`.

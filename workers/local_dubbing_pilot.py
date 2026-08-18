@@ -59,6 +59,7 @@ def main() -> int:
     parser.add_argument("--input", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--whisper-model", default="small")
+    parser.add_argument("--overrides", type=Path, help="JSON opcional con correcciones por índice de segmento.")
     args = parser.parse_args()
 
     if not args.input.is_file():
@@ -79,21 +80,25 @@ def main() -> int:
     translator = ensure_argos_en_es()
     model = WhisperModel(args.whisper_model, device="cpu", compute_type="int8")
     segments, _ = model.transcribe(str(source_audio), language="en", vad_filter=True)
+    overrides = json.loads(args.overrides.read_text(encoding="utf-8")) if args.overrides else {}
     records = []
     for index, segment in enumerate(segments):
         source_text = segment.text.strip()
         if not source_text:
             continue
-        translated = translator.translate(source_text, "en", "es")
+        translated = overrides.get(str(index), translator.translate(source_text, "en", "es"))
         raw = chunks / f"{index:04}-raw.wav"
         adjusted = chunks / f"{index:04}-adjusted.wav"
         run([piper_bin, "--model", piper_model, "--output_file", str(raw)], text=translated)
         target_duration = max(segment.end - segment.start, 0.2)
         probe = subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=nk=1:nw=1", str(raw)], text=True)
-        factor = max(float(probe.strip()) / target_duration, 0.25)
+        raw_duration = float(probe.strip())
+        # Nunca ralentizar una frase breve: es preferible una pausa natural a una voz estirada.
+        # Solo se acelera cuando la frase sintetizada supera la ventana original.
+        factor = max(raw_duration / target_duration, 1.0)
         filters = ",".join(atempo_filters(factor) + [f"adelay={round(segment.start * 1000)}|{round(segment.start * 1000)}"])
         run(["ffmpeg", "-y", "-i", str(raw), "-af", filters, str(adjusted)])
-        records.append({"start": segment.start, "end": segment.end, "source": source_text, "translation": translated, "audio": adjusted.name})
+        records.append({"start": segment.start, "end": segment.end, "source": source_text, "translation": translated, "audio": adjusted.name, "paceFactor": factor})
 
     if not records:
         raise SystemExit("No se detectó habla en inglés para traducir.")
