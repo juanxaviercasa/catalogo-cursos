@@ -2,11 +2,12 @@
 
 ## Propósito y estado actual
 
-La plataforma convierte una carpeta de Google Drive en una biblioteca de **19 cursos** agrupados en seis rutas pedagógicas. El contenido fuente permanece en Drive, mientras que el catálogo, las rutas, el avance del usuario y la preparación de medios se gestionan desde la aplicación.
+La plataforma convierte las bibliotecas compartidas de Google Drive en una biblioteca de **25 cursos** agrupados en siete rutas pedagógicas. El contenido fuente permanece en Drive, mientras que el catálogo, las rutas, el avance del usuario y la preparación de medios se gestionan desde la aplicación.
 
 | Área | Estado actual | Decisión principal |
 |---|---|---|
-| Catálogo y navegación | Operativo | El inventario estructurado de Drive alimenta las 19 fichas y sus módulos ordenados. |
+| Catálogo y navegación | Operativo | El inventario estructurado de Drive alimenta las 25 fichas y sus módulos ordenados. |
+| Cofre del Emprendedor · Kinobody | Operativo | Seis cursos incorporados en la ruta Salud y Rendimiento; los módulos enlazan a las carpetas de programa de Drive. |
 | Progreso | Operativo | El progreso por módulo, curso y ruta se guarda por usuario en la base de datos. |
 | Vídeos disponibles en Drive | Operativo | Los MP4 compatibles se pueden visualizar mediante el visor embebido de Drive. |
 | Importación de ZIP | Operativo para formatos web | El ZIP original no se modifica; MP4/WebM compatibles se copian al almacenamiento gestionado para reproducción desde la plataforma. |

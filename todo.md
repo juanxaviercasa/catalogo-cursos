@@ -90,3 +90,11 @@
 - [x] Persistir un historial administrativo de eventos de conversión por vídeo, sin almacenar secretos ni rutas de origen sensibles.
 - [x] Mostrar barras de progreso visuales para los estados de conversión y el avance agregado de la cola.
 - [x] Añadir filtros administrativos por estado, ruta de procesamiento y texto de vídeo para consultar el historial.
+- [x] Inventariar la carpeta de Drive `1dKjIxzuDxcQZLOKM-DdSUMYQq6S1JFNB` e identificar los cursos y módulos disponibles.
+- [x] Clasificar pedagógicamente los cursos de Cofre del Emprendedor y definir sus metadatos de aprendizaje.
+- [x] Integrar el nuevo catálogo de Cofre del Emprendedor con acceso a Drive y progreso persistente.
+- [x] Validar navegación, enlaces de contenido y visualización de los cursos nuevos.
+- [x] Sustituir los módulos Kinobody provisionales por IDs y enlaces reales de cada recurso observado en Drive.
+- [x] Verificar que los botones Ir al contenido de los módulos Kinobody apuntan a cada recurso correcto de Drive.
+- [x] Ampliar la comprobación E2E para representar las tres estructuras Kinobody: recursos visuales, biblioteca PDF y manual único.
+- [x] Verificar de forma exhaustiva los enlaces Ir al contenido de todos los módulos publicados en los seis cursos Kinobody.

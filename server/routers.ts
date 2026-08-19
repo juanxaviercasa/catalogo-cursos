@@ -8,7 +8,7 @@ import { DubbingSetupSchema, dubbingSetup, DriveCatalogSchema, getContentType, V
 import { extractPublicDriveZip } from "./zipImport";
 import { dispatchQueuedVideos, isProcessorConfigured, type VideoProcessorMode } from "./videoProcessorDispatch";
 
-const CATALOG_PATH = "/manus-storage/drive_courses_inventory_8a9ad92a.json";
+const CATALOG_PATH = "/manus-storage/drive_courses_inventory_with_kinobody_d70d6ad9.json";
 let catalogCache: DriveCourse[] | null = null;
 const extractedVideoSchema = z.object({ id: z.number(), title: z.string(), storageUrl: z.string().nullable(), sourceMimeType: z.string(), mimeType: z.string().nullable(), sizeBytes: z.number().nullable(), sortOrder: z.number(), processingStatus: z.enum(["queued", "processing", "ready", "failed"]), processingMessage: z.string().nullable(), wasTranscoded: z.boolean() });
 const zipImportSchema = z.object({ id: z.number(), zipId: z.string(), courseId: z.string(), sourceName: z.string(), sourceBytes: z.number().nullable(), status: z.enum(["processing", "ready", "failed"]), errorMessage: z.string().nullable(), videos: z.array(extractedVideoSchema) });
