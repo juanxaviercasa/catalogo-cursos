@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { completeZipImport, createZipImport, failZipImport, getMediaTracks, getModuleProgressByUserId, getVideoProcessingPreference, getZipImportByZipId, getZipImportsWithVideos, restartZipImport, setModuleProgress, setVideoProcessingPreference } from "./db";
+import { completeZipImport, createZipImport, failZipImport, getMediaTracks, getModuleProgressByUserId, getVideoProcessingHistory, getVideoProcessingPreference, getZipImportByZipId, getZipImportsWithVideos, restartZipImport, setModuleProgress, setVideoProcessingPreference } from "./db";
 import { DubbingSetupSchema, dubbingSetup, DriveCatalogSchema, getContentType, VideoProcessingSetupSchema, videoProcessingSetup, type DriveCourse } from "../shared/learning";
 import { extractPublicDriveZip } from "./zipImport";
 import { dispatchQueuedVideos, isProcessorConfigured, type VideoProcessorMode } from "./videoProcessorDispatch";
@@ -13,6 +13,7 @@ let catalogCache: DriveCourse[] | null = null;
 const extractedVideoSchema = z.object({ id: z.number(), title: z.string(), storageUrl: z.string().nullable(), sourceMimeType: z.string(), mimeType: z.string().nullable(), sizeBytes: z.number().nullable(), sortOrder: z.number(), processingStatus: z.enum(["queued", "processing", "ready", "failed"]), processingMessage: z.string().nullable(), wasTranscoded: z.boolean() });
 const zipImportSchema = z.object({ id: z.number(), zipId: z.string(), courseId: z.string(), sourceName: z.string(), sourceBytes: z.number().nullable(), status: z.enum(["processing", "ready", "failed"]), errorMessage: z.string().nullable(), videos: z.array(extractedVideoSchema) });
 const mediaTrackSchema = z.object({ id: z.number(), extractedVideoId: z.number(), language: z.string(), kind: z.enum(["dubbed_video", "captions"]), label: z.string(), storageUrl: z.string(), mimeType: z.string(), provider: z.string() });
+const videoProcessingHistorySchema = z.object({ id: z.number(), extractedVideoId: z.number(), title: z.string(), sourceName: z.string(), sourceMimeType: z.string(), status: z.enum(["queued", "processing", "ready", "failed"]), progressPercent: z.number().min(0).max(100), processingMode: z.enum(["local-worker", "persistent-worker"]).nullable(), message: z.string().nullable(), createdAt: z.date() });
 
 function serializeImportedVideo(video: Awaited<ReturnType<typeof getZipImportsWithVideos>>[number]["videos"][number]) {
   return {
@@ -112,6 +113,7 @@ export const appRouter = router({
       return tracks.map((track) => ({ id: track.id, extractedVideoId: track.extractedVideoId, language: track.language, kind: track.kind, label: track.label, storageUrl: track.storageUrl, mimeType: track.mimeType, provider: track.provider }));
     }),
     videoProcessingSetup: publicProcedure.output(VideoProcessingSetupSchema).query(() => getCurrentVideoProcessingSetup()),
+    videoProcessingHistory: adminProcedure.output(z.array(videoProcessingHistorySchema)).query(() => getVideoProcessingHistory()),
     setVideoProcessingMode: adminProcedure.input(z.object({ mode: z.enum(["local-worker", "persistent-worker"]) })).mutation(async ({ ctx, input }) => {
       await setVideoProcessingPreference({ selectedMode: input.mode, updatedByUserId: ctx.user.id });
       return getCurrentVideoProcessingSetup();

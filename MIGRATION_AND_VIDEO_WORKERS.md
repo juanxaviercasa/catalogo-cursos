@@ -29,6 +29,7 @@ La web llama a `POST /process` después de importar un ZIP con formatos incompat
 | Servicio HTTP | `workers/video_processor_service.mjs` | Recibe trabajos desde la web por HTTPS. |
 | Configuración de ejemplo | `config/video-processor-platform.env.example` y `workers/video-processor.env.example` | Separa los placeholders de la web y del proceso de FFmpeg. |
 | Preferencia de ruta | `video_processing_preferences` | Conserva solo la ruta seleccionada por el administrador, sin credenciales. |
+| Historial administrativo | `video_processing_events` | Registra estado, porcentaje, ruta seleccionada y mensaje de cada transición. |
 | Servicio persistente | `deploy/video-processor.service.example` | Plantilla de arranque continuo para Linux. |
 | Documentación de medios | `VIDEO_PROCESSING_SETUP.md` y `LOCAL_DUBBING_PILOT.md` | Operación de conversión y doblaje. |
 
@@ -121,6 +122,12 @@ pnpm tsx tests/e2e/verify_mkv_fixture_persisted.ts
 El piloto actual tiene seis vídeos disponibles: un MP4 original y cinco MKV convertidos a MP4. El primer vídeo también conserva su pista de audio español y subtítulos VTT. La prueba E2E confirma metadatos de todos los reproductores y el cambio entre el audio español y el original.
 
 La comprobación del fixture genera un MKV corto, lo incluye en un ZIP temporal y usa un registro temporal real. Verifica en la base de datos la secuencia `queued` → `processing` → `ready`, confirma `mimeType = video/mp4` y comprueba que el MP4 publicado responde desde el almacenamiento gestionado. Al final elimina los metadatos temporales.
+
+## Panel administrativo de conversiones
+
+Los administradores ven el bloque **“Historial y avance de la cola”** en la ficha de un curso con ZIP. El bloque calcula el avance agregado usando el último evento de cada vídeo y muestra una barra individual para cada transición. Los estados se traducen a `10%` al entrar en cola, `60%` durante el procesamiento y `100%` al quedar disponible o fallar; el porcentaje indica avance de etapa y no una estimación temporal.
+
+Los filtros permiten buscar por título o mensaje y acotar la lista por estado (`queued`, `processing`, `ready`, `failed`) o por ruta (`Equipo propio` y `Servicio persistente`). El historial guarda títulos, estado, porcentaje, mensaje y marca de tiempo. No conserva claves, URLs privadas ni secretos. Al introducir esta tabla se inicializaron eventos reales para los vídeos ya preparados, sin simular conversiones.
 
 ## Recuperación y resolución de problemas
 

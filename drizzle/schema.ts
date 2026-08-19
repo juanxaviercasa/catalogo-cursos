@@ -78,6 +78,16 @@ export const videoProcessingPreferences = mysqlTable("video_processing_preferenc
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
+export const videoProcessingEvents = mysqlTable("video_processing_events", {
+  id: int("id").autoincrement().primaryKey(),
+  extractedVideoId: int("extractedVideoId").notNull().references(() => extractedVideos.id, { onDelete: "cascade" }),
+  status: mysqlEnum("status", ["queued", "processing", "ready", "failed"]).notNull(),
+  progressPercent: int("progressPercent").notNull(),
+  processingMode: mysqlEnum("processingMode", ["local-worker", "persistent-worker"]),
+  message: text("message"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
 export const mediaTracks = mysqlTable("media_tracks", {
   id: int("id").autoincrement().primaryKey(),
   extractedVideoId: int("extractedVideoId").notNull().references(() => extractedVideos.id, { onDelete: "cascade" }),
@@ -101,5 +111,6 @@ export type ZipImport = typeof zipImports.$inferSelect;
 export type ExtractedVideo = typeof extractedVideos.$inferSelect;
 export type MediaTrack = typeof mediaTracks.$inferSelect;
 export type VideoProcessingPreference = typeof videoProcessingPreferences.$inferSelect;
+export type VideoProcessingEvent = typeof videoProcessingEvents.$inferSelect;
 
 // TODO: Add your tables here

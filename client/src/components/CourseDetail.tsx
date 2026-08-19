@@ -5,6 +5,7 @@ import { AlertTriangle, ArrowLeft, AudioLines, Check, CheckCircle2, ExternalLink
 import { useMemo, useState } from "react";
 import { ProgressRing } from "./ProgressRing";
 import { VideoProcessingPanel } from "./VideoProcessingPanel";
+import { VideoProcessingHistory, type VideoProcessingEvent } from "./VideoProcessingHistory";
 import { DubbingPanel } from "./DubbingPanel";
 
 const moduleIcon = (item: DriveItem) => {
@@ -31,7 +32,7 @@ function PreparedVideoPlayer({ video, tracks }: { video: ReadyImportedVideo; tra
   return <article className="prepared-video-card"><div className="prepared-video-card-head"><h3>{video.title}</h3>{spanishVideo && <div className="audio-selector" aria-label={`Idioma de audio para ${video.title}`}><button className={!isSpanish ? "audio-selector--selected" : ""} onClick={() => setLanguage("original")}>Original · inglés</button><button className={isSpanish ? "audio-selector--selected" : ""} onClick={() => setLanguage("es")}>Español</button></div>}</div><p className={isSpanish ? "audio-track-label audio-track-label--es" : "audio-track-label"}><AudioLines size={13} /> {isSpanish ? "Audio español local · ritmo refinado" : "Audio original en inglés"}</p><video key={source} controls preload="metadata" src={source}>{isSpanish && spanishCaptions && <track kind="subtitles" srcLang="es" label="Español" src={spanishCaptions.storageUrl} default />}</video>{isSpanish && spanishCaptions && <p className="subtitle-status">Subtítulos en español incluidos. Actívalos con el control <b>CC</b> del reproductor.</p>}</article>;
 }
 
-export function CourseDetail({ course, meta, route, completedIds, onBack, onToggle, canTrack, onLogin, zipImports, mediaTracks, canImportZip, isImportingZip, onPrepareZip, videoProcessingSetup, onSelectVideoProcessingMode, isSavingVideoProcessingMode, dubbingSetup }: {
+export function CourseDetail({ course, meta, route, completedIds, onBack, onToggle, canTrack, onLogin, zipImports, mediaTracks, canImportZip, isImportingZip, onPrepareZip, videoProcessingSetup, onSelectVideoProcessingMode, isSavingVideoProcessingMode, videoProcessingHistory = [], dubbingSetup }: {
   course: DriveCourse;
   meta: CourseMeta;
   route: LearningRoute;
@@ -48,6 +49,7 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
   videoProcessingSetup: import("@shared/learning").VideoProcessingSetup;
   onSelectVideoProcessingMode?: (mode: "local-worker" | "persistent-worker") => void;
   isSavingVideoProcessingMode?: boolean;
+  videoProcessingHistory?: VideoProcessingEvent[];
   dubbingSetup: import("@shared/learning").DubbingSetup;
 }) {
   const [activeVideo, setActiveVideo] = useState<DriveItem | null>(null);
@@ -106,6 +108,7 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
       </section>}
 
       {pilotZip && <VideoProcessingPanel setup={videoProcessingSetup} canConfigure={canImportZip} onSelectMode={onSelectVideoProcessingMode} isSaving={isSavingVideoProcessingMode} />}
+      {pilotZip && canImportZip && <VideoProcessingHistory events={videoProcessingHistory} />}
       {pilotZip && <DubbingPanel setup={dubbingSetup} isPilotReady={Boolean(pilotImport?.videos.some((video) => getSpanishMediaTracks(video.id, mediaTracks).dubbedVideo))} />}
 
       {activeVideo && (

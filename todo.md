@@ -87,3 +87,6 @@
 - [x] Conectar el fixture MKV al ciclo persistido del trabajador y comprobar la carga efectiva del MP4 publicado desde almacenamiento gestionado.
 - [x] Validar con un registro real que el fixture MKV persiste la transición `queued` → `processing` → `ready` con URL y MIME final en `extracted_videos`.
 - [x] Observar y afirmar explícitamente en base de datos la secuencia persistida `queued` → `processing` → `ready` del fixture MKV temporal.
+- [x] Persistir un historial administrativo de eventos de conversión por vídeo, sin almacenar secretos ni rutas de origen sensibles.
+- [x] Mostrar barras de progreso visuales para los estados de conversión y el avance agregado de la cola.
+- [x] Añadir filtros administrativos por estado, ruta de procesamiento y texto de vídeo para consultar el historial.

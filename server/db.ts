@@ -1,6 +1,6 @@
 import { asc, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { extractedVideos, InsertUser, mediaTracks, moduleProgress, users, videoProcessingPreferences, zipImports } from "../drizzle/schema";
+import { extractedVideos, InsertUser, mediaTracks, moduleProgress, users, videoProcessingEvents, videoProcessingPreferences, zipImports } from "../drizzle/schema";
 import type { ExtractedVideo as ImportedVideo } from "./zipImport";
 import { ENV } from './_core/env';
 
@@ -148,6 +148,15 @@ export async function getExtractedVideoById(videoId: number) {
 
 export type VideoProcessingMode = "local-worker" | "persistent-worker";
 
+const processingProgress: Record<"queued" | "processing" | "ready" | "failed", number> = { queued: 10, processing: 60, ready: 100, failed: 100 };
+
+const processingEventMessage: Record<"queued" | "processing" | "ready" | "failed", string> = {
+  queued: "En cola para convertir a MP4 compatible.",
+  processing: "Analizando códecs y preparando el MP4.",
+  ready: "MP4 disponible para reproducirse.",
+  failed: "La conversión no pudo completarse.",
+};
+
 export async function getVideoProcessingPreference() {
   const db = await getDb();
   if (!db) return undefined;
@@ -186,6 +195,28 @@ export async function setExtractedVideoProcessingStatus(input: {
     wasTranscoded: input.status === "ready" ? true : undefined,
     processedAt: input.status === "ready" ? new Date() : null,
   }).where(eq(extractedVideos.id, input.videoId));
+  const preference = await getVideoProcessingPreference();
+  await db.insert(videoProcessingEvents).values({
+    extractedVideoId: input.videoId,
+    status: input.status,
+    progressPercent: processingProgress[input.status],
+    processingMode: preference?.selectedMode ?? null,
+    message: input.message ?? processingEventMessage[input.status],
+  });
+}
+
+export async function getVideoProcessingHistory() {
+  const db = await getDb();
+  if (!db) return [];
+  const [events, imports] = await Promise.all([
+    db.select().from(videoProcessingEvents).orderBy(desc(videoProcessingEvents.createdAt), desc(videoProcessingEvents.id)).limit(250),
+    getZipImportsWithVideos(),
+  ]);
+  const videosById = new Map(imports.flatMap((item) => item.videos.map((video) => [video.id, { video, sourceName: item.sourceName }] as const)));
+  return events.flatMap((event) => {
+    const context = videosById.get(event.extractedVideoId);
+    return context ? [{ ...event, title: context.video.title, sourceMimeType: context.video.sourceMimeType, sourceName: context.sourceName }] : [];
+  });
 }
 
 export async function createZipImport(input: { zipId: string; courseId: string; sourceName: string; importedByUserId: number }) {
@@ -202,6 +233,17 @@ export async function completeZipImport(input: { importId: number; sourceBytes: 
   if (!db) throw new Error("La base de datos no está disponible.");
   for (const video of input.videos) {
     await db.insert(extractedVideos).values({ zipImportId: input.importId, ...video });
+  }
+  const preference = await getVideoProcessingPreference();
+  const importedVideos = await db.select().from(extractedVideos).where(eq(extractedVideos.zipImportId, input.importId));
+  for (const video of importedVideos) {
+    await db.insert(videoProcessingEvents).values({
+      extractedVideoId: video.id,
+      status: video.processingStatus,
+      progressPercent: processingProgress[video.processingStatus],
+      processingMode: preference?.selectedMode ?? null,
+      message: video.processingMessage ?? (video.processingStatus === "ready" ? "Vídeo compatible disponible sin conversión." : processingEventMessage[video.processingStatus]),
+    });
   }
   await db.update(zipImports).set({ status: "ready", sourceBytes: input.sourceBytes, importedAt: new Date(), errorMessage: null }).where(eq(zipImports.id, input.importId));
 }
