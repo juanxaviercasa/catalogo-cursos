@@ -5,7 +5,9 @@ const browser = await chromium.launch({ headless: true, executablePath: "/usr/bi
 try {
   const page = await browser.newPage({ viewport: { width: 1365, height: 1000 } });
   await page.goto("http://localhost:3000/curso/1dxvel2jEarUb7ijNesZULpHQmbpM0bDa", { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: "Leer en español" }).click();
+  const readyPdfButtons = await page.getByRole("button", { name: "Leer en español" }).count();
+  assert.equal(readyPdfButtons, 4, "Los cuatro PDFs prioritarios deben ofrecer lectura española.");
+  await page.getByRole("button", { name: "Leer en español" }).first().click();
   await page.getByRole("heading", { name: "01 - Main Guide" }).waitFor();
   await page.getByRole("button", { name: "Comparar" }).waitFor();
   const compareFrames = await page.locator(".pdf-compare-grid iframe").count();
@@ -22,7 +24,9 @@ try {
   assert.equal(visualImages, 2, "La localización visual debe mostrar la imagen original y su variante española.");
   const localizedImageUrl = await page.locator(".pdf-visual-compare img").last().getAttribute("src");
   assert.ok(localizedImageUrl?.includes("/manus-storage/afl-main-guide-page-01-es_3b48cfd6.png"), "La variante visual debe servirse desde almacenamiento gestionado.");
-  console.log(JSON.stringify({ compareFrames, reconstructedUrl, localizedImageUrl, visualImages, spanishTextLength: spanishText.length }, null, 2));
+  const visualProgress = await page.getByLabel("Progreso: Aprobado").count();
+  assert.equal(visualProgress, 1, "La localización visual aprobada debe informar su progreso completo.");
+  console.log(JSON.stringify({ readyPdfButtons, compareFrames, reconstructedUrl, localizedImageUrl, visualImages, visualProgress, spanishTextLength: spanishText.length }, null, 2));
 } finally {
   await browser.close();
 }

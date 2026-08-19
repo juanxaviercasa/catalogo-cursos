@@ -50,6 +50,24 @@ En cada ficha de curso, un administrador dispone de **«Preparar N PDFs»** para
 
 La plataforma aplica una prioridad explícita y reproducible. La acción **«Preparar español»** de un módulo es la vía para priorizar un PDF concreto. Si se usa **«Preparar N PDFs»**, los documentos se incorporan uno a uno siguiendo el orden pedagógico visible en el curso: primero el prefijo numérico del módulo y, ante empate, el nombre natural del archivo. Esta regla evita que una preparación masiva desordene la ruta de aprendizaje y permite adelantar de forma manual el documento que el usuario necesita leer primero.
 
+### Prioridades procesadas
+
+Se procesaron los tres primeros documentos pendientes de la secuencia **Aggressive Fat Loss 2.0**. Los restantes siguen persistidos en cola, sin alterar sus archivos fuente en Drive.
+
+| Prioridad | Documento | Resultado publicado |
+| --- | --- | --- |
+| 1 | `02 - Cheat Sheets.pdf` | 3 páginas y 4 segmentos; `/manus-storage/cheat-sheets-es_a8a0b4bd.pdf` |
+| 2 | `03 - Workout Program.pdf` | 11 páginas y 12 segmentos; `/manus-storage/workout-program-es_86055b77.pdf` |
+| 3 | `04 - Hypnosis Bonus.pdf` | 13 páginas y 19 segmentos; `/manus-storage/hypnosis-bonus-es_2dc8e438.pdf` |
+
+## Edición manual y progreso visual
+
+La pestaña **«Visual en español»** ahora incorpora un indicador de estado por imagen con cinco momentos: `Pendiente`, `Generando`, `En revisión`, `Aprobado` y `Requiere nueva variante`. El estado se expresa tanto con una etiqueta como con una barra de avance, para que el lector no confunda una imagen borrador con una versión aprobada.
+
+Los administradores pueden usar **«Editar texto»** para corregir el texto inglés identificado o la versión española antes de publicar una nueva variante. El botón **«Guardar y volver a generar»** guarda esos ajustes como la entrada de trabajo y solicita una nueva localización visual. La imagen anterior continúa como referencia hasta que el nuevo resultado pasa la revisión humana.
+
+> La edición manual modifica únicamente el texto de trabajo de la variante visual. No altera el PDF original, la imagen fuente, los enlaces de Drive ni el historial de revisión.
+
 | Opción | Estado en esta versión | Coste | Uso previsto |
 | --- | --- | --- |
 | Argos Translate + Tesseract | Activa como ruta predeterminada | Gratuito, local | Pilotos, documentos con texto y OCR básico. |
@@ -72,6 +90,8 @@ Por ello, cada imagen generada debe revisar: **ortografía española, cifras, t�
 | OCR de portada sin texto seleccionable | Activado y marcado como `ocr`; se documentó que la tipografía sobre fotografía requiere revisión visual. |
 | Persistencia visual | Variante de página 1 registrada con estado `ready`. |
 | Interfaz | La prueba E2E valida dos imágenes en la pestaña visual: fuente y versión española. |
+| Preparación priorizada | Cuatro módulos —incluido el piloto inicial— muestran «Leer en español» en la ficha del curso. |
+| Edición y progreso | El lector expone control de edición, acción de regeneración e indicador `Aprobado` para la variante revisada. |
 | Calidad de código | `pnpm check`, 15 pruebas Vitest y la prueba E2E del PDF completaron correctamente. |
 
 ## Referencias

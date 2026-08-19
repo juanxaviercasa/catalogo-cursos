@@ -114,3 +114,9 @@
 - [x] Integrar la visualización de imágenes originales y localizadas en español dentro de la lectura de documentos.
 - [x] Validar un piloto de localización visual y documentar límites, revisión humana y costes opcionales.
 - [x] Mantener DeepL y Google Cloud como placeholders opcionales y documentar cómo obtener sus credenciales sin activarlos por defecto.
+- [x] Preparar los PDFs prioritarios elegidos desde la administración y registrar su estado real de cola.
+- [x] Revisar y aprobar las variantes visuales localizadas que estén listas para publicación.
+- [x] Confirmar que DeepL y Google Cloud siguen como opciones placeholder sin credenciales activas ni tráfico externo.
+- [x] Añadir edición manual de texto fuente y traducción antes de generar o aprobar una imagen localizada.
+- [x] Mostrar un indicador de progreso del flujo visual por estado: pendiente, generando, revisión, aprobado o requiere nueva variante.
+- [x] Incorporar un botón de acción claro para guardar una edición manual y volver a generar la variante visual correspondiente.
