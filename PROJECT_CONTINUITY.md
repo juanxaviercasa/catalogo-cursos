@@ -89,6 +89,8 @@ La guía completa para mover el proyecto, escoger entre equipo propio o servicio
 
 El flujo gratuito de extracción, traducción y reconstrucción de PDFs está documentado en [`PDF_TRANSLATION_PILOT.md`](./PDF_TRANSLATION_PILOT.md). Incluye el piloto validado, los comandos de ejecución y registro, sus límites de texto extraíble y las alternativas de pago opcionales.
 
+La localización visual de texto dentro de imágenes, el OCR local para PDFs escaneados, la preparación masiva y el uso opcional de DeepL o Google Cloud están descritos en [`IMAGE_LOCALIZATION_PILOT.md`](./IMAGE_LOCALIZATION_PILOT.md). Las APIs externas no están activas: la plataforma prioriza la ruta local y exige revisión humana de cada variante visual.
+
 ## Modelo de datos propuesto para la siguiente fase
 
 | Entidad | Campos esenciales | Uso |

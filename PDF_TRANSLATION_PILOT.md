@@ -82,3 +82,5 @@ Al activar una API de pago, las credenciales deben configurarse como secretos de
 ## Operación y continuidad
 
 La base de datos mantiene el ciclo de vida `queued` → `extracting` → `translating` → `reconstructing` → `ready` o `failed`. Los archivos se sirven desde almacenamiento gestionado y la fuente original se sigue abriendo desde Google Drive. Esta separación permite mover el sitio a un dominio propio sin convertir el hosting web en repositorio de los documentos originales.
+
+La ampliación de OCR, preparación masiva y localización visual de texto dentro de imágenes está detallada en [`IMAGE_LOCALIZATION_PILOT.md`](./IMAGE_LOCALIZATION_PILOT.md). DeepL y Google Cloud se conservan como placeholders opcionales; la ruta local sigue siendo la predeterminada.

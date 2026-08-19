@@ -136,6 +136,26 @@ export const pdfTranslationSegments = mysqlTable("pdf_translation_segments", {
   uniqueIndex("pdf_translation_segment_unique").on(table.pdfTranslationId, table.pageNumber, table.segmentOrder),
 ]);
 
+export const pdfVisualLocalizations = mysqlTable("pdf_visual_localizations", {
+  id: int("id").autoincrement().primaryKey(),
+  pdfTranslationId: int("pdfTranslationId").notNull().references(() => pdfTranslations.id, { onDelete: "cascade" }),
+  pageNumber: int("pageNumber").notNull(),
+  sourceImageUrl: varchar("sourceImageUrl", { length: 1200 }).notNull(),
+  localizedStorageKey: varchar("localizedStorageKey", { length: 1024 }),
+  localizedStorageUrl: varchar("localizedStorageUrl", { length: 1200 }),
+  sourceText: text("sourceText").notNull(),
+  translatedText: text("translatedText").notNull(),
+  status: mysqlEnum("status", ["queued", "rendering", "review", "ready", "failed"]).notNull().default("queued"),
+  provider: varchar("provider", { length: 64 }).notNull().default("image-service"),
+  errorMessage: text("errorMessage"),
+  preparedByUserId: int("preparedByUserId").references(() => users.id, { onDelete: "set null" }),
+  reviewedAt: timestamp("reviewedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [
+  uniqueIndex("pdf_visual_localization_page_unique").on(table.pdfTranslationId, table.pageNumber),
+]);
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type ModuleProgress = typeof moduleProgress.$inferSelect;
@@ -147,5 +167,6 @@ export type VideoProcessingPreference = typeof videoProcessingPreferences.$infer
 export type VideoProcessingEvent = typeof videoProcessingEvents.$inferSelect;
 export type PdfTranslation = typeof pdfTranslations.$inferSelect;
 export type PdfTranslationSegment = typeof pdfTranslationSegments.$inferSelect;
+export type PdfVisualLocalization = typeof pdfVisualLocalizations.$inferSelect;
 
 // TODO: Add your tables here

@@ -106,3 +106,11 @@
 - [x] Crear un procesador local gratuito para extraer, traducir y reconstruir un PDF piloto en español.
 - [x] Añadir un visor comparativo original-inglés, lectura-español y PDF-español reconstruido dentro del curso.
 - [x] Validar visual y funcionalmente el PDF piloto bilingüe sin reemplazar su original de Drive.
+- [x] Definir y priorizar los PDFs adicionales que se prepararán para lectura en español desde la administración.
+- [x] Añadir una ruta de OCR para documentos escaneados o páginas PDF sin capa de texto seleccionable.
+- [x] Preparar una configuración segura y opcional para traducción de mayor calidad con DeepL o Google Translate.
+- [x] Diseñar un flujo de localización visual que detecte texto en imágenes, genere una versión española y conserve intacto el original.
+- [x] Persistir los resultados visuales localizados, sus referencias de origen y su estado de revisión sin guardar bytes de imagen en la base de datos.
+- [x] Integrar la visualización de imágenes originales y localizadas en español dentro de la lectura de documentos.
+- [x] Validar un piloto de localización visual y documentar límites, revisión humana y costes opcionales.
+- [x] Mantener DeepL y Google Cloud como placeholders opcionales y documentar cómo obtener sus credenciales sin activarlos por defecto.

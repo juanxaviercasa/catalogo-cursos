@@ -10,6 +10,9 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
+import subprocess
+import tempfile
 from functools import lru_cache
 from pathlib import Path
 
@@ -78,6 +81,22 @@ def escape_paragraph(text: str) -> str:
     return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
+def extract_ocr_text(input_pdf: Path, page_number: int, workspace: Path) -> str:
+    """Renderiza una página y extrae su texto inglés con Tesseract cuando no existe una capa de texto."""
+    if not shutil.which("tesseract"):
+        raise RuntimeError("OCR local no disponible: instala tesseract-ocr y tesseract-ocr-eng.")
+    prefix = workspace / f"page-{page_number:04d}"
+    subprocess.run([
+        "pdftoppm", "-f", str(page_number), "-l", str(page_number), "-r", "240", "-png", "-singlefile",
+        str(input_pdf), str(prefix),
+    ], check=True, capture_output=True, text=True)
+    rendered_page = prefix.with_suffix(".png")
+    result = subprocess.run([
+        "tesseract", str(rendered_page), "stdout", "-l", "eng", "--psm", "3",
+    ], check=True, capture_output=True, text=True)
+    return normalize_text(result.stdout)
+
+
 def build_pdf(output_path: Path, pages: list[dict]) -> None:
     font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
     bold_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
@@ -92,7 +111,7 @@ def build_pdf(output_path: Path, pages: list[dict]) -> None:
     for index, page in enumerate(pages, start=1):
         story.append(Paragraph(f"Página {page['pageNumber']}", heading))
         if not page["segments"]:
-            story.append(Paragraph("No se detectó texto seleccionable en esta página.", note))
+            story.append(Paragraph("No se detectó texto traducible después de intentar la extracción local y OCR.", note))
         for segment in page["segments"]:
             story.append(Paragraph(escape_paragraph(segment["translatedText"]), body))
         if index < len(pages):
@@ -105,6 +124,7 @@ def main() -> None:
     parser.add_argument("--input-pdf", required=True, type=Path)
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--max-pages", type=int, default=0, help="Limita páginas para pruebas; 0 procesa todo el documento.")
+    parser.add_argument("--disable-ocr", action="store_true", help="No usa OCR local en páginas sin texto seleccionable.")
     args = parser.parse_args()
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -117,10 +137,22 @@ def main() -> None:
     reader = PdfReader(str(args.input_pdf))
     total_pages = min(len(reader.pages), args.max_pages) if args.max_pages else len(reader.pages)
     pages: list[dict] = []
-    for page_number, page in enumerate(reader.pages[:total_pages], start=1):
-        source = normalize_text(page.extract_text() or "")
-        segments = [{"pageNumber": page_number, "segmentOrder": index, "sourceText": chunk, "translatedText": translate(chunk)} for index, chunk in enumerate(split_segments(source), start=1)]
-        pages.append({"pageNumber": page_number, "segments": segments})
+    with tempfile.TemporaryDirectory(prefix="pdf-bilingual-ocr-") as temporary_directory:
+        ocr_workspace = Path(temporary_directory)
+        for page_number, page in enumerate(reader.pages[:total_pages], start=1):
+            source = normalize_text(page.extract_text() or "")
+            extraction_method = "embedded-text"
+            if len(source) < 40 and not args.disable_ocr:
+                try:
+                    ocr_source = extract_ocr_text(args.input_pdf, page_number, ocr_workspace)
+                    if ocr_source:
+                        source = ocr_source
+                        extraction_method = "ocr"
+                except (OSError, subprocess.CalledProcessError, RuntimeError) as error:
+                    extraction_method = "ocr-unavailable"
+                    print(f"Aviso OCR página {page_number}: {error}")
+            segments = [{"pageNumber": page_number, "segmentOrder": index, "sourceText": chunk, "translatedText": translate(chunk)} for index, chunk in enumerate(split_segments(source), start=1)]
+            pages.append({"pageNumber": page_number, "extractionMethod": extraction_method, "segments": segments})
 
     reconstructed_pdf = args.output_dir / "lectura-es.pdf"
     segments_json = args.output_dir / "segments-es.json"

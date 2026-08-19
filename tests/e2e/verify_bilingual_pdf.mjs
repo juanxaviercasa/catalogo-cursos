@@ -17,7 +17,12 @@ try {
   await page.getByRole("button", { name: "PDF en español" }).click();
   const reconstructedUrl = await page.locator(".pdf-reconstructed-frame iframe").getAttribute("src");
   assert.ok(reconstructedUrl?.includes("/manus-storage/afl-main-guide-es_da20581a.pdf"), "El PDF reconstruido debe venir del almacenamiento gestionado.");
-  console.log(JSON.stringify({ compareFrames, reconstructedUrl, spanishTextLength: spanishText.length }, null, 2));
+  await page.getByRole("button", { name: "Visual en español" }).click();
+  const visualImages = await page.locator(".pdf-visual-compare img").count();
+  assert.equal(visualImages, 2, "La localización visual debe mostrar la imagen original y su variante española.");
+  const localizedImageUrl = await page.locator(".pdf-visual-compare img").last().getAttribute("src");
+  assert.ok(localizedImageUrl?.includes("/manus-storage/afl-main-guide-page-01-es_3b48cfd6.png"), "La variante visual debe servirse desde almacenamiento gestionado.");
+  console.log(JSON.stringify({ compareFrames, reconstructedUrl, localizedImageUrl, visualImages, spanishTextLength: spanishText.length }, null, 2));
 } finally {
   await browser.close();
 }

@@ -1,6 +1,6 @@
 import { asc, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { extractedVideos, InsertUser, mediaTracks, moduleProgress, pdfTranslationSegments, pdfTranslations, users, videoProcessingEvents, videoProcessingPreferences, zipImports } from "../drizzle/schema";
+import { extractedVideos, InsertUser, mediaTracks, moduleProgress, pdfTranslationSegments, pdfTranslations, pdfVisualLocalizations, users, videoProcessingEvents, videoProcessingPreferences, zipImports } from "../drizzle/schema";
 import type { ExtractedVideo as ImportedVideo } from "./zipImport";
 import { ENV } from './_core/env';
 
@@ -274,7 +274,8 @@ export async function getPdfTranslationDocument(courseId: string, moduleId: stri
   const document = (await db.select().from(pdfTranslations).where(eq(pdfTranslations.courseId, courseId)).limit(25)).find((item) => item.moduleId === moduleId);
   if (!document) return undefined;
   const segments = await db.select().from(pdfTranslationSegments).where(eq(pdfTranslationSegments.pdfTranslationId, document.id)).orderBy(asc(pdfTranslationSegments.pageNumber), asc(pdfTranslationSegments.segmentOrder));
-  return { ...document, segments };
+  const visualLocalizations = await db.select().from(pdfVisualLocalizations).where(eq(pdfVisualLocalizations.pdfTranslationId, document.id)).orderBy(asc(pdfVisualLocalizations.pageNumber));
+  return { ...document, segments, visualLocalizations };
 }
 
 export async function queuePdfTranslation(input: { courseId: string; moduleId: string; sourceUrl: string; preparedByUserId: number }) {
@@ -313,6 +314,37 @@ export async function savePdfTranslationResult(input: {
   if (!document) throw new Error("No se pudo guardar la traducción de PDF.");
   if (input.segments.length) await db.insert(pdfTranslationSegments).values(input.segments.map((segment) => ({ ...segment, pdfTranslationId: document.id })));
   return getPdfTranslationDocument(input.courseId, input.moduleId);
+}
+
+export async function savePdfVisualLocalization(input: {
+  courseId: string;
+  moduleId: string;
+  pageNumber: number;
+  sourceImageUrl: string;
+  localizedStorageKey?: string | null;
+  localizedStorageUrl?: string | null;
+  sourceText: string;
+  translatedText: string;
+  status: "queued" | "rendering" | "review" | "ready" | "failed";
+  provider: string;
+  errorMessage?: string | null;
+  preparedByUserId?: number | null;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible.");
+  const document = await getPdfTranslationDocument(input.courseId, input.moduleId);
+  if (!document) throw new Error("Prepara primero la traducción del PDF antes de localizar sus imágenes.");
+  const existing = document.visualLocalizations.find((item) => item.pageNumber === input.pageNumber);
+  const values = { sourceImageUrl: input.sourceImageUrl, localizedStorageKey: input.localizedStorageKey ?? null, localizedStorageUrl: input.localizedStorageUrl ?? null, sourceText: input.sourceText, translatedText: input.translatedText, status: input.status, provider: input.provider, errorMessage: input.errorMessage ?? null, preparedByUserId: input.preparedByUserId ?? null };
+  if (existing) await db.update(pdfVisualLocalizations).set(values).where(eq(pdfVisualLocalizations.id, existing.id));
+  else await db.insert(pdfVisualLocalizations).values({ ...values, pdfTranslationId: document.id, pageNumber: input.pageNumber });
+  return getPdfTranslationDocument(input.courseId, input.moduleId);
+}
+
+export async function reviewPdfVisualLocalization(input: { id: number; approved: boolean }) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible.");
+  await db.update(pdfVisualLocalizations).set({ status: input.approved ? "ready" : "failed", reviewedAt: new Date(), errorMessage: input.approved ? null : "La variante visual requiere una nueva revisión." }).where(eq(pdfVisualLocalizations.id, input.id));
 }
 
 // TODO: add feature queries here as your schema grows.

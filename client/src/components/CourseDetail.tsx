@@ -33,7 +33,7 @@ function PreparedVideoPlayer({ video, tracks }: { video: ReadyImportedVideo; tra
   return <article className="prepared-video-card"><div className="prepared-video-card-head"><h3>{video.title}</h3>{spanishVideo && <div className="audio-selector" aria-label={`Idioma de audio para ${video.title}`}><button className={!isSpanish ? "audio-selector--selected" : ""} onClick={() => setLanguage("original")}>Original · inglés</button><button className={isSpanish ? "audio-selector--selected" : ""} onClick={() => setLanguage("es")}>Español</button></div>}</div><p className={isSpanish ? "audio-track-label audio-track-label--es" : "audio-track-label"}><AudioLines size={13} /> {isSpanish ? "Audio español local · ritmo refinado" : "Audio original en inglés"}</p><video key={source} controls preload="metadata" src={source}>{isSpanish && spanishCaptions && <track kind="subtitles" srcLang="es" label="Español" src={spanishCaptions.storageUrl} default />}</video>{isSpanish && spanishCaptions && <p className="subtitle-status">Subtítulos en español incluidos. Actívalos con el control <b>CC</b> del reproductor.</p>}</article>;
 }
 
-export function CourseDetail({ course, meta, route, completedIds, onBack, onToggle, canTrack, onLogin, zipImports, mediaTracks, canImportZip, isImportingZip, onPrepareZip, videoProcessingSetup, onSelectVideoProcessingMode, isSavingVideoProcessingMode, videoProcessingHistory = [], dubbingSetup, pdfTranslations = [], isPreparingPdf = false, onPreparePdf }: {
+export function CourseDetail({ course, meta, route, completedIds, onBack, onToggle, canTrack, onLogin, zipImports, mediaTracks, canImportZip, isImportingZip, onPrepareZip, videoProcessingSetup, onSelectVideoProcessingMode, isSavingVideoProcessingMode, videoProcessingHistory = [], dubbingSetup, pdfTranslations = [], isPreparingPdf = false, onPreparePdf, isPreparingCoursePdfs = false, onPrepareCoursePdfs }: {
   course: DriveCourse;
   meta: CourseMeta;
   route: LearningRoute;
@@ -55,6 +55,8 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
   pdfTranslations?: PdfTranslationSummary[];
   isPreparingPdf?: boolean;
   onPreparePdf?: (item: DriveItem) => void;
+  isPreparingCoursePdfs?: boolean;
+  onPrepareCoursePdfs?: () => void;
 }) {
   const [activeVideo, setActiveVideo] = useState<DriveItem | null>(null);
   const [preparedVideos, setPreparedVideos] = useState<ReadyImportedVideo[] | null>(null);
@@ -68,6 +70,7 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
   const readyPilotVideos = (pilotImport?.videos ?? []).filter(isReadyVideo);
   const pendingPilotVideos = (pilotImport?.videos ?? []).filter((video) => video.processingStatus === "queued" || video.processingStatus === "processing");
   const failedPilotVideos = (pilotImport?.videos ?? []).filter((video) => video.processingStatus === "failed");
+  const unpreparedPdfCount = modules.filter((item) => getContentType(item) === "pdf" && !pdfTranslations.some((document) => document.courseId === course.id && document.moduleId === item.id)).length;
 
   return (
     <section className="course-detail-shell">
@@ -125,7 +128,7 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
       )}
 
       <section className="module-section">
-        <div className="section-heading"><div><p className="eyebrow"><span /> SECUENCIA PEDAGÓGICA</p><h2>Módulos del curso</h2></div><p>{completed} de {modules.length} vistos</p></div>
+        <div className="section-heading"><div><p className="eyebrow"><span /> SECUENCIA PEDAGÓGICA</p><h2>Módulos del curso</h2></div><div className="module-section-actions">{canImportZip && unpreparedPdfCount > 0 && onPrepareCoursePdfs && <button className="prepare-course-pdfs" disabled={isPreparingCoursePdfs} onClick={onPrepareCoursePdfs}>{isPreparingCoursePdfs ? <Loader2 className="animate-spin" size={14} /> : <Languages size={14} />} Preparar {unpreparedPdfCount} PDFs</button>}<p>{completed} de {modules.length} vistos</p></div></div>
         <div className="module-list">
           {modules.map((item, index) => {
             const contentType = getContentType(item);
@@ -153,7 +156,7 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
           })}
         </div>
       </section>
-      {activePdf && (() => { const translation = pdfTranslations.find((document) => document.courseId === course.id && document.moduleId === activePdf.id); return translation ? <BilingualPdfPanel courseId={course.id} item={activePdf} translation={translation} onClose={() => setActivePdf(null)} /> : null; })()}
+      {activePdf && (() => { const translation = pdfTranslations.find((document) => document.courseId === course.id && document.moduleId === activePdf.id); return translation ? <BilingualPdfPanel courseId={course.id} item={activePdf} translation={translation} onClose={() => setActivePdf(null)} canManage={canImportZip} /> : null; })()}
       {preparedVideos && <section className="prepared-video-panel"><div className="video-panel-head"><div><span>VÍDEOS PREPARADOS</span><h2>Reproducir desde la plataforma</h2></div><button onClick={() => setPreparedVideos(null)}>Cerrar</button></div><p>Estos vídeos se importaron una vez desde el ZIP original de Drive y ahora se sirven desde el almacenamiento gestionado de la plataforma.</p><div className="prepared-video-list">{preparedVideos.map((video) => <PreparedVideoPlayer key={video.id} video={video} tracks={mediaTracks.filter((track) => track.extractedVideoId === video.id)} />)}</div></section>}
       {!canTrack && <aside className="tracking-note"><CheckCircle2 size={18} /><span>Inicia sesión para marcar módulos como vistos y guardar tu progreso entre sesiones.</span><button onClick={onLogin}>Iniciar sesión</button></aside>}
     </section>

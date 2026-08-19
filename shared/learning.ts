@@ -74,8 +74,29 @@ export const PdfTranslationSummarySchema = z.object({
   preparedAt: z.date().nullable(),
 });
 
+export const PdfVisualLocalizationSchema = z.object({
+  id: z.number(),
+  pageNumber: z.number().int().positive(),
+  sourceImageUrl: z.string(),
+  localizedStorageUrl: z.string().nullable(),
+  sourceText: z.string(),
+  translatedText: z.string(),
+  status: z.enum(["queued", "rendering", "review", "ready", "failed"]),
+  provider: z.string(),
+  errorMessage: z.string().nullable(),
+  reviewedAt: z.date().nullable(),
+});
+
 export const PdfTranslationDocumentSchema = PdfTranslationSummarySchema.extend({
   segments: z.array(z.object({ id: z.number(), pageNumber: z.number(), segmentOrder: z.number(), sourceText: z.string(), translatedText: z.string() })),
+  visualLocalizations: z.array(PdfVisualLocalizationSchema),
+});
+
+export const PdfTranslationSetupSchema = z.object({
+  ocr: z.object({ provider: z.literal("tesseract-local"), tier: z.literal("free"), status: z.enum(["available", "not_configured"]), description: z.string() }),
+  providers: z.array(z.object({ id: z.enum(["argos-local", "deepl", "google-cloud"]), label: z.string(), tier: z.enum(["free", "optional-paid"]), recommended: z.boolean(), description: z.string() })),
+  visualLocalization: z.object({ provider: z.literal("image-service"), status: z.enum(["pilot_ready", "available"]), description: z.string(), requiresReview: z.literal(true) }),
+  placeholders: z.array(z.object({ key: z.string(), purpose: z.string(), example: z.string() })),
 });
 
 export type DriveItem = z.infer<typeof DriveItemSchema>;
@@ -84,6 +105,23 @@ export type VideoProcessingSetup = z.infer<typeof VideoProcessingSetupSchema>;
 export type DubbingSetup = z.infer<typeof DubbingSetupSchema>;
 export type PdfTranslationSummary = z.infer<typeof PdfTranslationSummarySchema>;
 export type PdfTranslationDocument = z.infer<typeof PdfTranslationDocumentSchema>;
+export type PdfVisualLocalization = z.infer<typeof PdfVisualLocalizationSchema>;
+export type PdfTranslationSetup = z.infer<typeof PdfTranslationSetupSchema>;
+
+export const pdfTranslationSetup: PdfTranslationSetup = {
+  ocr: { provider: "tesseract-local", tier: "free", status: "available", description: "OCR local para páginas escaneadas o sin texto seleccionable; procesa el documento en el trabajador sin enviarlo a un proveedor externo." },
+  providers: [
+    { id: "argos-local", label: "Argos Translate local", tier: "free", recommended: true, description: "Ruta actual de texto extraíble y OCR local. No requiere una API de pago, pero exige revisión de terminología." },
+    { id: "deepl", label: "DeepL API", tier: "optional-paid", recommended: false, description: "Alternativa opcional para mayor fluidez y glosarios; su traducción de documentos e imágenes se configura con una clave privada del servidor." },
+    { id: "google-cloud", label: "Google Cloud Vision + Translate", tier: "optional-paid", recommended: false, description: "Alternativa para OCR estructurado y traducción a escala; requiere proyecto, facturación y credenciales seguras." },
+  ],
+  visualLocalization: { provider: "image-service", status: "pilot_ready", description: "Genera una variante visual en español a partir de una imagen de origen, manteniendo el original como referencia y dejando el resultado para revisión humana.", requiresReview: true },
+  placeholders: [
+    { key: "DEEPL_API_KEY", purpose: "Activa DeepL como traductor opcional de mayor calidad desde el servidor.", example: "REEMPLAZAR_CON_CLAVE_DEEPL" },
+    { key: "GOOGLE_CLOUD_VISION_CREDENTIALS", purpose: "Credenciales del proyecto de Google para OCR estructurado opcional.", example: "REEMPLAZAR_CON_JSON_O_REFERENCIA_SEGURA" },
+    { key: "GOOGLE_TRANSLATE_API_KEY", purpose: "Clave privada de Google Cloud Translation para la ruta opcional de pago.", example: "REEMPLAZAR_CON_CLAVE_GOOGLE" },
+  ],
+};
 
 export const videoProcessingSetup: VideoProcessingSetup = {
   status: "placeholder",

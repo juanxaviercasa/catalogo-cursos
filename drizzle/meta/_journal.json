@@ -64,6 +64,13 @@
       "when": 1787116233897,
       "tag": "0008_panoramic_skin",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1787117912072,
+      "tag": "0009_flippant_freak",
+      "breakpoints": true
     }
   ]
 }

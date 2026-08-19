@@ -3,10 +3,11 @@ import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { completeZipImport, createZipImport, failZipImport, getMediaTracks, getModuleProgressByUserId, getPdfTranslationDocument, getPdfTranslations, getVideoProcessingHistory, getVideoProcessingPreference, getZipImportByZipId, getZipImportsWithVideos, queuePdfTranslation, restartZipImport, setModuleProgress, setVideoProcessingPreference } from "./db";
-import { DubbingSetupSchema, dubbingSetup, DriveCatalogSchema, getContentType, PdfTranslationDocumentSchema, PdfTranslationSummarySchema, VideoProcessingSetupSchema, videoProcessingSetup, type DriveCourse } from "../shared/learning";
+import { completeZipImport, createZipImport, failZipImport, getMediaTracks, getModuleProgressByUserId, getPdfTranslationDocument, getPdfTranslations, getVideoProcessingHistory, getVideoProcessingPreference, getZipImportByZipId, getZipImportsWithVideos, queuePdfTranslation, restartZipImport, reviewPdfVisualLocalization, savePdfVisualLocalization, setModuleProgress, setVideoProcessingPreference } from "./db";
+import { DubbingSetupSchema, dubbingSetup, DriveCatalogSchema, getContentType, orderedModules, PdfTranslationDocumentSchema, PdfTranslationSetupSchema, PdfTranslationSummarySchema, pdfTranslationSetup, VideoProcessingSetupSchema, videoProcessingSetup, type DriveCourse } from "../shared/learning";
 import { extractPublicDriveZip } from "./zipImport";
 import { dispatchQueuedVideos, isProcessorConfigured, type VideoProcessorMode } from "./videoProcessorDispatch";
+import { generateImage } from "./_core/imageGeneration";
 
 const CATALOG_PATH = "/manus-storage/drive_courses_inventory_with_kinobody_d70d6ad9.json";
 let catalogCache: DriveCourse[] | null = null;
@@ -17,6 +18,14 @@ const videoProcessingHistorySchema = z.object({ id: z.number(), extractedVideoId
 
 function serializePdfTranslation(document: Awaited<ReturnType<typeof getPdfTranslations>>[number]) {
   return { id: document.id, courseId: document.courseId, moduleId: document.moduleId, sourceUrl: document.sourceUrl, sourceLanguage: document.sourceLanguage, targetLanguage: document.targetLanguage, status: document.status, processingMode: document.processingMode, reconstructedStorageUrl: document.reconstructedStorageUrl, pageCount: document.pageCount, errorMessage: document.errorMessage, preparedAt: document.preparedAt };
+}
+
+function serializePdfTranslationDocument(document: NonNullable<Awaited<ReturnType<typeof getPdfTranslationDocument>>>) {
+  return {
+    ...serializePdfTranslation(document),
+    segments: document.segments.map((segment) => ({ id: segment.id, pageNumber: segment.pageNumber, segmentOrder: segment.segmentOrder, sourceText: segment.sourceText, translatedText: segment.translatedText })),
+    visualLocalizations: document.visualLocalizations.map((visual) => ({ id: visual.id, pageNumber: visual.pageNumber, sourceImageUrl: visual.sourceImageUrl, localizedStorageUrl: visual.localizedStorageUrl, sourceText: visual.sourceText, translatedText: visual.translatedText, status: visual.status, provider: visual.provider, errorMessage: visual.errorMessage, reviewedAt: visual.reviewedAt })),
+  };
 }
 
 function serializeImportedVideo(video: Awaited<ReturnType<typeof getZipImportsWithVideos>>[number]["videos"][number]) {
@@ -123,14 +132,56 @@ export const appRouter = router({
       return getCurrentVideoProcessingSetup();
     }),
     dubbingSetup: publicProcedure.output(DubbingSetupSchema).query(() => dubbingSetup),
+    pdfTranslationSetup: publicProcedure.output(PdfTranslationSetupSchema).query(() => pdfTranslationSetup),
     pdfTranslations: publicProcedure.output(z.array(PdfTranslationSummarySchema)).query(async () => (await getPdfTranslations()).map(serializePdfTranslation)),
     pdfTranslation: publicProcedure.input(z.object({ courseId: z.string().min(1).max(128), moduleId: z.string().min(1).max(128) })).output(PdfTranslationDocumentSchema.nullable()).query(async ({ input }) => {
       const document = await getPdfTranslationDocument(input.courseId, input.moduleId);
-      return document ? { ...serializePdfTranslation(document), segments: document.segments.map((segment) => ({ id: segment.id, pageNumber: segment.pageNumber, segmentOrder: segment.segmentOrder, sourceText: segment.sourceText, translatedText: segment.translatedText })) } : null;
+      return document ? serializePdfTranslationDocument(document) : null;
     }),
     preparePdfTranslation: adminProcedure.input(z.object({ courseId: z.string().min(1).max(128), moduleId: z.string().min(1).max(128), sourceUrl: z.string().url() })).output(PdfTranslationDocumentSchema.nullable()).mutation(async ({ ctx, input }) => {
       const document = await queuePdfTranslation({ ...input, preparedByUserId: ctx.user.id });
-      return document ? { ...serializePdfTranslation(document), segments: document.segments.map((segment) => ({ id: segment.id, pageNumber: segment.pageNumber, segmentOrder: segment.segmentOrder, sourceText: segment.sourceText, translatedText: segment.translatedText })) } : null;
+      return document ? serializePdfTranslationDocument(document) : null;
+    }),
+    prepareCoursePdfTranslations: adminProcedure.input(z.object({ courseId: z.string().min(1).max(128) })).output(z.object({ queued: z.number().int().nonnegative(), alreadyReady: z.number().int().nonnegative() })).mutation(async ({ ctx, input }) => {
+      const host = ctx.req.get("host");
+      const catalog = await loadCatalog(host ? `${ctx.req.protocol}://${host}` : "http://localhost:3000");
+      const course = catalog.find((item) => item.id === input.courseId);
+      if (!course) throw new Error("El curso solicitado no pertenece al catálogo autorizado.");
+      const pdfs = orderedModules(course.children).filter((item) => getContentType(item) === "pdf");
+      let queued = 0;
+      let alreadyReady = 0;
+      for (const pdf of pdfs) {
+        const document = await queuePdfTranslation({ courseId: course.id, moduleId: pdf.id, sourceUrl: pdf.webViewLink, preparedByUserId: ctx.user.id });
+        if (document?.status === "ready") alreadyReady += 1;
+        else queued += 1;
+      }
+      return { queued, alreadyReady };
+    }),
+    localizePdfImage: adminProcedure.input(z.object({ courseId: z.string().min(1).max(128), moduleId: z.string().min(1).max(128), pageNumber: z.number().int().positive(), sourceImageUrl: z.string().min(1).max(1200), sourceText: z.string().min(1).max(8000), translatedText: z.string().min(1).max(8000) })).output(PdfTranslationDocumentSchema.nullable()).mutation(async ({ ctx, input }) => {
+      if (!input.sourceImageUrl.includes("/manus-storage/")) throw new Error("La imagen de origen debe estar publicada en el almacenamiento gestionado del proyecto.");
+      await savePdfVisualLocalization({ ...input, status: "rendering", provider: "image-service", preparedByUserId: ctx.user.id });
+      const host = ctx.req.get("host");
+      const origin = host ? `${ctx.req.protocol}://${host}` : "http://localhost:3000";
+      const sourceImageUrl = input.sourceImageUrl.startsWith("http") ? input.sourceImageUrl : `${origin}${input.sourceImageUrl}`;
+      try {
+        const result = await generateImage({
+          model: "MODEL_GPT_IMAGE_2",
+          quality: "high",
+          originalImages: [{ url: sourceImageUrl, mimeType: "image/png" }],
+          prompt: `Edit the provided image. Replace only this visible English text: “${input.sourceText}”. Render this exact Spanish text in the same visual position, hierarchy, and style: “${input.translatedText}”. Preserve the people, objects, background, layout, colors, perspective, non-target text, and all other details. Do not add or remove content. The Spanish text must be clearly readable and spelled exactly as supplied.`,
+        });
+        const document = await savePdfVisualLocalization({ ...input, localizedStorageUrl: result.url ?? null, status: "review", provider: "image-service", preparedByUserId: ctx.user.id });
+        return document ? serializePdfTranslationDocument(document) : null;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "La localización visual no pudo completarse.";
+        await savePdfVisualLocalization({ ...input, status: "failed", provider: "image-service", errorMessage: message, preparedByUserId: ctx.user.id });
+        throw new Error(message);
+      }
+    }),
+    reviewPdfVisualLocalization: adminProcedure.input(z.object({ id: z.number().int().positive(), approved: z.boolean(), courseId: z.string().min(1).max(128), moduleId: z.string().min(1).max(128) })).output(PdfTranslationDocumentSchema.nullable()).mutation(async ({ input }) => {
+      await reviewPdfVisualLocalization({ id: input.id, approved: input.approved });
+      const document = await getPdfTranslationDocument(input.courseId, input.moduleId);
+      return document ? serializePdfTranslationDocument(document) : null;
     }),
     prepareZip: adminProcedure.input(z.object({ zipId: z.string().min(1).max(128), courseId: z.string().min(1).max(128) })).output(zipImportSchema).mutation(async ({ ctx, input }) => {
       const host = ctx.req.get("host");
