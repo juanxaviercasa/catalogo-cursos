@@ -68,6 +68,7 @@ export const PdfTranslationSummarySchema = z.object({
   targetLanguage: z.string(),
   status: z.enum(["queued", "extracting", "translating", "reconstructing", "ready", "failed"]),
   processingMode: z.enum(["local-worker", "persistent-worker"]),
+  priority: z.number().int().min(1).max(999),
   reconstructedStorageUrl: z.string().nullable(),
   pageCount: z.number().nullable(),
   errorMessage: z.string().nullable(),

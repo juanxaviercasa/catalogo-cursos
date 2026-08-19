@@ -71,6 +71,13 @@
       "when": 1787117912072,
       "tag": "0009_flippant_freak",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1787120803939,
+      "tag": "0010_sloppy_random",
+      "breakpoints": true
     }
   ]
 }

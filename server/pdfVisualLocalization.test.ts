@@ -12,6 +12,7 @@ describe("contratos de PDF visual localizado", () => {
       targetLanguage: "es",
       status: "ready",
       processingMode: "local-worker",
+      priority: 3,
       reconstructedStorageUrl: "/manus-storage/lectura-es.pdf",
       pageCount: 1,
       errorMessage: null,
@@ -31,6 +32,7 @@ describe("contratos de PDF visual localizado", () => {
       }],
     });
     expect(result.success).toBe(true);
+    if (result.success) expect(result.data.priority).toBe(3);
   });
 
   it("expone OCR local y los proveedores opcionales sin credenciales en el contrato público", () => {

@@ -60,6 +60,14 @@ Se procesaron los tres primeros documentos pendientes de la secuencia **Aggressi
 | 2 | `03 - Workout Program.pdf` | 11 páginas y 12 segmentos; `/manus-storage/workout-program-es_86055b77.pdf` |
 | 3 | `04 - Hypnosis Bonus.pdf` | 13 páginas y 19 segmentos; `/manus-storage/hypnosis-bonus-es_2dc8e438.pdf` |
 
+El bloque siguiente ya está preparado y publicado mediante la misma ruta local. Con ello, el curso cuenta con siete documentos bilingües listos para lectura, incluidos el piloto inicial y los dos bloques priorizados.
+
+| Prioridad | Documento | Resultado publicado |
+| --- | --- | --- |
+| 1 | `05 - Presence Bonus.pdf` | 22 páginas y 25 segmentos; `/manus-storage/presence-bonus-es_cba45c50.pdf` |
+| 2 | `06 - The Science of Fasting.pdf` | 20 páginas y 41 segmentos; `/manus-storage/science-fasting-es_b9885978.pdf` |
+| 3 | `07 - 2-Day Meal Plan.pdf` | 8 páginas y 9 segmentos; `/manus-storage/two-day-meal-plan-es_fac6515a.pdf` |
+
 ## Edición manual y progreso visual
 
 La pestaña **«Visual en español»** ahora incorpora un indicador de estado por imagen con cinco momentos: `Pendiente`, `Generando`, `En revisión`, `Aprobado` y `Requiere nueva variante`. El estado se expresa tanto con una etiqueta como con una barra de avance, para que el lector no confunda una imagen borrador con una versión aprobada.
@@ -67,6 +75,21 @@ La pestaña **«Visual en español»** ahora incorpora un indicador de estado po
 Los administradores pueden usar **«Editar texto»** para corregir el texto inglés identificado o la versión española antes de publicar una nueva variante. El botón **«Guardar y volver a generar»** guarda esos ajustes como la entrada de trabajo y solicita una nueva localización visual. La imagen anterior continúa como referencia hasta que el nuevo resultado pasa la revisión humana.
 
 > La edición manual modifica únicamente el texto de trabajo de la variante visual. No altera el PDF original, la imagen fuente, los enlaces de Drive ni el historial de revisión.
+
+La segunda variante corresponde a la portada de **Presence Bonus**. Tras revisar legibilidad, traducción, tipografía y preservación de la marca Kinobody, quedó aprobada como `ready`. Conserva la fuente `/manus-storage/presence-bonus-page-01_c3297100.png` y una salida localizada separada; ambas permanecen trazables y reversibles.
+
+## Consola administrativa de prioridades
+
+La pantalla principal incorpora **«Cola de PDFs bilingües»** para administradores. Resume los trabajos por estado y por bandas de prioridad, y permite filtrar por documento, curso, estado y prioridad. Cada fila conserva una prioridad numérica persistente entre 1 y 999; los valores más bajos se muestran primero y expresan el siguiente orden operativo, sin cambiar los archivos ni los enlaces de Drive.
+
+| Control | Uso |
+| --- | --- |
+| Búsqueda | Localiza un PDF por curso o por nombre de módulo. |
+| Filtro de estado | Aísla trabajos en cola, procesamiento, listos o con revisión pendiente. |
+| Filtro de prioridad | Filtra las bandas 1–3 inmediatas, 4–10 próximas, 11–99 planificadas y 100+ estándar. |
+| Filtro de curso | Permite concentrarse en una ruta documental concreta. |
+| Prioridad + Guardar | Reordena de manera persistente el próximo trabajo local. |
+| Resumen de cola | Muestra recuentos por estado y por banda de prioridad para detectar carga y pendientes. |
 
 | Opción | Estado en esta versión | Coste | Uso previsto |
 | --- | --- | --- |
@@ -88,10 +111,12 @@ Por ello, cada imagen generada debe revisar: **ortografía española, cifras, t�
 | Comprobación | Resultado |
 | --- | --- |
 | OCR de portada sin texto seleccionable | Activado y marcado como `ocr`; se documentó que la tipografía sobre fotografía requiere revisión visual. |
-| Persistencia visual | Variante de página 1 registrada con estado `ready`. |
-| Interfaz | La prueba E2E valida dos imágenes en la pestaña visual: fuente y versión española. |
+| Persistencia visual | Dos variantes de portada registradas con estado `ready`: Main Guide y Presence Bonus. |
+| Interfaz | La prueba E2E valida fuente y versión española en las dos variantes visuales aprobadas. |
 | Preparación priorizada | Cuatro módulos —incluido el piloto inicial— muestran «Leer en español» en la ficha del curso. |
 | Edición y progreso | El lector expone control de edición, acción de regeneración e indicador `Aprobado` para la variante revisada. |
+| Segundo bloque | Siete módulos muestran «Leer en español» después de completar Presence Bonus, The Science of Fasting y 2-Day Meal Plan; cinco permanecen en cola priorizada. |
+| Consola de cola | Validada visualmente con 12 documentos, filtros de estado, curso y prioridad; recuentos por estado y banda; y control de prioridad. |
 | Calidad de código | `pnpm check`, 15 pruebas Vitest y la prueba E2E del PDF completaron correctamente. |
 
 ## Referencias

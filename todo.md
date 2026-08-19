@@ -120,3 +120,13 @@
 - [x] Añadir edición manual de texto fuente y traducción antes de generar o aprobar una imagen localizada.
 - [x] Mostrar un indicador de progreso del flujo visual por estado: pendiente, generando, revisión, aprobado o requiere nueva variante.
 - [x] Incorporar un botón de acción claro para guardar una edición manual y volver a generar la variante visual correspondiente.
+- [x] Procesar el siguiente bloque pedagógico de PDFs en cola: Presence Bonus, The Science of Fasting y 2-Day Meal Plan.
+- [x] Crear y aprobar al menos una segunda variante visual localizada a partir de contenido real del curso.
+- [x] Añadir una consola administrativa de documentos bilingües con búsqueda y filtros por estado, curso y prioridad.
+- [x] Permitir que un administrador establezca la prioridad explícita de un PDF pendiente desde la consola.
+- [x] Mostrar un resumen de la cola documental con recuentos por estado y prioridad.
+- [x] Documentar el bloque adicional, las nuevas imágenes localizadas y el uso de la consola administrativa.
+- [x] Añadir un filtro explícito por prioridad en la consola administrativa de PDFs bilingües y validarlo.
+- [x] Ampliar el resumen de la cola documental con recuentos por prioridad además de los estados.
+- [x] Verificar la documentación del bloque adicional, la variante visual en revisión y el uso de la consola administrativa.
+- [x] Añadir una prueba de flujo que valide cada banda del filtro de prioridad de la consola administrativa.

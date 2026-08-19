@@ -1,6 +1,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { CourseCard } from "@/components/CourseCard";
 import { CourseDetail } from "@/components/CourseDetail";
+import { PdfTranslationAdminPanel } from "@/components/PdfTranslationAdminPanel";
 import { ProgressRing } from "@/components/ProgressRing";
 import { startLogin } from "@/const";
 import { courseMetaById, courseMeta, learningRoutes } from "@shared/courseMeta";
@@ -34,6 +35,7 @@ export default function Home() {
   const setVideoProcessingMode = trpc.learning.setVideoProcessingMode.useMutation({ onSuccess: (setup) => { utils.learning.videoProcessingSetup.setData(undefined, setup); toast.success("Ruta de procesamiento seleccionada. Completa sus variables privadas para activarla."); }, onError: (error) => toast.error(error.message) });
   const preparePdfTranslation = trpc.learning.preparePdfTranslation.useMutation({ onSuccess: () => { utils.learning.pdfTranslations.invalidate(); toast.success("El PDF entró en la cola de traducción local."); }, onError: (error) => toast.error(error.message) });
   const prepareCoursePdfTranslations = trpc.learning.prepareCoursePdfTranslations.useMutation({ onSuccess: (result) => { utils.learning.pdfTranslations.invalidate(); toast.success(result.queued ? `${result.queued} PDF(s) entraron en la cola de traducción local.` : "Todos los PDFs del curso ya están preparados."); }, onError: (error) => toast.error(error.message) });
+  const setPdfTranslationPriority = trpc.learning.setPdfTranslationPriority.useMutation({ onSuccess: () => { utils.learning.pdfTranslations.invalidate(); toast.success("Prioridad del PDF actualizada."); }, onError: (error) => toast.error(error.message) });
   const [search, setSearch] = useState("");
   const [routeFilter, setRouteFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
@@ -43,6 +45,11 @@ export default function Home() {
   const courses = useMemo(() => (catalogQuery.data ?? []).map((course) => ({ course, meta: courseMetaById[course.id] })).filter((item): item is { course: DriveCourse; meta: NonNullable<typeof courseMetaById[string]> } => Boolean(item.meta)).sort((a, b) => a.meta.order - b.meta.order), [catalogQuery.data]);
   const courseProgress = (course: DriveCourse) => calculateProgress(course.children.map((item) => item.id), completedIds);
   const selected = courses.find((item) => item.course.id === params?.courseId);
+  const pdfAdminEntries = useMemo(() => (pdfTranslationsQuery.data ?? []).map((document) => {
+    const course = courses.find((item) => item.course.id === document.courseId);
+    const module = course?.course.children.find((item) => item.id === document.moduleId);
+    return { ...document, courseTitle: course?.meta.title ?? document.courseId, moduleName: module?.name.replace(/\.pdf$/i, "") ?? document.moduleId };
+  }), [courses, pdfTranslationsQuery.data]);
 
   const filteredCourses = courses.filter(({ course, meta }) => {
     const progress = courseProgress(course);
@@ -95,6 +102,8 @@ export default function Home() {
         <section className="catalog-hero"><div><p className="eyebrow"><span /> BIBLIOTECA PERSONAL · DRIVE</p><h1>Aprende con<br /><em>dirección.</em></h1><p>{courseCount} cursos organizados en rutas que convierten una biblioteca extensa en una secuencia concreta: decide qué estudiar, abre el contenido y registra lo aprendido.</p></div><div className="hero-focus-card"><span>ENFOQUE DE HOY</span><h2>{inProgressCourses[0]?.meta.title ?? "Elige tu primera ruta"}</h2><p>{inProgressCourses[0] ? `${courseProgress(inProgressCourses[0].course)}% completado` : "Empieza por una ruta pedagógica para crear impulso."}</p><button onClick={() => inProgressCourses[0] ? setLocation(`/curso/${inProgressCourses[0].course.id}`) : setRouteFilter("business")}>{inProgressCourses[0] ? "Continuar curso" : "Explorar rutas"}<ArrowUpRight size={16} /></button></div></section>
 
         <section className="catalog-toolbar"><div className="search-field"><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por curso, habilidad o resultado…" /></div><div className="filter-group"><Filter size={15} /><select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value as TypeFilter)} aria-label="Filtrar por tipo de contenido">{Object.entries(contentLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as StatusFilter)} aria-label="Filtrar por estado"><option value="all">Cualquier estado</option><option value="pending">Pendiente</option><option value="active">En curso</option><option value="complete">Completado</option></select></div></section>
+
+        {user?.role === "admin" && <PdfTranslationAdminPanel documents={pdfAdminEntries} onSetPriority={(id, priority) => setPdfTranslationPriority.mutate({ id, priority })} isSaving={setPdfTranslationPriority.isPending} />}
 
         <section className="route-rail" aria-label="Rutas de aprendizaje">{learningRoutes.map((route) => <button key={route.id} onClick={() => { setRouteFilter(route.id); setStatusFilter("all"); }} className={`route-card route-card--${route.accent} ${routeFilter === route.id ? "route-card--selected" : ""}`}><span>{courseMeta.filter((course) => course.routeId === route.id).length} cursos</span><h2>{route.label}</h2><p>{route.description}</p></button>)}</section>
 

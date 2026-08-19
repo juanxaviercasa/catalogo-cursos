@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { completeZipImport, createZipImport, failZipImport, getMediaTracks, getModuleProgressByUserId, getPdfTranslationDocument, getPdfTranslations, getVideoProcessingHistory, getVideoProcessingPreference, getZipImportByZipId, getZipImportsWithVideos, queuePdfTranslation, restartZipImport, reviewPdfVisualLocalization, savePdfVisualLocalization, setModuleProgress, setVideoProcessingPreference } from "./db";
+import { completeZipImport, createZipImport, failZipImport, getMediaTracks, getModuleProgressByUserId, getPdfTranslationDocument, getPdfTranslations, getVideoProcessingHistory, getVideoProcessingPreference, getZipImportByZipId, getZipImportsWithVideos, queuePdfTranslation, restartZipImport, reviewPdfVisualLocalization, savePdfVisualLocalization, setModuleProgress, setPdfTranslationPriority, setVideoProcessingPreference } from "./db";
 import { DubbingSetupSchema, dubbingSetup, DriveCatalogSchema, getContentType, orderedModules, PdfTranslationDocumentSchema, PdfTranslationSetupSchema, PdfTranslationSummarySchema, pdfTranslationSetup, VideoProcessingSetupSchema, videoProcessingSetup, type DriveCourse } from "../shared/learning";
 import { extractPublicDriveZip } from "./zipImport";
 import { dispatchQueuedVideos, isProcessorConfigured, type VideoProcessorMode } from "./videoProcessorDispatch";
@@ -17,7 +17,7 @@ const mediaTrackSchema = z.object({ id: z.number(), extractedVideoId: z.number()
 const videoProcessingHistorySchema = z.object({ id: z.number(), extractedVideoId: z.number(), title: z.string(), sourceName: z.string(), sourceMimeType: z.string(), status: z.enum(["queued", "processing", "ready", "failed"]), progressPercent: z.number().min(0).max(100), processingMode: z.enum(["local-worker", "persistent-worker"]).nullable(), message: z.string().nullable(), createdAt: z.date() });
 
 function serializePdfTranslation(document: Awaited<ReturnType<typeof getPdfTranslations>>[number]) {
-  return { id: document.id, courseId: document.courseId, moduleId: document.moduleId, sourceUrl: document.sourceUrl, sourceLanguage: document.sourceLanguage, targetLanguage: document.targetLanguage, status: document.status, processingMode: document.processingMode, reconstructedStorageUrl: document.reconstructedStorageUrl, pageCount: document.pageCount, errorMessage: document.errorMessage, preparedAt: document.preparedAt };
+  return { id: document.id, courseId: document.courseId, moduleId: document.moduleId, sourceUrl: document.sourceUrl, sourceLanguage: document.sourceLanguage, targetLanguage: document.targetLanguage, status: document.status, processingMode: document.processingMode, priority: document.priority, reconstructedStorageUrl: document.reconstructedStorageUrl, pageCount: document.pageCount, errorMessage: document.errorMessage, preparedAt: document.preparedAt };
 }
 
 function serializePdfTranslationDocument(document: NonNullable<Awaited<ReturnType<typeof getPdfTranslationDocument>>>) {
@@ -141,6 +141,9 @@ export const appRouter = router({
     preparePdfTranslation: adminProcedure.input(z.object({ courseId: z.string().min(1).max(128), moduleId: z.string().min(1).max(128), sourceUrl: z.string().url() })).output(PdfTranslationDocumentSchema.nullable()).mutation(async ({ ctx, input }) => {
       const document = await queuePdfTranslation({ ...input, preparedByUserId: ctx.user.id });
       return document ? serializePdfTranslationDocument(document) : null;
+    }),
+    setPdfTranslationPriority: adminProcedure.input(z.object({ id: z.number().int().positive(), priority: z.number().int().min(1).max(999) })).output(z.void()).mutation(async ({ input }) => {
+      await setPdfTranslationPriority(input);
     }),
     prepareCoursePdfTranslations: adminProcedure.input(z.object({ courseId: z.string().min(1).max(128) })).output(z.object({ queued: z.number().int().nonnegative(), alreadyReady: z.number().int().nonnegative() })).mutation(async ({ ctx, input }) => {
       const host = ctx.req.get("host");

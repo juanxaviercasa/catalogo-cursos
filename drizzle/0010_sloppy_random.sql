@@ -1,0 +1,1 @@
+ALTER TABLE `pdf_translations` ADD `priority` int DEFAULT 100 NOT NULL;

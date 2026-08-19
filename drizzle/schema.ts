@@ -112,6 +112,7 @@ export const pdfTranslations = mysqlTable("pdf_translations", {
   targetLanguage: varchar("targetLanguage", { length: 16 }).notNull().default("es"),
   status: mysqlEnum("status", ["queued", "extracting", "translating", "reconstructing", "ready", "failed"]).notNull().default("queued"),
   processingMode: mysqlEnum("processingMode", ["local-worker", "persistent-worker"]).notNull().default("local-worker"),
+  priority: int("priority").notNull().default(100),
   reconstructedStorageKey: varchar("reconstructedStorageKey", { length: 1024 }),
   reconstructedStorageUrl: varchar("reconstructedStorageUrl", { length: 1200 }),
   pageCount: int("pageCount"),

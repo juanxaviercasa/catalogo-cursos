@@ -265,7 +265,13 @@ export type PdfTranslationStatus = "queued" | "extracting" | "translating" | "re
 export async function getPdfTranslations() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(pdfTranslations).orderBy(desc(pdfTranslations.updatedAt));
+  return db.select().from(pdfTranslations).orderBy(asc(pdfTranslations.priority), desc(pdfTranslations.updatedAt));
+}
+
+export async function setPdfTranslationPriority(input: { id: number; priority: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible.");
+  await db.update(pdfTranslations).set({ priority: input.priority }).where(eq(pdfTranslations.id, input.id));
 }
 
 export async function getPdfTranslationDocument(courseId: string, moduleId: string) {
