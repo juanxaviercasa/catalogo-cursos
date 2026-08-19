@@ -11,9 +11,36 @@ import { convertToBrowserMp4 } from "./local_video_processor.mjs";
 const MAX_ZIP_BYTES = 350 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 150 * 1024 * 1024;
 
+type ProcessingUpdate = {
+  status: "processing" | "ready" | "failed";
+  message?: string | null;
+  storage?: { key: string; url: string; mimeType: string; sizeBytes: number };
+};
+
+type ProcessingDependencies = {
+  updateStatus: (update: ProcessingUpdate) => Promise<void>;
+  upload: (key: string, bytes: Buffer, mimeType: string) => Promise<{ key: string; url: string }>;
+};
+
 function argument(name: string) {
   const index = process.argv.indexOf(name);
   return index === -1 ? undefined : process.argv[index + 1];
+}
+
+export async function processQueuedVideoSource(input: { videoId: number; zipImportId: number; sourcePath: string; outputDirectory: string }, dependencies: ProcessingDependencies) {
+  await dependencies.updateStatus({ status: "processing", message: "Analizando códecs y preparando el MP4." });
+  try {
+    const result = await convertToBrowserMp4(input.sourcePath, input.outputDirectory);
+    const bytes = await readFile(result.outputPath);
+    const stored = await dependencies.upload(`course-imports/${input.zipImportId}/converted/${basename(result.outputPath)}`, bytes, "video/mp4");
+    const storage = { key: stored.key, url: stored.url, mimeType: "video/mp4", sizeBytes: bytes.byteLength };
+    await dependencies.updateStatus({ status: "ready", storage });
+    return { ...result, storage };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "La conversión no terminó.";
+    await dependencies.updateStatus({ status: "failed", message: message.slice(0, 2000) });
+    throw error;
+  }
 }
 
 async function extractQueuedSource(input: { zipId: string; sourcePath: string; videoId: number; outputDirectory: string }) {
@@ -50,7 +77,6 @@ async function main() {
   if (!video) throw new Error("No existe el vídeo en cola solicitado.");
   if (video.processingStatus !== "queued" && video.processingStatus !== "failed") throw new Error(`El vídeo no está disponible para procesar; estado actual: ${video.processingStatus}.`);
 
-  await setExtractedVideoProcessingStatus({ videoId, status: "processing", message: "Analizando códecs y preparando el MP4." });
   let temporarySource: { sourcePath: string; zipPath: string } | undefined;
   try {
     let source = inputPath;
@@ -60,25 +86,19 @@ async function main() {
       temporarySource = await extractQueuedSource({ zipId: zipImport.zipId, sourcePath: video.sourcePath, videoId, outputDirectory });
       source = temporarySource.sourcePath;
     }
-    const result = await convertToBrowserMp4(source, outputDirectory);
-    const bytes = await readFile(result.outputPath);
-    const stored = await storagePut(`course-imports/${video.zipImportId}/converted/${basename(result.outputPath)}`, bytes, "video/mp4");
-    await setExtractedVideoProcessingStatus({
-      videoId,
-      status: "ready",
-      storage: { key: stored.key, url: stored.url, mimeType: "video/mp4", sizeBytes: bytes.byteLength },
+    const result = await processQueuedVideoSource({ videoId, zipImportId: video.zipImportId, sourcePath: source, outputDirectory }, {
+      updateStatus: (update) => setExtractedVideoProcessingStatus({ videoId, ...update }),
+      upload: storagePut,
     });
-    console.log(JSON.stringify({ videoId, status: "ready", mode: result.mode, storageUrl: stored.url }, null, 2));
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "La conversión no terminó.";
-    await setExtractedVideoProcessingStatus({ videoId, status: "failed", message: message.slice(0, 2000) });
-    throw error;
+    console.log(JSON.stringify({ videoId, status: "ready", mode: result.mode, storageUrl: result.storage.url }, null, 2));
   } finally {
     if (temporarySource) await Promise.all([rm(temporarySource.sourcePath, { force: true }), rm(temporarySource.zipPath, { force: true })]);
   }
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : error);
-  process.exitCode = 1;
-});
+if (process.argv[1]?.endsWith("process_queued_video.ts")) {
+  main().catch((error) => {
+    console.error(error instanceof Error ? error.message : error);
+    process.exitCode = 1;
+  });
+}

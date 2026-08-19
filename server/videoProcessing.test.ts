@@ -6,9 +6,11 @@ describe("configuración de conversión de vídeo", () => {
   it("expone opciones sin claves reales, conserva una ruta gratuita y valida estados de disponibilidad", () => {
     expect(VideoProcessingSetupSchema.parse(videoProcessingSetup).workerStatus).toBe("not_configured");
     expect(videoProcessingSetup.activeMode).toBeNull();
+    expect(videoProcessingSetup.selectedMode).toBeNull();
+    expect(videoProcessingSetup.modeAvailability).toEqual({ localWorker: false, persistentWorker: false });
     expect(videoProcessingSetup.providers.some((provider) => provider.tier === "free")).toBe(true);
     expect(videoProcessingSetup.placeholders.every((field) => field.example.includes("REEMPLAZAR") || field.key === "VIDEO_PROCESSOR_MODE")).toBe(true);
-    expect(VideoProcessingSetupSchema.parse({ ...videoProcessingSetup, status: "pilot_ready", workerStatus: "configured", activeMode: "local-worker", availability: { queued: 0, processing: 0, ready: 6, failed: 0, transcoded: 5 } }).availability.transcoded).toBe(5);
+    expect(VideoProcessingSetupSchema.parse({ ...videoProcessingSetup, status: "pilot_ready", workerStatus: "configured", activeMode: "local-worker", selectedMode: "local-worker", modeAvailability: { localWorker: true, persistentWorker: false }, availability: { queued: 0, processing: 0, ready: 6, failed: 0, transcoded: 5 } }).availability.transcoded).toBe(5);
   });
 
   it("conserva códecs ya compatibles y normaliza los nombres para objetos almacenables", () => {

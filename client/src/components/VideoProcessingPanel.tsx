@@ -7,10 +7,11 @@ const iconFor = {
   "managed-provider": Cloud,
 };
 
-export function VideoProcessingPanel({ setup }: { setup: VideoProcessingSetup }) {
+export function VideoProcessingPanel({ setup, canConfigure = false, onSelectMode, isSaving = false }: { setup: VideoProcessingSetup; canConfigure?: boolean; onSelectMode?: (mode: "local-worker" | "persistent-worker") => void; isSaving?: boolean }) {
   const isPilotReady = setup.status === "pilot_ready";
   const pendingCount = setup.availability.queued + setup.availability.processing;
   const activeLabel = setup.activeMode === "local-worker" ? "Equipo propio" : setup.activeMode === "persistent-worker" ? "Servicio persistente" : null;
+  const selectedLabel = setup.selectedMode === "local-worker" ? "Equipo propio" : setup.selectedMode === "persistent-worker" ? "Servicio persistente" : null;
   return (
     <section className="processing-placeholder" aria-labelledby="processing-placeholder-title">
       <div className="processing-placeholder-head">
@@ -18,6 +19,7 @@ export function VideoProcessingPanel({ setup }: { setup: VideoProcessingSetup })
         <div><span>{activeLabel ? `RUTA SELECCIONADA · ${activeLabel.toUpperCase()}` : isPilotReady ? "ESTADO ACTUAL · PILOTO LISTO" : "ESTADO ACTUAL · NO CONFIGURADO"}</span><h2 id="processing-placeholder-title">{activeLabel ? `Conversión automática por ${activeLabel.toLowerCase()}` : isPilotReady ? "Conversión MP4 validada" : "Conversión automática aún no activa"}</h2><p>{activeLabel ? `Los MKV nuevos se entregarán automáticamente al ${activeLabel.toLowerCase()} seleccionado; los MP4/WebM válidos se conservan sin conversión.` : isPilotReady ? `El ZIP piloto conserva ${setup.availability.ready - setup.availability.transcoded} vídeo reproducible y convirtió ${setup.availability.transcoded} MKV a MP4. Todos se sirven desde el almacenamiento gestionado.` : "Los MP4/WebM que ya son reproducibles se conservan. Los MKV y otros formatos no compatibles no se convierten hasta que se configure un procesador real."}</p></div>
       </div>
       <div className="pending-service-status">{activeLabel || isPilotReady ? <CheckCircle2 size={16} /> : <CircleDashed size={16} />}<div><b>{activeLabel ? `Ruta activa: ${activeLabel}` : isPilotReady ? `${setup.availability.ready} vídeos disponibles` : "Proveedor pendiente de configurar"}</b><span>{activeLabel ? pendingCount ? `${pendingCount} vídeos siguen en cola o conversión.` : "La siguiente importación enviará automáticamente los formatos incompatibles." : isPilotReady ? pendingCount ? `${pendingCount} vídeos siguen en cola o conversión.` : "La automatización para futuros ZIP sigue pendiente de configurar." : "Estas tarjetas no son botones y no activan ninguna conversión."}</span></div></div>
+      {canConfigure && <div className="processing-admin-selector"><div><b>Ruta administrativa</b><span>{selectedLabel ? `${selectedLabel} seleccionada. ${activeLabel ? "Sus placeholders están completos." : "Faltan URL HTTPS y secreto en el servidor."}` : "Selecciona la ruta que recibirá los próximos formatos incompatibles."}</span></div><div className="processing-admin-options"><button disabled={isSaving} aria-pressed={setup.selectedMode === "local-worker"} onClick={() => onSelectMode?.("local-worker")}>Equipo propio <small>{setup.modeAvailability.localWorker ? "placeholders completos" : "placeholders pendientes"}</small></button><button disabled={isSaving} aria-pressed={setup.selectedMode === "persistent-worker"} onClick={() => onSelectMode?.("persistent-worker")}>Servicio persistente <small>{setup.modeAvailability.persistentWorker ? "placeholders completos" : "placeholders pendientes"}</small></button></div></div>}
       <details className="pending-details"><summary>Ver opciones técnicas futuras <span>{isPilotReady ? "Pendientes para próximos ZIP" : "No activas"}</span></summary><div className="processing-provider-grid">
           {setup.providers.map((provider) => {
             const Icon = iconFor[provider.id];

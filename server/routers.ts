@@ -3,10 +3,10 @@ import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { completeZipImport, createZipImport, failZipImport, getMediaTracks, getModuleProgressByUserId, getZipImportByZipId, getZipImportsWithVideos, restartZipImport, setModuleProgress } from "./db";
+import { completeZipImport, createZipImport, failZipImport, getMediaTracks, getModuleProgressByUserId, getVideoProcessingPreference, getZipImportByZipId, getZipImportsWithVideos, restartZipImport, setModuleProgress, setVideoProcessingPreference } from "./db";
 import { DubbingSetupSchema, dubbingSetup, DriveCatalogSchema, getContentType, VideoProcessingSetupSchema, videoProcessingSetup, type DriveCourse } from "../shared/learning";
 import { extractPublicDriveZip } from "./zipImport";
-import { dispatchQueuedVideos } from "./videoProcessorDispatch";
+import { dispatchQueuedVideos, isProcessorConfigured, type VideoProcessorMode } from "./videoProcessorDispatch";
 
 const CATALOG_PATH = "/manus-storage/drive_courses_inventory_8a9ad92a.json";
 let catalogCache: DriveCourse[] | null = null;
@@ -37,13 +37,17 @@ async function getCurrentVideoProcessingSetup() {
     if (video.wasTranscoded && video.processingStatus === "ready") availability.transcoded += 1;
   }
   const pilotComplete = availability.transcoded > 0;
-  const configuredMode: "local-worker" | "persistent-worker" | null = process.env.VIDEO_PROCESSOR_MODE === "local-worker" || process.env.VIDEO_PROCESSOR_MODE === "persistent-worker" ? process.env.VIDEO_PROCESSOR_MODE : null;
-  const hasConfiguredWorker = Boolean(configuredMode && process.env.VIDEO_PROCESSOR_URL && process.env.VIDEO_PROCESSOR_SHARED_SECRET);
+  const preference = await getVideoProcessingPreference();
+  const selectedMode = preference?.selectedMode ?? null;
+  const modeAvailability = { localWorker: isProcessorConfigured("local-worker"), persistentWorker: isProcessorConfigured("persistent-worker") };
+  const hasConfiguredWorker = selectedMode === "local-worker" ? modeAvailability.localWorker : selectedMode === "persistent-worker" ? modeAvailability.persistentWorker : false;
   return {
     ...videoProcessingSetup,
     status: pilotComplete ? "pilot_ready" as const : "placeholder" as const,
     workerStatus: hasConfiguredWorker ? "configured" as const : pilotComplete ? "pilot_complete" as const : "not_configured" as const,
-    activeMode: hasConfiguredWorker ? configuredMode : null,
+    activeMode: hasConfiguredWorker ? selectedMode : null,
+    selectedMode,
+    modeAvailability,
     availability,
   };
 }
@@ -108,6 +112,10 @@ export const appRouter = router({
       return tracks.map((track) => ({ id: track.id, extractedVideoId: track.extractedVideoId, language: track.language, kind: track.kind, label: track.label, storageUrl: track.storageUrl, mimeType: track.mimeType, provider: track.provider }));
     }),
     videoProcessingSetup: publicProcedure.output(VideoProcessingSetupSchema).query(() => getCurrentVideoProcessingSetup()),
+    setVideoProcessingMode: adminProcedure.input(z.object({ mode: z.enum(["local-worker", "persistent-worker"]) })).mutation(async ({ ctx, input }) => {
+      await setVideoProcessingPreference({ selectedMode: input.mode, updatedByUserId: ctx.user.id });
+      return getCurrentVideoProcessingSetup();
+    }),
     dubbingSetup: publicProcedure.output(DubbingSetupSchema).query(() => dubbingSetup),
     prepareZip: adminProcedure.input(z.object({ zipId: z.string().min(1).max(128), courseId: z.string().min(1).max(128) })).output(zipImportSchema).mutation(async ({ ctx, input }) => {
       const host = ctx.req.get("host");
@@ -131,7 +139,8 @@ export const appRouter = router({
         await completeZipImport({ importId: importRecord.id, sourceBytes: extracted.sourceBytes, videos: extracted.videos });
         const allImports = await getZipImportsWithVideos();
         const imported = allImports.find((item) => item.id === importRecord.id)!;
-        await dispatchQueuedVideos(imported.videos.filter((video) => video.processingStatus === "queued").map((video) => ({ id: video.id, sourcePath: video.sourcePath })));
+        const preference = await getVideoProcessingPreference();
+        await dispatchQueuedVideos(imported.videos.filter((video) => video.processingStatus === "queued").map((video) => ({ id: video.id, sourcePath: video.sourcePath })), (preference?.selectedMode ?? null) as VideoProcessorMode | null);
         return { ...imported, videos: imported.videos.map(serializeImportedVideo) };
       } catch (error) {
         const message = error instanceof Error ? error.message : "La importación falló.";

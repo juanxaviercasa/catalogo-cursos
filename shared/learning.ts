@@ -21,6 +21,8 @@ export const VideoProcessingSetupSchema = z.object({
   status: z.enum(["placeholder", "pilot_ready"]),
   workerStatus: z.enum(["not_configured", "pilot_complete", "configured"]),
   activeMode: z.enum(["local-worker", "persistent-worker"]).nullable(),
+  selectedMode: z.enum(["local-worker", "persistent-worker"]).nullable(),
+  modeAvailability: z.object({ localWorker: z.boolean(), persistentWorker: z.boolean() }),
   availability: z.object({
     queued: z.number().int().nonnegative(),
     processing: z.number().int().nonnegative(),
@@ -66,6 +68,8 @@ export const videoProcessingSetup: VideoProcessingSetup = {
   status: "placeholder",
   workerStatus: "not_configured",
   activeMode: null,
+  selectedMode: null,
+  modeAvailability: { localWorker: false, persistentWorker: false },
   availability: { queued: 0, processing: 0, ready: 0, failed: 0, transcoded: 0 },
   storage: {
     provider: "managed-object-storage",

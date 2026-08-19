@@ -80,3 +80,10 @@
 - [x] Documentar la migración del proyecto y del trabajador de vídeo a otro entorno, incluidos almacenamiento, base de datos, secretos y dominio.
 - [x] Registrar `https://github.com/juanxaviercasa/catalogo-cursos.git` como repositorio de continuidad en la documentación.
 - [x] Sincronizar la versión actual del proyecto con el repositorio GitHub de continuidad indicado por el usuario.
+- [x] Consolidar los placeholders seguros de URL HTTPS, puerto y secreto del trabajador de vídeo sin activar credenciales reales.
+- [x] Añadir un selector administrativo para elegir la ruta de procesamiento local o persistente y mostrar su estado de configuración.
+- [x] Preparar una importación de prueba reproducible con vídeos MKV para verificar cola, conversión y disponibilidad del resultado.
+- [x] Extender el fixture MKV reproducible para validar el ciclo completo desde cola hasta MP4 disponible para reproducción.
+- [x] Conectar el fixture MKV al ciclo persistido del trabajador y comprobar la carga efectiva del MP4 publicado desde almacenamiento gestionado.
+- [x] Validar con un registro real que el fixture MKV persiste la transición `queued` → `processing` → `ready` con URL y MIME final en `extracted_videos`.
+- [x] Observar y afirmar explícitamente en base de datos la secuencia persistida `queued` → `processing` → `ready` del fixture MKV temporal.

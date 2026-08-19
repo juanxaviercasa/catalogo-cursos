@@ -93,8 +93,6 @@ export async function extractPublicDriveZip(input: { zipId: string; sourceName: 
   }
 
   const temporaryFile = `/tmp/drive-zip-${input.importId}-${crypto.randomUUID()}.zip`;
-  const videos: ExtractedVideo[] = [];
-  let totalVideoBytes = 0;
   let downloadedBytes = 0;
 
   try {
@@ -107,8 +105,17 @@ export async function extractPublicDriveZip(input: { zipId: string; sourceName: 
     });
     await pipeline(Readable.fromWeb(response.body as never), limit, createWriteStream(temporaryFile, { flags: "wx" }));
 
-    const archive = await openArchive(temporaryFile);
-    await new Promise<void>((resolve, reject) => {
+    return await extractZipFile({ archivePath: temporaryFile, importId: input.importId, sourceBytes: declaredSize || null });
+  } finally {
+    await fs.unlink(temporaryFile).catch(() => undefined);
+  }
+}
+
+export async function extractZipFile(input: { archivePath: string; importId: number; sourceBytes?: number | null }) {
+  const videos: ExtractedVideo[] = [];
+  let totalVideoBytes = 0;
+  const archive = await openArchive(input.archivePath);
+  await new Promise<void>((resolve, reject) => {
       let settled = false;
       const fail = (error: unknown) => {
         if (settled) return;
@@ -170,13 +177,10 @@ export async function extractPublicDriveZip(input: { zipId: string; sourceName: 
         }).catch(fail);
       });
       next();
-    });
-  } finally {
-    await fs.unlink(temporaryFile).catch(() => undefined);
-  }
+  });
 
   if (!videos.length) throw new Error("El ZIP no contiene vídeos compatibles para reproducir.");
-  return { videos, sourceBytes: declaredSize || null };
+  return { videos, sourceBytes: input.sourceBytes ?? null };
 }
 
 export const zipImportLimits = {

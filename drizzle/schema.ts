@@ -71,6 +71,13 @@ export const extractedVideos = mysqlTable("extracted_videos", {
   uniqueIndex("extracted_videos_import_path_unique").on(table.zipImportId, table.sourcePath),
 ]);
 
+export const videoProcessingPreferences = mysqlTable("video_processing_preferences", {
+  id: int("id").autoincrement().primaryKey(),
+  selectedMode: mysqlEnum("selectedMode", ["local-worker", "persistent-worker"]),
+  updatedByUserId: int("updatedByUserId").references(() => users.id, { onDelete: "set null" }),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
 export const mediaTracks = mysqlTable("media_tracks", {
   id: int("id").autoincrement().primaryKey(),
   extractedVideoId: int("extractedVideoId").notNull().references(() => extractedVideos.id, { onDelete: "cascade" }),
@@ -93,5 +100,6 @@ export type InsertModuleProgress = typeof moduleProgress.$inferInsert;
 export type ZipImport = typeof zipImports.$inferSelect;
 export type ExtractedVideo = typeof extractedVideos.$inferSelect;
 export type MediaTrack = typeof mediaTracks.$inferSelect;
+export type VideoProcessingPreference = typeof videoProcessingPreferences.$inferSelect;
 
 // TODO: Add your tables here

@@ -1,6 +1,6 @@
-import { asc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { extractedVideos, InsertUser, mediaTracks, moduleProgress, users, zipImports } from "../drizzle/schema";
+import { extractedVideos, InsertUser, mediaTracks, moduleProgress, users, videoProcessingPreferences, zipImports } from "../drizzle/schema";
 import type { ExtractedVideo as ImportedVideo } from "./zipImport";
 import { ENV } from './_core/env';
 
@@ -144,6 +144,26 @@ export async function getExtractedVideoById(videoId: number) {
   if (!db) return undefined;
   const result = await db.select().from(extractedVideos).where(eq(extractedVideos.id, videoId)).limit(1);
   return result[0];
+}
+
+export type VideoProcessingMode = "local-worker" | "persistent-worker";
+
+export async function getVideoProcessingPreference() {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(videoProcessingPreferences).orderBy(desc(videoProcessingPreferences.updatedAt)).limit(1);
+  return result[0];
+}
+
+export async function setVideoProcessingPreference(input: { selectedMode: VideoProcessingMode; updatedByUserId: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible.");
+  const existing = await getVideoProcessingPreference();
+  if (existing) {
+    await db.update(videoProcessingPreferences).set({ selectedMode: input.selectedMode, updatedByUserId: input.updatedByUserId }).where(eq(videoProcessingPreferences.id, existing.id));
+  } else {
+    await db.insert(videoProcessingPreferences).values(input);
+  }
 }
 
 export async function setExtractedVideoProcessingStatus(input: {
