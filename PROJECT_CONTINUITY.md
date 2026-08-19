@@ -14,6 +14,7 @@ La plataforma convierte las bibliotecas compartidas de Google Drive en una bibli
 | ZIP piloto | Operativo | Seis vídeos reproducibles: un MP4 original y cinco MKV convertidos a MP4 en almacenamiento gestionado. |
 | Conversión de formatos | Operativa y seleccionable | MP4/WebM se conservan; los formatos incompatibles se encolan y pueden procesarse en equipo propio o servicio persistente. |
 | Doblaje inglés→español | Piloto operativo | El primer módulo tiene MP4 doblado, subtítulos VTT y selector de idioma. |
+| PDF bilingüe inglés→español | Piloto operativo | El Main Guide de Aggressive Fat Loss 2.0 ofrece comparación, lectura española y PDF reconstruido; el original permanece en Drive. |
 
 ## Arquitectura vigente
 
@@ -24,6 +25,8 @@ La aplicación usa React y TypeScript en el cliente, procedimientos tipados en e
 | `module_progress` | Módulos completados por usuario. | Base de datos. |
 | `zip_imports` | Estado de cada archivo ZIP preparado. | Base de datos. |
 | `extracted_videos` | Metadatos y URL de vídeos ya extraídos. | Base de datos + almacenamiento de objetos. |
+| `pdf_translations` | Estado y URL del documento español reconstruido. | Base de datos + almacenamiento de objetos. |
+| `pdf_translation_segments` | Texto fuente y traducción por página. | Base de datos. |
 | `/manus-storage/` | Entrega mediante redirección firmada. | Almacenamiento de objetos. |
 | Google Drive | Fuente original, carpeta y archivos de curso. | Externo. |
 
@@ -83,6 +86,8 @@ Los valores se deben añadir exclusivamente a la configuración segura del servi
 ## Continuación fuera de este entorno
 
 La guía completa para mover el proyecto, escoger entre equipo propio o servicio persistente y operar el procesador está en [`MIGRATION_AND_VIDEO_WORKERS.md`](./MIGRATION_AND_VIDEO_WORKERS.md). Incluye archivos de configuración de ejemplo, la plantilla de servicio Linux y las comprobaciones de reproducción.
+
+El flujo gratuito de extracción, traducción y reconstrucción de PDFs está documentado en [`PDF_TRANSLATION_PILOT.md`](./PDF_TRANSLATION_PILOT.md). Incluye el piloto validado, los comandos de ejecución y registro, sus límites de texto extraíble y las alternativas de pago opcionales.
 
 ## Modelo de datos propuesto para la siguiente fase
 

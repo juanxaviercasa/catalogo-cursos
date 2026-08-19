@@ -103,6 +103,39 @@ export const mediaTracks = mysqlTable("media_tracks", {
   uniqueIndex("media_tracks_video_language_kind_unique").on(table.extractedVideoId, table.language, table.kind),
 ]);
 
+export const pdfTranslations = mysqlTable("pdf_translations", {
+  id: int("id").autoincrement().primaryKey(),
+  courseId: varchar("courseId", { length: 128 }).notNull(),
+  moduleId: varchar("moduleId", { length: 128 }).notNull(),
+  sourceUrl: varchar("sourceUrl", { length: 1200 }).notNull(),
+  sourceLanguage: varchar("sourceLanguage", { length: 16 }).notNull().default("en"),
+  targetLanguage: varchar("targetLanguage", { length: 16 }).notNull().default("es"),
+  status: mysqlEnum("status", ["queued", "extracting", "translating", "reconstructing", "ready", "failed"]).notNull().default("queued"),
+  processingMode: mysqlEnum("processingMode", ["local-worker", "persistent-worker"]).notNull().default("local-worker"),
+  reconstructedStorageKey: varchar("reconstructedStorageKey", { length: 1024 }),
+  reconstructedStorageUrl: varchar("reconstructedStorageUrl", { length: 1200 }),
+  pageCount: int("pageCount"),
+  errorMessage: text("errorMessage"),
+  preparedByUserId: int("preparedByUserId").references(() => users.id, { onDelete: "set null" }),
+  preparedAt: timestamp("preparedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [
+  uniqueIndex("pdf_translations_course_module_unique").on(table.courseId, table.moduleId),
+]);
+
+export const pdfTranslationSegments = mysqlTable("pdf_translation_segments", {
+  id: int("id").autoincrement().primaryKey(),
+  pdfTranslationId: int("pdfTranslationId").notNull().references(() => pdfTranslations.id, { onDelete: "cascade" }),
+  pageNumber: int("pageNumber").notNull(),
+  segmentOrder: int("segmentOrder").notNull(),
+  sourceText: text("sourceText").notNull(),
+  translatedText: text("translatedText").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex("pdf_translation_segment_unique").on(table.pdfTranslationId, table.pageNumber, table.segmentOrder),
+]);
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type ModuleProgress = typeof moduleProgress.$inferSelect;
@@ -112,5 +145,7 @@ export type ExtractedVideo = typeof extractedVideos.$inferSelect;
 export type MediaTrack = typeof mediaTracks.$inferSelect;
 export type VideoProcessingPreference = typeof videoProcessingPreferences.$inferSelect;
 export type VideoProcessingEvent = typeof videoProcessingEvents.$inferSelect;
+export type PdfTranslation = typeof pdfTranslations.$inferSelect;
+export type PdfTranslationSegment = typeof pdfTranslationSegments.$inferSelect;
 
 // TODO: Add your tables here

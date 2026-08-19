@@ -57,6 +57,13 @@
       "when": 1787113758596,
       "tag": "0007_outgoing_grim_reaper",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1787116233897,
+      "tag": "0008_panoramic_skin",
+      "breakpoints": true
     }
   ]
 }

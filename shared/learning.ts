@@ -59,10 +59,31 @@ export const DubbingSetupSchema = z.object({
   placeholders: z.array(z.object({ key: z.string(), purpose: z.string(), example: z.string() })),
 });
 
+export const PdfTranslationSummarySchema = z.object({
+  id: z.number(),
+  courseId: z.string(),
+  moduleId: z.string(),
+  sourceUrl: z.string().url(),
+  sourceLanguage: z.string(),
+  targetLanguage: z.string(),
+  status: z.enum(["queued", "extracting", "translating", "reconstructing", "ready", "failed"]),
+  processingMode: z.enum(["local-worker", "persistent-worker"]),
+  reconstructedStorageUrl: z.string().nullable(),
+  pageCount: z.number().nullable(),
+  errorMessage: z.string().nullable(),
+  preparedAt: z.date().nullable(),
+});
+
+export const PdfTranslationDocumentSchema = PdfTranslationSummarySchema.extend({
+  segments: z.array(z.object({ id: z.number(), pageNumber: z.number(), segmentOrder: z.number(), sourceText: z.string(), translatedText: z.string() })),
+});
+
 export type DriveItem = z.infer<typeof DriveItemSchema>;
 export type DriveCourse = z.infer<typeof DriveCourseSchema>;
 export type VideoProcessingSetup = z.infer<typeof VideoProcessingSetupSchema>;
 export type DubbingSetup = z.infer<typeof DubbingSetupSchema>;
+export type PdfTranslationSummary = z.infer<typeof PdfTranslationSummarySchema>;
+export type PdfTranslationDocument = z.infer<typeof PdfTranslationDocumentSchema>;
 
 export const videoProcessingSetup: VideoProcessingSetup = {
   status: "placeholder",

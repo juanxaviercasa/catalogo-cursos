@@ -98,3 +98,11 @@
 - [x] Verificar que los botones Ir al contenido de los módulos Kinobody apuntan a cada recurso correcto de Drive.
 - [x] Ampliar la comprobación E2E para representar las tres estructuras Kinobody: recursos visuales, biblioteca PDF y manual único.
 - [x] Verificar de forma exhaustiva los enlaces Ir al contenido de todos los módulos publicados en los seis cursos Kinobody.
+- [x] Analizar un PDF de Kinobody y definir una ruta gratuita de extracción, traducción y lectura en español.
+- [x] Persistir versiones o segmentos traducidos de PDF sin reemplazar el documento original de Drive.
+- [x] Añadir una acción Leer en español con estado de preparación y lectura segura dentro del curso.
+- [x] Validar el piloto de PDF traducido, documentar sus límites y las rutas opcionales de pago.
+- [x] Modelar resultados de PDF bilingüe con documento reconstruido, segmentos legibles y estados de preparación.
+- [x] Crear un procesador local gratuito para extraer, traducir y reconstruir un PDF piloto en español.
+- [x] Añadir un visor comparativo original-inglés, lectura-español y PDF-español reconstruido dentro del curso.
+- [x] Validar visual y funcionalmente el PDF piloto bilingüe sin reemplazar su original de Drive.

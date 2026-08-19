@@ -3,8 +3,8 @@ import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { completeZipImport, createZipImport, failZipImport, getMediaTracks, getModuleProgressByUserId, getVideoProcessingHistory, getVideoProcessingPreference, getZipImportByZipId, getZipImportsWithVideos, restartZipImport, setModuleProgress, setVideoProcessingPreference } from "./db";
-import { DubbingSetupSchema, dubbingSetup, DriveCatalogSchema, getContentType, VideoProcessingSetupSchema, videoProcessingSetup, type DriveCourse } from "../shared/learning";
+import { completeZipImport, createZipImport, failZipImport, getMediaTracks, getModuleProgressByUserId, getPdfTranslationDocument, getPdfTranslations, getVideoProcessingHistory, getVideoProcessingPreference, getZipImportByZipId, getZipImportsWithVideos, queuePdfTranslation, restartZipImport, setModuleProgress, setVideoProcessingPreference } from "./db";
+import { DubbingSetupSchema, dubbingSetup, DriveCatalogSchema, getContentType, PdfTranslationDocumentSchema, PdfTranslationSummarySchema, VideoProcessingSetupSchema, videoProcessingSetup, type DriveCourse } from "../shared/learning";
 import { extractPublicDriveZip } from "./zipImport";
 import { dispatchQueuedVideos, isProcessorConfigured, type VideoProcessorMode } from "./videoProcessorDispatch";
 
@@ -14,6 +14,10 @@ const extractedVideoSchema = z.object({ id: z.number(), title: z.string(), stora
 const zipImportSchema = z.object({ id: z.number(), zipId: z.string(), courseId: z.string(), sourceName: z.string(), sourceBytes: z.number().nullable(), status: z.enum(["processing", "ready", "failed"]), errorMessage: z.string().nullable(), videos: z.array(extractedVideoSchema) });
 const mediaTrackSchema = z.object({ id: z.number(), extractedVideoId: z.number(), language: z.string(), kind: z.enum(["dubbed_video", "captions"]), label: z.string(), storageUrl: z.string(), mimeType: z.string(), provider: z.string() });
 const videoProcessingHistorySchema = z.object({ id: z.number(), extractedVideoId: z.number(), title: z.string(), sourceName: z.string(), sourceMimeType: z.string(), status: z.enum(["queued", "processing", "ready", "failed"]), progressPercent: z.number().min(0).max(100), processingMode: z.enum(["local-worker", "persistent-worker"]).nullable(), message: z.string().nullable(), createdAt: z.date() });
+
+function serializePdfTranslation(document: Awaited<ReturnType<typeof getPdfTranslations>>[number]) {
+  return { id: document.id, courseId: document.courseId, moduleId: document.moduleId, sourceUrl: document.sourceUrl, sourceLanguage: document.sourceLanguage, targetLanguage: document.targetLanguage, status: document.status, processingMode: document.processingMode, reconstructedStorageUrl: document.reconstructedStorageUrl, pageCount: document.pageCount, errorMessage: document.errorMessage, preparedAt: document.preparedAt };
+}
 
 function serializeImportedVideo(video: Awaited<ReturnType<typeof getZipImportsWithVideos>>[number]["videos"][number]) {
   return {
@@ -119,6 +123,15 @@ export const appRouter = router({
       return getCurrentVideoProcessingSetup();
     }),
     dubbingSetup: publicProcedure.output(DubbingSetupSchema).query(() => dubbingSetup),
+    pdfTranslations: publicProcedure.output(z.array(PdfTranslationSummarySchema)).query(async () => (await getPdfTranslations()).map(serializePdfTranslation)),
+    pdfTranslation: publicProcedure.input(z.object({ courseId: z.string().min(1).max(128), moduleId: z.string().min(1).max(128) })).output(PdfTranslationDocumentSchema.nullable()).query(async ({ input }) => {
+      const document = await getPdfTranslationDocument(input.courseId, input.moduleId);
+      return document ? { ...serializePdfTranslation(document), segments: document.segments.map((segment) => ({ id: segment.id, pageNumber: segment.pageNumber, segmentOrder: segment.segmentOrder, sourceText: segment.sourceText, translatedText: segment.translatedText })) } : null;
+    }),
+    preparePdfTranslation: adminProcedure.input(z.object({ courseId: z.string().min(1).max(128), moduleId: z.string().min(1).max(128), sourceUrl: z.string().url() })).output(PdfTranslationDocumentSchema.nullable()).mutation(async ({ ctx, input }) => {
+      const document = await queuePdfTranslation({ ...input, preparedByUserId: ctx.user.id });
+      return document ? { ...serializePdfTranslation(document), segments: document.segments.map((segment) => ({ id: segment.id, pageNumber: segment.pageNumber, segmentOrder: segment.segmentOrder, sourceText: segment.sourceText, translatedText: segment.translatedText })) } : null;
+    }),
     prepareZip: adminProcedure.input(z.object({ zipId: z.string().min(1).max(128), courseId: z.string().min(1).max(128) })).output(zipImportSchema).mutation(async ({ ctx, input }) => {
       const host = ctx.req.get("host");
       const catalog = await loadCatalog(host ? `${ctx.req.protocol}://${host}` : "http://localhost:3000");

@@ -1,6 +1,6 @@
 import { asc, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { extractedVideos, InsertUser, mediaTracks, moduleProgress, users, videoProcessingEvents, videoProcessingPreferences, zipImports } from "../drizzle/schema";
+import { extractedVideos, InsertUser, mediaTracks, moduleProgress, pdfTranslationSegments, pdfTranslations, users, videoProcessingEvents, videoProcessingPreferences, zipImports } from "../drizzle/schema";
 import type { ExtractedVideo as ImportedVideo } from "./zipImport";
 import { ENV } from './_core/env';
 
@@ -258,6 +258,61 @@ export async function restartZipImport(importId: number) {
   const db = await getDb();
   if (!db) throw new Error("La base de datos no está disponible.");
   await db.update(zipImports).set({ status: "processing", errorMessage: null, sourceBytes: null }).where(eq(zipImports.id, importId));
+}
+
+export type PdfTranslationStatus = "queued" | "extracting" | "translating" | "reconstructing" | "ready" | "failed";
+
+export async function getPdfTranslations() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(pdfTranslations).orderBy(desc(pdfTranslations.updatedAt));
+}
+
+export async function getPdfTranslationDocument(courseId: string, moduleId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const document = (await db.select().from(pdfTranslations).where(eq(pdfTranslations.courseId, courseId)).limit(25)).find((item) => item.moduleId === moduleId);
+  if (!document) return undefined;
+  const segments = await db.select().from(pdfTranslationSegments).where(eq(pdfTranslationSegments.pdfTranslationId, document.id)).orderBy(asc(pdfTranslationSegments.pageNumber), asc(pdfTranslationSegments.segmentOrder));
+  return { ...document, segments };
+}
+
+export async function queuePdfTranslation(input: { courseId: string; moduleId: string; sourceUrl: string; preparedByUserId: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible.");
+  const existing = await getPdfTranslationDocument(input.courseId, input.moduleId);
+  if (existing?.status === "ready" || ["extracting", "translating", "reconstructing"].includes(existing?.status ?? "")) return existing;
+  if (existing) {
+    await db.update(pdfTranslations).set({ status: "queued", errorMessage: null, preparedByUserId: input.preparedByUserId }).where(eq(pdfTranslations.id, existing.id));
+  } else {
+    await db.insert(pdfTranslations).values({ ...input, status: "queued", processingMode: "local-worker" });
+  }
+  return getPdfTranslationDocument(input.courseId, input.moduleId);
+}
+
+export async function savePdfTranslationResult(input: {
+  courseId: string;
+  moduleId: string;
+  sourceUrl: string;
+  reconstructedStorageKey: string;
+  reconstructedStorageUrl: string;
+  pageCount: number;
+  segments: Array<{ pageNumber: number; segmentOrder: number; sourceText: string; translatedText: string }>;
+  preparedByUserId?: number | null;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible.");
+  const existing = await getPdfTranslationDocument(input.courseId, input.moduleId);
+  if (existing) {
+    await db.update(pdfTranslations).set({ sourceUrl: input.sourceUrl, status: "ready", reconstructedStorageKey: input.reconstructedStorageKey, reconstructedStorageUrl: input.reconstructedStorageUrl, pageCount: input.pageCount, errorMessage: null, preparedByUserId: input.preparedByUserId ?? existing.preparedByUserId, preparedAt: new Date() }).where(eq(pdfTranslations.id, existing.id));
+    await db.delete(pdfTranslationSegments).where(eq(pdfTranslationSegments.pdfTranslationId, existing.id));
+  } else {
+    await db.insert(pdfTranslations).values({ courseId: input.courseId, moduleId: input.moduleId, sourceUrl: input.sourceUrl, status: "ready", reconstructedStorageKey: input.reconstructedStorageKey, reconstructedStorageUrl: input.reconstructedStorageUrl, pageCount: input.pageCount, preparedByUserId: input.preparedByUserId ?? null, preparedAt: new Date() });
+  }
+  const document = await getPdfTranslationDocument(input.courseId, input.moduleId);
+  if (!document) throw new Error("No se pudo guardar la traducción de PDF.");
+  if (input.segments.length) await db.insert(pdfTranslationSegments).values(input.segments.map((segment) => ({ ...segment, pdfTranslationId: document.id })));
+  return getPdfTranslationDocument(input.courseId, input.moduleId);
 }
 
 // TODO: add feature queries here as your schema grows.

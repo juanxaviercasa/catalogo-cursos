@@ -1,12 +1,13 @@
 import type { CourseMeta, LearningRoute } from "@shared/courseMeta";
-import { getContentType, orderedModules, type DriveCourse, type DriveItem } from "@shared/learning";
+import { getContentType, orderedModules, type DriveCourse, type DriveItem, type PdfTranslationSummary } from "@shared/learning";
 import { getSpanishMediaTracks, type MediaTrack } from "@shared/mediaTracks";
-import { AlertTriangle, ArrowLeft, AudioLines, Check, CheckCircle2, ExternalLink, FileArchive, FileText, FolderOpen, Loader2, Play, PlayCircle, Server } from "lucide-react";
+import { AlertTriangle, ArrowLeft, AudioLines, Check, CheckCircle2, ExternalLink, FileArchive, FileText, FolderOpen, Languages, Loader2, Play, PlayCircle, Server } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ProgressRing } from "./ProgressRing";
 import { VideoProcessingPanel } from "./VideoProcessingPanel";
 import { VideoProcessingHistory, type VideoProcessingEvent } from "./VideoProcessingHistory";
 import { DubbingPanel } from "./DubbingPanel";
+import { BilingualPdfPanel } from "./BilingualPdfPanel";
 
 const moduleIcon = (item: DriveItem) => {
   const type = getContentType(item);
@@ -32,7 +33,7 @@ function PreparedVideoPlayer({ video, tracks }: { video: ReadyImportedVideo; tra
   return <article className="prepared-video-card"><div className="prepared-video-card-head"><h3>{video.title}</h3>{spanishVideo && <div className="audio-selector" aria-label={`Idioma de audio para ${video.title}`}><button className={!isSpanish ? "audio-selector--selected" : ""} onClick={() => setLanguage("original")}>Original · inglés</button><button className={isSpanish ? "audio-selector--selected" : ""} onClick={() => setLanguage("es")}>Español</button></div>}</div><p className={isSpanish ? "audio-track-label audio-track-label--es" : "audio-track-label"}><AudioLines size={13} /> {isSpanish ? "Audio español local · ritmo refinado" : "Audio original en inglés"}</p><video key={source} controls preload="metadata" src={source}>{isSpanish && spanishCaptions && <track kind="subtitles" srcLang="es" label="Español" src={spanishCaptions.storageUrl} default />}</video>{isSpanish && spanishCaptions && <p className="subtitle-status">Subtítulos en español incluidos. Actívalos con el control <b>CC</b> del reproductor.</p>}</article>;
 }
 
-export function CourseDetail({ course, meta, route, completedIds, onBack, onToggle, canTrack, onLogin, zipImports, mediaTracks, canImportZip, isImportingZip, onPrepareZip, videoProcessingSetup, onSelectVideoProcessingMode, isSavingVideoProcessingMode, videoProcessingHistory = [], dubbingSetup }: {
+export function CourseDetail({ course, meta, route, completedIds, onBack, onToggle, canTrack, onLogin, zipImports, mediaTracks, canImportZip, isImportingZip, onPrepareZip, videoProcessingSetup, onSelectVideoProcessingMode, isSavingVideoProcessingMode, videoProcessingHistory = [], dubbingSetup, pdfTranslations = [], isPreparingPdf = false, onPreparePdf }: {
   course: DriveCourse;
   meta: CourseMeta;
   route: LearningRoute;
@@ -51,9 +52,13 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
   isSavingVideoProcessingMode?: boolean;
   videoProcessingHistory?: VideoProcessingEvent[];
   dubbingSetup: import("@shared/learning").DubbingSetup;
+  pdfTranslations?: PdfTranslationSummary[];
+  isPreparingPdf?: boolean;
+  onPreparePdf?: (item: DriveItem) => void;
 }) {
   const [activeVideo, setActiveVideo] = useState<DriveItem | null>(null);
   const [preparedVideos, setPreparedVideos] = useState<ReadyImportedVideo[] | null>(null);
+  const [activePdf, setActivePdf] = useState<DriveItem | null>(null);
   const modules = useMemo(() => orderedModules(course.children), [course.children]);
   const completed = modules.filter((item) => completedIds.has(item.id)).length;
   const progress = modules.length ? Math.round((completed / modules.length) * 100) : 0;
@@ -124,6 +129,7 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
         <div className="module-list">
           {modules.map((item, index) => {
             const contentType = getContentType(item);
+            const pdfTranslation = contentType === "pdf" ? pdfTranslations.find((document) => document.courseId === course.id && document.moduleId === item.id) : undefined;
             const isComplete = completedIds.has(item.id);
             const importRecord = zipImports.find((record) => record.zipId === item.id);
             return (
@@ -136,14 +142,18 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
                 <div className="module-copy"><h3>{item.name.replace(/\.(zip|mp4|ts|pdf)$/i, "")}</h3><p>{contentType === "video" ? "Vídeo disponible para reproducir desde Google Drive." : contentType === "zip" ? "Archivo ZIP con material de curso; ábrelo en Drive para acceder a su contenido." : contentType === "folder" ? "Carpeta de Drive con lecciones o recursos organizados." : contentType === "pdf" ? "Documento PDF disponible en la carpeta original." : "Recurso disponible en Google Drive."}</p></div>
                 <div className="module-actions">
                   {contentType === "video" && <button className="watch-button" onClick={() => setActiveVideo(item)}><Play size={14} /> Ver aquí</button>}
+                  {contentType === "pdf" && pdfTranslation?.status === "ready" && <button className="pdf-translation-button" onClick={() => setActivePdf(item)}><Languages size={14} /> Leer en español</button>}
+                  {contentType === "pdf" && !pdfTranslation && canImportZip && onPreparePdf && <button className="pdf-translation-button" disabled={isPreparingPdf} onClick={() => onPreparePdf(item)}>{isPreparingPdf ? <Loader2 className="animate-spin" size={14} /> : <Languages size={14} />} Preparar español</button>}
                   <a href={item.webViewLink} target="_blank" rel="noreferrer">Ir al contenido <ExternalLink size={15} /></a>
                 </div>
+                {contentType === "pdf" && pdfTranslation && <div className={`pdf-translation-status pdf-translation-status--${pdfTranslation.status}`}>{pdfTranslation.status === "ready" ? <><Languages size={14} /> <span>Lectura en español y PDF reconstruido disponibles.</span></> : <><Loader2 className="animate-spin" size={14} /> <span>{pdfTranslation.status === "failed" ? pdfTranslation.errorMessage ?? "La traducción requiere revisión." : "En cola para preparación local en español."}</span></>}</div>}
                 {contentType === "zip" && <div className="zip-note"><AlertTriangle size={15} /><span><b>Archivo ZIP original.</b> “Ir al contenido” abre Drive y no descomprime el archivo. {importRecord?.status === "ready" ? `${importRecord.videos.filter(isReadyVideo).length} vídeos ya fueron preparados y se reproducen desde la plataforma.${importRecord.videos.some((video) => video.processingStatus === "queued" || video.processingStatus === "processing") ? " Otros siguen en conversión." : ""}` : "Usa la acción destacada “Preparar vídeos en la plataforma” situada arriba."}</span>{importRecord?.status === "ready" ? <button className="prepared-button" onClick={() => setPreparedVideos(importRecord.videos.filter(isReadyVideo))}><Server size={14} /> Ver vídeos listos</button> : null}</div>}
               </article>
             );
           })}
         </div>
       </section>
+      {activePdf && (() => { const translation = pdfTranslations.find((document) => document.courseId === course.id && document.moduleId === activePdf.id); return translation ? <BilingualPdfPanel courseId={course.id} item={activePdf} translation={translation} onClose={() => setActivePdf(null)} /> : null; })()}
       {preparedVideos && <section className="prepared-video-panel"><div className="video-panel-head"><div><span>VÍDEOS PREPARADOS</span><h2>Reproducir desde la plataforma</h2></div><button onClick={() => setPreparedVideos(null)}>Cerrar</button></div><p>Estos vídeos se importaron una vez desde el ZIP original de Drive y ahora se sirven desde el almacenamiento gestionado de la plataforma.</p><div className="prepared-video-list">{preparedVideos.map((video) => <PreparedVideoPlayer key={video.id} video={video} tracks={mediaTracks.filter((track) => track.extractedVideoId === video.id)} />)}</div></section>}
       {!canTrack && <aside className="tracking-note"><CheckCircle2 size={18} /><span>Inicia sesión para marcar módulos como vistos y guardar tu progreso entre sesiones.</span><button onClick={onLogin}>Iniciar sesión</button></aside>}
     </section>
