@@ -130,3 +130,8 @@
 - [x] Ampliar el resumen de la cola documental con recuentos por prioridad además de los estados.
 - [x] Verificar la documentación del bloque adicional, la variante visual en revisión y el uso de la consola administrativa.
 - [x] Añadir una prueba de flujo que valide cada banda del filtro de prioridad de la consola administrativa.
+- [x] Procesar los cinco PDFs pendientes priorizados y publicar sus reconstrucciones en español.
+- [ ] Crear y aprobar nuevas localizaciones visuales para documentos del bloque final.
+- [x] Añadir filtro administrativo por ruta pedagógica en la cola de PDFs bilingües.
+- [x] Añadir exportación CSV del estado filtrado de la cola documental.
+- [x] Validar, documentar y sincronizar el cierre de la cola documental completa.

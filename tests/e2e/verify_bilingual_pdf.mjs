@@ -6,7 +6,7 @@ try {
   const page = await browser.newPage({ viewport: { width: 1365, height: 1000 } });
   await page.goto("http://localhost:3000/curso/1dxvel2jEarUb7ijNesZULpHQmbpM0bDa", { waitUntil: "networkidle" });
   const readyPdfButtons = await page.getByRole("button", { name: "Leer en español" }).count();
-  assert.equal(readyPdfButtons, 7, "Los siete PDFs prioritarios disponibles deben ofrecer lectura española.");
+  assert.equal(readyPdfButtons, 12, "Los doce PDFs disponibles deben ofrecer lectura española.");
   await page.getByRole("button", { name: "Leer en español" }).first().click();
   await page.getByRole("heading", { name: "01 - Main Guide" }).waitFor();
   await page.getByRole("button", { name: "Comparar" }).waitFor();

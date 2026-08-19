@@ -68,6 +68,16 @@ El bloque siguiente ya está preparado y publicado mediante la misma ruta local.
 | 2 | `06 - The Science of Fasting.pdf` | 20 páginas y 41 segmentos; `/manus-storage/science-fasting-es_b9885978.pdf` |
 | 3 | `07 - 2-Day Meal Plan.pdf` | 8 páginas y 9 segmentos; `/manus-storage/two-day-meal-plan-es_fac6515a.pdf` |
 
+El bloque final cerró la cola restante del curso. Los doce PDFs publicados de **Aggressive Fat Loss 2.0** cuentan ahora con original de Drive, lectura segmentada en español y PDF reconstruido independiente.
+
+| Documento | Páginas | Segmentos | PDF reconstruido |
+| --- | ---: | ---: | --- |
+| `08 - AFL Workout Program.pdf` | 11 | 13 | `/manus-storage/afl-workout-program-es_49757e17.pdf` |
+| `09 - Secret Code To Building A Chiseled Physique.pdf` | 14 | 14 | `/manus-storage/secret-code-es_43d60af1.pdf` |
+| `10 - Kinobody Drinking Guide.pdf` | 12 | 12 | `/manus-storage/drinking-guide-es_89782e19.pdf` |
+| `11 - AFL-cheatsheet.pdf` | 2 | 4 | `/manus-storage/afl-cheatsheet-es_1dca073c.pdf` |
+| `12 - AggressiveFatLoss.pdf` | 17 | 35 | `/manus-storage/aggressive-fat-loss-es_a071f3ca.pdf` |
+
 ## Edición manual y progreso visual
 
 La pestaña **«Visual en español»** ahora incorpora un indicador de estado por imagen con cinco momentos: `Pendiente`, `Generando`, `En revisión`, `Aprobado` y `Requiere nueva variante`. El estado se expresa tanto con una etiqueta como con una barra de avance, para que el lector no confunda una imagen borrador con una versión aprobada.
@@ -78,18 +88,22 @@ Los administradores pueden usar **«Editar texto»** para corregir el texto ingl
 
 La segunda variante corresponde a la portada de **Presence Bonus**. Tras revisar legibilidad, traducción, tipografía y preservación de la marca Kinobody, quedó aprobada como `ready`. Conserva la fuente `/manus-storage/presence-bonus-page-01_c3297100.png` y una salida localizada separada; ambas permanecen trazables y reversibles.
 
+La portada de **Kinobody Drinking Guide** quedó preparada como fuente para la siguiente localización, pero la generación de su variante española se aplazó al alcanzar el límite diario del plan gratuito de generación de imágenes. No se publicó una variante parcial ni se alteró la fuente. Al restablecer la cuota o habilitar más capacidad, se retomará con la traducción ya definida: `La Guía de Bebidas AFL` y `Cómo disfrutar del alcohol mientras pierdes grasa y desarrollas músculo`.
+
 ## Consola administrativa de prioridades
 
-La pantalla principal incorpora **«Cola de PDFs bilingües»** para administradores. Resume los trabajos por estado y por bandas de prioridad, y permite filtrar por documento, curso, estado y prioridad. Cada fila conserva una prioridad numérica persistente entre 1 y 999; los valores más bajos se muestran primero y expresan el siguiente orden operativo, sin cambiar los archivos ni los enlaces de Drive.
+La pantalla principal incorpora **«Cola de PDFs bilingües»** para administradores. Resume los trabajos por estado y por bandas de prioridad, y permite filtrar por documento, curso, ruta pedagógica, estado y prioridad. Cada fila conserva una prioridad numérica persistente entre 1 y 999; los valores más bajos se muestran primero y expresan el siguiente orden operativo, sin cambiar los archivos ni los enlaces de Drive.
 
 | Control | Uso |
 | --- | --- |
 | Búsqueda | Localiza un PDF por curso o por nombre de módulo. |
 | Filtro de estado | Aísla trabajos en cola, procesamiento, listos o con revisión pendiente. |
 | Filtro de prioridad | Filtra las bandas 1–3 inmediatas, 4–10 próximas, 11–99 planificadas y 100+ estándar. |
+| Filtro de ruta | Aísla los documentos de una ruta pedagógica, como Salud y Rendimiento. |
 | Filtro de curso | Permite concentrarse en una ruta documental concreta. |
 | Prioridad + Guardar | Reordena de manera persistente el próximo trabajo local. |
 | Resumen de cola | Muestra recuentos por estado y por banda de prioridad para detectar carga y pendientes. |
+| Exportar CSV | Descarga la vista filtrada con curso, módulo, ruta, estado, prioridad y páginas. |
 
 | Opción | Estado en esta versión | Coste | Uso previsto |
 | --- | --- | --- |
@@ -113,11 +127,11 @@ Por ello, cada imagen generada debe revisar: **ortografía española, cifras, t�
 | OCR de portada sin texto seleccionable | Activado y marcado como `ocr`; se documentó que la tipografía sobre fotografía requiere revisión visual. |
 | Persistencia visual | Dos variantes de portada registradas con estado `ready`: Main Guide y Presence Bonus. |
 | Interfaz | La prueba E2E valida fuente y versión española en las dos variantes visuales aprobadas. |
-| Preparación priorizada | Cuatro módulos —incluido el piloto inicial— muestran «Leer en español» en la ficha del curso. |
+| Preparación priorizada | Doce módulos —incluido el piloto inicial— muestran «Leer en español» en la ficha del curso. |
 | Edición y progreso | El lector expone control de edición, acción de regeneración e indicador `Aprobado` para la variante revisada. |
-| Segundo bloque | Siete módulos muestran «Leer en español» después de completar Presence Bonus, The Science of Fasting y 2-Day Meal Plan; cinco permanecen en cola priorizada. |
-| Consola de cola | Validada visualmente con 12 documentos, filtros de estado, curso y prioridad; recuentos por estado y banda; y control de prioridad. |
-| Calidad de código | `pnpm check`, 15 pruebas Vitest y la prueba E2E del PDF completaron correctamente. |
+| Cola cerrada | Los 12 documentos del curso están listos y la E2E confirma los 12 accesos de lectura en español. |
+| Consola de cola | Validada visualmente con 12 documentos, filtros de estado, curso, ruta y prioridad; exportación CSV; recuentos por estado y banda; y control de prioridad. |
+| Calidad de código | `pnpm check`, 19 pruebas Vitest y la prueba E2E del PDF completaron correctamente. |
 
 ## Referencias
 

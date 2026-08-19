@@ -48,7 +48,7 @@ export default function Home() {
   const pdfAdminEntries = useMemo(() => (pdfTranslationsQuery.data ?? []).map((document) => {
     const course = courses.find((item) => item.course.id === document.courseId);
     const module = course?.course.children.find((item) => item.id === document.moduleId);
-    return { ...document, courseTitle: course?.meta.title ?? document.courseId, moduleName: module?.name.replace(/\.pdf$/i, "") ?? document.moduleId };
+    return { ...document, courseTitle: course?.meta.title ?? document.courseId, moduleName: module?.name.replace(/\.pdf$/i, "") ?? document.moduleId, routeId: course?.meta.routeId ?? "other", routeLabel: learningRoutes.find((route) => route.id === course?.meta.routeId)?.label ?? "Sin ruta" };
   }), [courses, pdfTranslationsQuery.data]);
 
   const filteredCourses = courses.filter(({ course, meta }) => {
