@@ -111,3 +111,18 @@ Procesar traducciones y doblajes puede crear una adaptación del material. Antes
 [4] [faster-whisper](https://github.com/SYSTRAN/faster-whisper)
 [5] [Argos Translate](https://github.com/argosopentech/argos-translate)
 [6] [Piper](https://github.com/rhasspy/piper)
+
+## Actualización de continuidad — 19 de agosto de 2026
+
+La cola del curso **Aggressive Fat Loss 2.0** quedó cerrada con **12 PDFs disponibles en español**. Cada documento conserva su original de Google Drive y tiene una reconstrucción independiente, segmentos bilingües persistidos y acceso mediante «Leer en español». La ruta local usa extracción directa u OCR de respaldo, Argos Translate y ReportLab.
+
+| Entregable reciente | Estado |
+|---|---|
+| Cinco PDFs finales procesados | Listos: AFL Workout Program, Secret Code To Building A Chiseled Physique, Kinobody Drinking Guide, AFL-cheatsheet y AggressiveFatLoss. |
+| Localización visual | Dos portadas aprobadas: Main Guide y Presence Bonus. La portada de Drinking Guide quedó documentada como siguiente variante, pero su generación se aplazó al alcanzar la cuota diaria gratuita de imágenes. |
+| Consola administrativa | Búsqueda, estado, curso, ruta pedagógica y prioridad; recuentos por estado y banda; prioridad editable. |
+| Exportación | Botón «Exportar CSV» con los registros filtrados de curso, módulo, ruta, estado, prioridad y páginas. |
+| Validación | `pnpm check`, 19 pruebas Vitest y E2E con 12 accesos de lectura española. |
+| Repositorio | Continuidad en `https://github.com/juanxaviercasa/catalogo-cursos.git`; el checkpoint `9ba533aa` contiene estos avances. |
+
+La única tarea abierta es crear y aprobar la nueva variante visual de Drinking Guide cuando se restablezca la cuota gratuita o se habilite capacidad adicional. No se publicó una imagen parcial ni se modificó el original. Al retomarla, se debe registrar la variante como `review`, comprobar ortografía, cifras, marca y composición, y cambiarla a `ready` solo tras la revisión humana.
