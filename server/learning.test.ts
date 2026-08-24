@@ -63,6 +63,12 @@ describe("learning catalog helpers", () => {
     expect(courseMeta.filter((meta) => getCourseSource(meta) === "google_drive").every((meta) => !meta.sourceAccountEmail)).toBe(true);
   });
 
+  it("registra la portada conceptual de Drinking Guide sin presentarla como original", () => {
+    const course = courseMeta.find((item) => item.id === "1dxvel2jEarUb7ijNesZULpHQmbpM0bDa");
+    expect(course?.coverImageUrl).toBe("/manus-storage/kinobody-drinking-guide-concept_169b6d33.png");
+    expect(course?.coverImageNote).toContain("no sustituye");
+  });
+
   it("incluye la ruta Salud y Rendimiento y sus seis cursos Kinobody", () => {
     expect(learningRoutes.find((route) => route.id === "fitness")?.label).toBe("Salud y Rendimiento");
     const fitnessCourses = courseMeta.filter((course) => course.routeId === "fitness").sort((left, right) => left.order - right.order);

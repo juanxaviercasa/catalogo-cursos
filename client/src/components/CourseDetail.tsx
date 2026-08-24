@@ -90,6 +90,8 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
         <ProgressRing value={progress} size={94} />
       </div>
 
+      {meta.coverImageUrl && <aside className="course-concept-cover" aria-label="Portada conceptual del curso"><img src={meta.coverImageUrl} alt="Portada conceptual de Kinobody Drinking Guide" /><div><span>RECURSO VISUAL CONCEPTUAL</span><h2>Kinobody Drinking Guide</h2><p>{meta.coverImageNote ?? "Imagen conceptual generada para orientar la navegación."}</p><small>El material original permanece en la carpeta de origen.</small></div></aside>}
+
       <div className="route-map-line" aria-label={`Ruta de estudio: ${route.label}, curso ${meta.order}, módulos`}>
         <span>{route.shortLabel}</span><i /><span>CURSO {String(meta.order).padStart(2, "0")}</span><i /><span>MÓDULOS</span>
       </div>

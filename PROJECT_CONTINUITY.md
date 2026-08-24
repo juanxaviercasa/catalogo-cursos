@@ -161,3 +161,11 @@ La sesión autenticada permitió abrir el módulo `29. Meta Broad Targeting & Sp
 La inspección autenticada también abrió `KCPQHDFCC/10-QHDFCC Training Final Steps`: contiene `QHD_Family_Coach.png` y `02-MUST_COMPLETE_this_to_receive_Certificate___Seal.pdf`. Estos recursos permanecen en Terabox; no se descargaron. El catálogo sigue mostrando el módulo de forma ordenada y la ficha continúa atribuida a `juanxaviercasa@gmail.com`.
 
 La inspección autenticada de `AI AUTOMATION AGENCY/01- AI AUTOMATION DEMO BUILD` mostró la subcarpeta `Module-1 AI AUTOMATION DEMO BUILD` y dos archivos auxiliares: `10k Free Courses.pdf` y `100$ Free.docx`. Se registraron únicamente sus nombres y tamaños visibles; los originales permanecen en Terabox y no se descargaron ni se incorporaron al almacenamiento de la plataforma.
+
+## Actualización — portada conceptual de Kinobody Drinking Guide
+
+Al no disponerse de la imagen fuente real de Drinking Guide, se generó una portada editorial original para orientar la navegación dentro de la plataforma. Está publicada en `/manus-storage/kinobody-drinking-guide-concept_169b6d33.png` y aparece en la ficha de `Kinobody · Aggressive Fat Loss 2.0` como **recurso visual conceptual**.
+
+La interfaz la etiqueta expresamente como no oficial y mantiene el enlace a la carpeta original de Google Drive. Esta imagen no reemplaza, modifica ni pretende reproducir la portada real del documento. Si posteriormente se obtiene la portada fuente, podrá incorporarse como referencia original y conservarse la variante conceptual como material auxiliar.
+
+La integración está cubierta por una prueba de catálogo que verifica la URL del recurso y la advertencia de no sustitución. La imagen generada debe revisarse visualmente en el entorno publicado antes de considerarla aprobada.

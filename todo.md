@@ -166,3 +166,6 @@
 - [x] Integrar los 20 archivos internos verificados de Robert Richards — OnlyFans Agency como módulos Terabox enlazables, conservando los originales sin descargarlos.
 
 - [x] Corregir la procedencia de los 79 cursos Terabox a juanxaviercasa@gmail.com y verificar que permanezca separada de Cofre del Emprendedor.
+- [x] Crear una portada conceptual original para Kinobody Drinking Guide al no disponer de la fuente real.
+- [x] Integrar la portada conceptual como recurso visual claramente etiquetado, sin sustituir ni afirmar que es la portada original.
+- [x] Actualizar la documentación de continuidad y cubrir la referencia visual con una prueba Vitest.
