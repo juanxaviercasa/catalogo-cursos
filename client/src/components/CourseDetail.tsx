@@ -100,7 +100,7 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
         <article><span>QUÉ APRENDERÁS</span><p>{meta.whatYouLearn}</p></article>
         <article><span>QUÉ VER PRIMERO</span><p>{meta.startHere}</p></article>
         <article><span>RESULTADO PRÁCTICO</span><p>{meta.outcome}</p></article>
-        <article className="drive-brief"><span>ORIGEN DEL CURSO</span><a href={course.webViewLink} target="_blank" rel="noreferrer">Abrir carpeta en {sourceLabel} <ExternalLink size={15} /></a>{meta.sourceAccountEmail && <small className="source-account-note">Cuenta: {meta.sourceAccountEmail}</small>}</article>
+        <article className="drive-brief"><span>ORIGEN DEL CURSO</span><a href={course.webViewLink} target="_blank" rel="noreferrer">Abrir carpeta en {sourceLabel} <ExternalLink size={15} /></a>{meta.sourceAccountEmail && <small className="source-account-note">Cuenta: {meta.sourceAccountEmail}</small>}{sourceLabel === "Terabox" && <small className="source-account-note">Ubicación: raíz de la cuenta · sin carpeta jxcasa</small>}</article>
       </div>
 
       {pilotZip && <section className={`zip-import-hero zip-import-hero--${pilotImport?.status ?? "idle"}`}>

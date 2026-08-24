@@ -169,3 +169,7 @@
 - [x] Crear una portada conceptual original para Kinobody Drinking Guide al no disponer de la fuente real.
 - [x] Integrar la portada conceptual como recurso visual claramente etiquetado, sin sustituir ni afirmar que es la portada original.
 - [x] Actualizar la documentación de continuidad y cubrir la referencia visual con una prueba Vitest.
+
+- [x] Revalidar la raíz Terabox sin la carpeta jxcasa y actualizar las rutas del inventario plano.
+- [x] Confirmar en sesión autenticada que los 79 cursos siguen visibles y conservar la atribución juanxaviercasa@gmail.com.
+- [x] Actualizar documentación, pruebas y catálogo para reflejar la eliminación de la doble anidación.

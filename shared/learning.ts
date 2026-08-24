@@ -12,6 +12,7 @@ export const DriveCourseSchema = z.object({
   id: z.string(),
   name: z.string(),
   webViewLink: z.string().url(),
+  rootPath: z.string().optional(),
   children: z.array(DriveItemSchema),
 });
 

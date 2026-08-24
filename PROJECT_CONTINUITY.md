@@ -169,3 +169,10 @@ Al no disponerse de la imagen fuente real de Drinking Guide, se generó una port
 La interfaz la etiqueta expresamente como no oficial y mantiene el enlace a la carpeta original de Google Drive. Esta imagen no reemplaza, modifica ni pretende reproducir la portada real del documento. Si posteriormente se obtiene la portada fuente, podrá incorporarse como referencia original y conservarse la variante conceptual como material auxiliar.
 
 La integración está cubierta por una prueba de catálogo que verifica la URL del recurso y la advertencia de no sustitución. La imagen generada debe revisarse visualmente en el entorno publicado antes de considerarla aprobada.
+
+
+## Actualización — Terabox en raíz de cuenta
+
+En la sesión autenticada del 24 de agosto de 2026, la cuenta de Terabox mostró los cursos directamente en «Todos los archivos» de `https://1024tera.com/spanish/main`. La carpeta intermedia `jxcasa` ya no aparece. El inventario mantiene sus 79 IDs históricos para no romper progreso ni referencias, pero cada curso declara `rootPath: "/"` y su enlace operativo apunta a la raíz autenticada.
+
+El enlace compartido anterior `surl=68IfqGVjoXwH5FzSAbgVXA` continúa mostrando «este contenido ha sido eliminado» y, por ello, no se reutiliza como destino operativo. La plataforma no inventa enlaces profundos: abre la raíz actual y requiere la sesión autorizada de `juanxaviercasa@gmail.com` para que el usuario localice el curso. La separación de origen frente a Google Drive permanece intacta.

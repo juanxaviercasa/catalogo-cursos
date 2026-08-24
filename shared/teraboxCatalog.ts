@@ -1,11 +1,15 @@
 import type { DriveCourse } from "./learning";
 
-export const TERABOX_SHARED_LINK = "https://www.1024tera.com/spanish/sharing/link?surl=68IfqGVjoXwH5FzSAbgVXA";
+export const TERABOX_ROOT_URL = "https://1024tera.com/spanish/main";
+/** Alias histórico conservado para no romper imports existentes. */
+export const TERABOX_SHARED_LINK = TERABOX_ROOT_URL;
+export const TERABOX_ROOT_PATH = "/";
 
 const teraboxCourse = (id: string, name: string): DriveCourse => ({
   id: `terabox-jxcasa-${id}`,
   name,
   webViewLink: TERABOX_SHARED_LINK,
+  rootPath: TERABOX_ROOT_PATH,
   children: [{
     id: `terabox-jxcasa-${id}-folder`,
     name: `01 · Abrir carpeta del curso en Terabox`,
@@ -19,6 +23,7 @@ const teraboxCourseWithFolders = (id: string, name: string, folders: string[]): 
   id: `terabox-jxcasa-${id}`,
   name,
   webViewLink: TERABOX_SHARED_LINK,
+  rootPath: TERABOX_ROOT_PATH,
   children: folders.map((folder, index) => ({
     id: `terabox-jxcasa-${id}-${index + 1}`,
     name: folder,
@@ -32,6 +37,7 @@ const teraboxCourseWithFiles = (id: string, name: string, files: string[]): Driv
   id: `terabox-jxcasa-${id}`,
   name,
   webViewLink: TERABOX_SHARED_LINK,
+  rootPath: TERABOX_ROOT_PATH,
   children: files.map((file, index) => ({
     id: `terabox-jxcasa-${id}-file-${index + 1}`,
     name: file,
@@ -42,7 +48,7 @@ const teraboxCourseWithFiles = (id: string, name: string, files: string[]): Driv
 });
 
 /**
- * Inventario confirmado en la carpeta compartida jxcasa.
+ * Inventario confirmado en la raíz de la cuenta Terabox, tras eliminar el contenedor jxcasa.
  * Los hijos son un acceso honesto a la carpeta original: aún no se han creado
  * copias ni se han supuesto módulos que no hayan sido inspeccionados.
  */

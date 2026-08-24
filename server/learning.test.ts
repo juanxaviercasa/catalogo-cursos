@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { calculateProgress, getContentType, orderedModules, type DriveItem } from "../shared/learning";
 import { courseMeta, getCourseSource, learningRoutes, TERABOX_SOURCE_ACCOUNT_EMAIL } from "../shared/courseMeta";
-import { teraboxCatalog } from "../shared/teraboxCatalog";
+import { TERABOX_ROOT_PATH, TERABOX_ROOT_URL, teraboxCatalog } from "../shared/teraboxCatalog";
 
 const module = (id: string, name: string, mimeType: string, kind: "file" | "folder" = "file"): DriveItem => ({
   id,
@@ -49,7 +49,9 @@ describe("learning catalog helpers", () => {
   it("registra los 20 cursos Terabox confirmados y conserva un enlace compartido verificable", () => {
     expect(teraboxCatalog).toHaveLength(79);
     expect(new Set(teraboxCatalog.map((course) => course.id)).size).toBe(79);
-    expect(teraboxCatalog.every((course) => course.webViewLink.includes("1024tera.com/spanish/sharing/link"))).toBe(true);
+    expect(TERABOX_ROOT_PATH).toBe("/");
+    expect(TERABOX_ROOT_URL).toBe("https://1024tera.com/spanish/main");
+    expect(teraboxCatalog.every((course) => course.webViewLink === TERABOX_ROOT_URL && course.rootPath === TERABOX_ROOT_PATH)).toBe(true);
     expect(teraboxCatalog.find((course) => course.id === "terabox-jxcasa-ai-digital-marketing-guide")?.children).toHaveLength(20);
     expect(teraboxCatalog.find((course) => course.id === "terabox-jxcasa-ai-automation-agency")?.children).toHaveLength(7);
     expect(teraboxCatalog.find((course) => course.id === "terabox-jxcasa-kcpqhdfcc")?.children).toHaveLength(11);
