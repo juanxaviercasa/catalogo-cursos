@@ -157,3 +157,5 @@ La prueba de catálogo mantiene 79 cursos Terabox, valida los 20 elementos de Ro
 
 ### Profundización posterior de Terabox — módulo 29
 La sesión autenticada permitió abrir el módulo `29. Meta Broad Targeting & Special Ad Categories @joinBITTUfreecourses` dentro de `The AI-Powered Digital Marketing & Digital Advertising Guide`. Se observaron tres vídeos MP4, tres subtítulos SRT, una página HTML y un archivo TXT de contraseña. La contraseña no se descargó, no se almacenó y no se incorporó a la interfaz. El catálogo mantiene el módulo como carpeta Terabox y la colección continúa atribuida a `juanxaviercasa@gmail.com`.
+
+La inspección autenticada también abrió `KCPQHDFCC/10-QHDFCC Training Final Steps`: contiene `QHD_Family_Coach.png` y `02-MUST_COMPLETE_this_to_receive_Certificate___Seal.pdf`. Estos recursos permanecen en Terabox; no se descargaron. El catálogo sigue mostrando el módulo de forma ordenada y la ficha continúa atribuida a `juanxaviercasa@gmail.com`.
