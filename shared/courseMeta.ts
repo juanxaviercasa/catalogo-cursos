@@ -1,3 +1,5 @@
+import { expandedTeraboxNames, teraboxSlug } from "./teraboxCatalog";
+
 export type LearningRoute = {
   id: string;
   label: string;
@@ -82,6 +84,17 @@ export const courseMeta: CourseMeta[] = [
   { id: "terabox-jxcasa-etsy-academy", source: "terabox", routeId: "ecommerce", order: 2, title: "Growing Your Craft — Etsy Academy 2.0", description: "Programa de creación y crecimiento de una tienda en Etsy.", whatYouLearn: "Ordenar producto, presentación, adquisición y operación de una tienda creativa.", startHere: "Abrir la carpeta del curso en Terabox", outcome: "Un plan inicial para estructurar una tienda en Etsy." },
   { id: "terabox-jxcasa-matt-par-tube-ai", source: "terabox", routeId: "content", order: 9, title: "Matt Par — Tube AI System", description: "Sistema de creación y crecimiento de contenido para YouTube con apoyo de IA.", whatYouLearn: "Revisar nicho, producción, empaquetado y distribución de vídeos.", startHere: "Abrir la carpeta del curso en Terabox", outcome: "Un plan editorial inicial para YouTube." },
   { id: "terabox-jxcasa-david-tian-social-circle", source: "terabox", routeId: "sales", order: 7, title: "David Tian — Social Circle Mastery", description: "Programa de comunicación y relaciones sociales identificado en Terabox.", whatYouLearn: "Revisar comunicación interpersonal y convertir el contenido en prácticas responsables.", startHere: "Abrir la carpeta del curso en Terabox", outcome: "Un plan de práctica de comunicación interpersonal." },
+  ...expandedTeraboxNames.map((title, index) => ({
+    id: `terabox-jxcasa-${teraboxSlug(title)}`,
+    source: "terabox" as const,
+    routeId: /ecom|shopify|etsy|print on demand|ecommerce/i.test(title) ? "ecommerce" : /sales|closing|cardone|appointment|prospecting|offer/i.test(title) ? "sales" : /ai|chatgpt|notion|deepfake|supermind/i.test(title) ? "ai" : /social|youtube|viral|content|media/i.test(title) ? "content" : "business",
+    order: 20 + index,
+    title,
+    description: "Curso Terabox incorporado desde el inventario visible; pendiente de inspección interna detallada.",
+    whatYouLearn: "Revisar el contenido original y ordenar sus módulos cuando se disponga de la navegación interna.",
+    startHere: "Abrir la carpeta del curso en Terabox",
+    outcome: "Una ruta pedagógica confirmada después de inspeccionar sus archivos.",
+  })),
 ];
 
 export function getCourseSource(meta: CourseMeta): CourseSource {

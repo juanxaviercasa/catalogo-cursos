@@ -47,13 +47,14 @@ describe("learning catalog helpers", () => {
   });
 
   it("registra los 20 cursos Terabox confirmados y conserva un enlace compartido verificable", () => {
-    expect(teraboxCatalog).toHaveLength(20);
-    expect(new Set(teraboxCatalog.map((course) => course.id)).size).toBe(20);
+    expect(teraboxCatalog).toHaveLength(79);
+    expect(new Set(teraboxCatalog.map((course) => course.id)).size).toBe(79);
     expect(teraboxCatalog.every((course) => course.webViewLink.includes("1024tera.com/spanish/sharing/link"))).toBe(true);
     expect(teraboxCatalog.find((course) => course.id === "terabox-jxcasa-ai-digital-marketing-guide")?.children).toHaveLength(20);
     expect(teraboxCatalog.find((course) => course.id === "terabox-jxcasa-ai-automation-agency")?.children).toHaveLength(7);
     expect(teraboxCatalog.find((course) => course.id === "terabox-jxcasa-kcpqhdfcc")?.children).toHaveLength(11);
     expect(teraboxCatalog.filter((course) => !["terabox-jxcasa-ai-digital-marketing-guide", "terabox-jxcasa-ai-automation-agency", "terabox-jxcasa-kcpqhdfcc"].includes(course.id)).every((course) => course.children.length === 1)).toBe(true);
+    expect(teraboxCatalog.some((course) => course.name === "A.I. Ads Machine + 10 Profitable Sales Funnels + The Digital Marketer's Guide To ChatGPT")).toBe(true);
     expect(teraboxCatalog.every((course) => courseMeta.some((meta) => meta.id === course.id && getCourseSource(meta) === "terabox"))).toBe(true);
   });
 
