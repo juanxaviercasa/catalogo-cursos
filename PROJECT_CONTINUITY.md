@@ -126,7 +126,7 @@ La cola del curso **Aggressive Fat Loss 2.0** quedó cerrada con **12 PDFs dispo
 | Validación | `pnpm check`, 19 pruebas Vitest y E2E con 12 accesos de lectura española. |
 | Repositorio | Continuidad en `https://github.com/juanxaviercasa/catalogo-cursos.git`; el checkpoint `9ba533aa` contiene estos avances. |
 
-La única tarea abierta es crear y aprobar la nueva variante visual de Drinking Guide cuando se restablezca la cuota gratuita o se habilite capacidad adicional. No se publicó una imagen parcial ni se modificó el original. Al retomarla, se debe registrar la variante como `review`, comprobar ortografía, cifras, marca y composición, y cambiarla a `ready` solo tras la revisión humana.
+La variante visual de Drinking Guide ya fue generada, registrada primero como `review` y aprobada como `ready` tras la revisión visual. El PDF real asociado es el módulo `1SHiRfoyhxC3kNOqaRC_SQlWvpI7pXzYZ`; la fuente conceptual y la variante española permanecen como URLs distintas en almacenamiento gestionado. El original de Drive no se modificó ni se reemplazó.
 
 
 ## Actualización — catálogo separado por Google Drive y Terabox

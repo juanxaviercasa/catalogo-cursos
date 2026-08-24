@@ -131,14 +131,14 @@
 - [x] Verificar la documentación del bloque adicional, la variante visual en revisión y el uso de la consola administrativa.
 - [x] Añadir una prueba de flujo que valide cada banda del filtro de prioridad de la consola administrativa.
 - [x] Procesar los cinco PDFs pendientes priorizados y publicar sus reconstrucciones en español.
-- [ ] Crear y aprobar nuevas localizaciones visuales para documentos del bloque final.
+- [x] Crear y aprobar nuevas localizaciones visuales para documentos del bloque final.
 - [x] Añadir filtro administrativo por ruta pedagógica en la cola de PDFs bilingües.
 - [x] Añadir exportación CSV del estado filtrado de la cola documental.
 - [x] Validar, documentar y sincronizar el cierre de la cola documental completa.
 
 - [x] Documentar el estado actual de los avances para la continuidad del proyecto.
 - [x] Crear y enviar el commit de los avances al repositorio GitHub de continuidad.
-- [ ] Crear y aprobar nuevas localizaciones visuales para documentos del bloque final cuando se restablezca la cuota de generación.
+- [x] Crear y aprobar nuevas localizaciones visuales para documentos del bloque final cuando se restablezca la cuota de generación.
 
 - [x] Inventariar la nueva carpeta de Google Drive del correo cursosgo235@gmail.com y clasificar sus cursos y módulos reales.
 - [x] Añadir una fuente persistente `google_drive`/`terabox` para que ningún curso se mezcle por correo o proveedor.
