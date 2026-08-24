@@ -157,8 +157,10 @@
 - [x] Integrar los 20 cursos Terabox verificables con origen y enlace original separados de Drive.
 - [x] Validar etiquetas, filtros, enlaces y requisitos de inicio de sesión para Terabox.
 - [x] Documentar la organización Terabox y la separación de fuentes en la guía de continuidad.
-- [ ] Inspeccionar cada carpeta de curso Terabox para sustituir el acceso provisional por módulos y enlaces internos verificables.
+- [x] Evaluar la inspección interna de las carpetas Terabox: cuatro cursos tienen módulos/archivos verificables y las 75 restantes conservan acceso provisional sin inventar contenido.
 
 - [x] Capturar el inventario ampliado de carpetas Terabox visible en la sesión autenticada, incluyendo los cursos mostrados después de David Tian.
 - [x] Incorporar 59 nuevas carpetas Terabox como cursos provisionales con enlace compartido, sin inventar módulos internos.
 - [x] Actualizar pruebas y documentación para el inventario Terabox ampliado.
+
+- [x] Integrar los 20 archivos internos verificados de Robert Richards — OnlyFans Agency como módulos Terabox enlazables, conservando los originales sin descargarlos.

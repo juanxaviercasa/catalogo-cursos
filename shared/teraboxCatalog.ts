@@ -28,6 +28,19 @@ const teraboxCourseWithFolders = (id: string, name: string, folders: string[]): 
   })),
 });
 
+const teraboxCourseWithFiles = (id: string, name: string, files: string[]): DriveCourse => ({
+  id: `terabox-jxcasa-${id}`,
+  name,
+  webViewLink: TERABOX_SHARED_LINK,
+  children: files.map((file, index) => ({
+    id: `terabox-jxcasa-${id}-file-${index + 1}`,
+    name: file,
+    mimeType: file.endsWith(".mp4") ? "video/mp4" : file.endsWith(".xlsx") ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    kind: "file" as const,
+    webViewLink: TERABOX_SHARED_LINK,
+  })),
+});
+
 /**
  * Inventario confirmado en la carpeta compartida jxcasa.
  * Los hijos son un acceso honesto a la carpeta original: aún no se han creado
@@ -142,7 +155,28 @@ export const teraboxCatalog: DriveCourse[] = [
     "09-Module 9 Parenting by Design",
     "10-QHDFCC Training Final Steps",
   ]),
-  teraboxCourse("onlyfans-agency", "Robert Richards — How to Create a Successful OnlyFans Agency"),
+  teraboxCourseWithFiles("onlyfans-agency", "Robert Richards — How to Create a Successful OnlyFans Agency", [
+    "01-Introduction.mp4",
+    "02-Chapter 1 - Finding Models.mp4",
+    "04-Ch 3 - Creating Accounts.mp4",
+    "05-Ch 4 - Contracts - Taxes.mp4",
+    "06-Ch 5 - Free Photoshoot.mp4",
+    "07-Ch 6 - Content Creation.mp4",
+    "09-Ch 8 - The Art Of Finesse.mp4",
+    "10-Ch 9 - Managing Social Media.mp4",
+    "11-Ch 10 - OnlyFans Automation.mp4",
+    "12-Ch 11 - Dealing with Flaky Models.mp4",
+    "13-Ch 12 - Promoting OnlyFans PT1.mp4",
+    "14-Ch 13 - Promoting Onlyfans PT2.mp4",
+    "15-Chapter 14 - Promoting OnlyFans PT3.mp4",
+    "16-Chapter 15 - Promoting OnlyFans PT4.mp4",
+    "17-Chapter 16 - Promoting OnlyFans PT5.mp4",
+    "18-Ch 17 - Referral links.mp4",
+    "19-Ch 18 - Recap & Final Thoughts.mp4",
+    "22-June 2022 Update.mp4",
+    "21-Account List Template.xlsx",
+    "20-Model Relase Template.docx",
+  ]),
   teraboxCourse("millionaire-speakers", "Millionaire Speakers Leadership Influence Mastery"),
   teraboxCourse("how-to-use-ai-to-make-money", "How to Use AI to Make Money"),
   teraboxCourse("chatgpt-make-money-ai-canva", "ChatGPT Complete Course: Make Money with AI & Canva 2025"),

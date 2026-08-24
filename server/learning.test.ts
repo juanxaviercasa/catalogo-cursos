@@ -53,7 +53,9 @@ describe("learning catalog helpers", () => {
     expect(teraboxCatalog.find((course) => course.id === "terabox-jxcasa-ai-digital-marketing-guide")?.children).toHaveLength(20);
     expect(teraboxCatalog.find((course) => course.id === "terabox-jxcasa-ai-automation-agency")?.children).toHaveLength(7);
     expect(teraboxCatalog.find((course) => course.id === "terabox-jxcasa-kcpqhdfcc")?.children).toHaveLength(11);
-    expect(teraboxCatalog.filter((course) => !["terabox-jxcasa-ai-digital-marketing-guide", "terabox-jxcasa-ai-automation-agency", "terabox-jxcasa-kcpqhdfcc"].includes(course.id)).every((course) => course.children.length === 1)).toBe(true);
+    expect(teraboxCatalog.find((course) => course.id === "terabox-jxcasa-onlyfans-agency")?.children).toHaveLength(20);
+    expect(teraboxCatalog.find((course) => course.id === "terabox-jxcasa-onlyfans-agency")?.children.filter((item) => item.kind === "file")).toHaveLength(20);
+    expect(teraboxCatalog.filter((course) => !["terabox-jxcasa-ai-digital-marketing-guide", "terabox-jxcasa-ai-automation-agency", "terabox-jxcasa-kcpqhdfcc", "terabox-jxcasa-onlyfans-agency"].includes(course.id)).every((course) => course.children.length === 1)).toBe(true);
     expect(teraboxCatalog.some((course) => course.name === "A.I. Ads Machine + 10 Profitable Sales Funnels + The Digital Marketer's Guide To ChatGPT")).toBe(true);
     expect(teraboxCatalog.every((course) => courseMeta.some((meta) => meta.id === course.id && getCourseSource(meta) === "terabox"))).toBe(true);
   });
