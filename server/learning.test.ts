@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { calculateProgress, getContentType, orderedModules, type DriveItem } from "../shared/learning";
-import { courseMeta, getCourseSource, learningRoutes } from "../shared/courseMeta";
+import { courseMeta, getCourseSource, learningRoutes, TERABOX_SOURCE_ACCOUNT_EMAIL } from "../shared/courseMeta";
 import { teraboxCatalog } from "../shared/teraboxCatalog";
 
 const module = (id: string, name: string, mimeType: string, kind: "file" | "folder" = "file"): DriveItem => ({
@@ -58,6 +58,9 @@ describe("learning catalog helpers", () => {
     expect(teraboxCatalog.filter((course) => !["terabox-jxcasa-ai-digital-marketing-guide", "terabox-jxcasa-ai-automation-agency", "terabox-jxcasa-kcpqhdfcc", "terabox-jxcasa-onlyfans-agency"].includes(course.id)).every((course) => course.children.length === 1)).toBe(true);
     expect(teraboxCatalog.some((course) => course.name === "A.I. Ads Machine + 10 Profitable Sales Funnels + The Digital Marketer's Guide To ChatGPT")).toBe(true);
     expect(teraboxCatalog.every((course) => courseMeta.some((meta) => meta.id === course.id && getCourseSource(meta) === "terabox"))).toBe(true);
+    expect(courseMeta.filter((meta) => getCourseSource(meta) === "terabox")).toHaveLength(79);
+    expect(courseMeta.filter((meta) => getCourseSource(meta) === "terabox").every((meta) => meta.sourceAccountEmail === TERABOX_SOURCE_ACCOUNT_EMAIL)).toBe(true);
+    expect(courseMeta.filter((meta) => getCourseSource(meta) === "google_drive").every((meta) => !meta.sourceAccountEmail)).toBe(true);
   });
 
   it("incluye la ruta Salud y Rendimiento y sus seis cursos Kinobody", () => {
