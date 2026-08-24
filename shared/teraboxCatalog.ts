@@ -256,3 +256,39 @@ export const teraboxCabellosalirrosasNames = [
 export const teraboxCabellosalirrosasCatalog: DriveCourse[] = teraboxCabellosalirrosasNames.map((name) =>
   teraboxCourseForAccount(CABELLOSALIRROSAS_CONFIG, teraboxSlug(name), name),
 );
+
+
+export const TERABOX_CABELLOSALIRROSAS_SECOND_SHARED_LINK = "https://www.1024terabox.com/s/1JA9tWWmNRL1nTHLBWrpqfg";
+const CABELLOSALIRROSAS_SECOND_CONFIG: TeraboxAccountConfig = {
+  idPrefix: "terabox-cabellosalirrosas-second",
+  sharedLink: TERABOX_CABELLOSALIRROSAS_SECOND_SHARED_LINK,
+  rootPath: "/",
+};
+
+/** Inventario inicial observado en el segundo enlace compartido de cabellosalirrosas. */
+export const teraboxCabellosalirrosasSecondNames = [
+  "Cómo Crear una LLC en USA - Libertad Virtual",
+  "Courses",
+  "Ingles",
+  "MAQUINA DEL DINERO",
+  "Brandon Timothy - Digital Freedom Academy",
+  "Evento SEOPlus 2024",
+  "Alex Pereira - Insta To Riches Roadmap",
+  "MASTER EN 6 CIFRAS",
+  "Contable",
+  "Duerme Como Tesla",
+  "LANZA TU ESCUELA ONLINE",
+  "Bootcamp ENGLISH FOR DEVELOPERS- Grupo 3",
+  "Libros Mate",
+  "Programa de coaching Formula 100k",
+  "ventas",
+  "Curso Máster en VSL – Serghei Harin",
+  "Curso Youtube + IA Maquina de Imprimir Dinero",
+  "Víctor Heras",
+  "Ian Bernal",
+  "Curso Revolucion del Infoproducto – Paulo Ponquio",
+] as const;
+
+export const teraboxCabellosalirrosasSecondCatalog: DriveCourse[] = teraboxCabellosalirrosasSecondNames.map((name) =>
+  teraboxCourseForAccount(CABELLOSALIRROSAS_SECOND_CONFIG, teraboxSlug(name), name),
+);

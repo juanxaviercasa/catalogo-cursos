@@ -178,3 +178,8 @@
 - [x] Mantener la nueva cuenta separada de juanxaviercasa@gmail.com y de las cuentas Google Drive.
 - [x] Clasificar pedagógicamente e integrar los cursos de la nueva cuenta con rutas y enlaces de origen.
 - [x] Documentar, probar, publicar y sincronizar la ampliación del catálogo Terabox.
+
+- [x] Inspeccionar el segundo enlace Terabox `1JA9tWWmNRL1nTHLBWrpqfg` mediante el acceso Google de cabellosalirrosas@gmail.com.
+- [x] Inventariar sus cursos y archivos visibles sin descargar ni modificar originales.
+- [x] Integrar esta colección con IDs y cuenta separados de la primera colección cabellosalirrosas.
+- [x] Documentar, probar, publicar y sincronizar la ampliación del segundo enlace.

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { calculateProgress, getContentType, orderedModules, type DriveItem } from "../shared/learning";
 import { courseMeta, getCourseSource, learningRoutes, TERABOX_SOURCE_ACCOUNT_EMAIL } from "../shared/courseMeta";
-import { TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL, TERABOX_CABELLOSALIRROSAS_SHARED_LINK, TERABOX_ROOT_PATH, TERABOX_ROOT_URL, teraboxCabellosalirrosasCatalog, teraboxCatalog } from "../shared/teraboxCatalog";
+import { TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL, TERABOX_CABELLOSALIRROSAS_SECOND_SHARED_LINK, TERABOX_CABELLOSALIRROSAS_SHARED_LINK, TERABOX_ROOT_PATH, TERABOX_ROOT_URL, teraboxCabellosalirrosasCatalog, teraboxCabellosalirrosasSecondCatalog, teraboxCatalog } from "../shared/teraboxCatalog";
 
 const module = (id: string, name: string, mimeType: string, kind: "file" | "folder" = "file"): DriveItem => ({
   id,
@@ -70,9 +70,17 @@ describe("learning catalog helpers", () => {
     expect(new Set(teraboxCabellosalirrosasCatalog.map((course) => course.id)).size).toBe(20);
     expect(teraboxCabellosalirrosasCatalog.every((course) => course.webViewLink === TERABOX_CABELLOSALIRROSAS_SHARED_LINK && course.rootPath === "/")).toBe(true);
     expect(teraboxCabellosalirrosasCatalog.every((course) => course.id.startsWith("terabox-cabellosalirrosas-") && courseMeta.some((meta) => meta.id === course.id && meta.sourceAccountEmail === TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL))).toBe(true);
-    expect(courseMeta.filter((meta) => meta.sourceAccountEmail === TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL)).toHaveLength(20);
+    expect(courseMeta.filter((meta) => meta.sourceAccountEmail === TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL)).toHaveLength(40);
     expect(courseMeta.filter((meta) => meta.sourceAccountEmail === TERABOX_SOURCE_ACCOUNT_EMAIL)).toHaveLength(79);
     expect(teraboxCatalog.every((course) => !course.id.startsWith("terabox-cabellosalirrosas-"))).toBe(true);
+  });
+
+  it("registra el segundo enlace de cabellosalirrosas con colección y URL independientes", () => {
+    expect(teraboxCabellosalirrosasSecondCatalog).toHaveLength(20);
+    expect(new Set(teraboxCabellosalirrosasSecondCatalog.map((course) => course.id)).size).toBe(20);
+    expect(teraboxCabellosalirrosasSecondCatalog.every((course) => course.webViewLink === TERABOX_CABELLOSALIRROSAS_SECOND_SHARED_LINK && course.rootPath === "/" && course.id.startsWith("terabox-cabellosalirrosas-second-"))).toBe(true);
+    expect(courseMeta.filter((meta) => meta.sourceAccountEmail === TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL && meta.id.startsWith("terabox-cabellosalirrosas-second-")).length).toBe(20);
+    expect(teraboxCabellosalirrosasCatalog.every((course) => !teraboxCabellosalirrosasSecondCatalog.some((second) => second.id === course.id))).toBe(true);
   });
 
   it("registra la portada conceptual de Drinking Guide sin presentarla como original", () => {
@@ -84,7 +92,7 @@ describe("learning catalog helpers", () => {
   it("incluye la ruta Salud y Rendimiento y sus seis cursos Kinobody", () => {
     expect(learningRoutes.find((route) => route.id === "fitness")?.label).toBe("Salud y Rendimiento");
     const fitnessCourses = courseMeta.filter((course) => course.routeId === "fitness").sort((left, right) => left.order - right.order);
-    expect(fitnessCourses).toHaveLength(12);
+    expect(fitnessCourses).toHaveLength(13);
     expect(fitnessCourses.map((course) => course.id)).toEqual([
       "1IkRomy3M6h9RfDKSln9NjW-Q4x7FZJ2p",
       "1dxvel2jEarUb7ijNesZULpHQmbpM0bDa",
@@ -98,6 +106,7 @@ describe("learning catalog helpers", () => {
       "terabox-cabellosalirrosas-nitrofit",
       "terabox-cabellosalirrosas-mi-diario-de-yoga-xuan-lan",
       "terabox-cabellosalirrosas-merengue-a-lo-maco-en-el-bajo-electrico",
+      "terabox-cabellosalirrosas-second-duerme-como-tesla",
     ]);
   });
 });

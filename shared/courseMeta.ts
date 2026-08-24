@@ -1,4 +1,4 @@
-import { expandedTeraboxNames, teraboxCabellosalirrosasNames, teraboxSlug, TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL } from "./teraboxCatalog";
+import { expandedTeraboxNames, teraboxCabellosalirrosasNames, teraboxCabellosalirrosasSecondNames, teraboxSlug, TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL } from "./teraboxCatalog";
 
 export type LearningRoute = {
   id: string;
@@ -112,6 +112,18 @@ export const courseMeta: CourseMeta[] = [
     whatYouLearn: "Recorrer el contenido original y convertir sus archivos en una secuencia práctica de aprendizaje.",
     startHere: "Abrir la carpeta del curso en Terabox",
     outcome: "Una ruta pedagógica organizada después de revisar sus módulos y recursos.",
+  })),
+  ...teraboxCabellosalirrosasSecondNames.map((title, index) => ({
+    id: `terabox-cabellosalirrosas-second-${teraboxSlug(title)}`,
+    source: "terabox" as const,
+    sourceAccountEmail: TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL,
+    routeId: /english|developer|libros|contable|llc|escuela|infoproducto|courses/i.test(title) ? "ai" : /ventas|vsl|youtube|seo|marketing|million|dinero|brandon|alex pereira|victor heras|ian bernal/i.test(title) ? "business" : /duerme|fitness|salud/i.test(title) ? "fitness" : "content",
+    order: 60 + index,
+    title,
+    description: "Curso Terabox del segundo enlace compartido de cabellosalirrosas; incorporado con acceso de origen y pendiente de inspección interna detallada.",
+    whatYouLearn: "Recorrer el material original y transformarlo en una secuencia de estudio con objetivos y prácticas concretas.",
+    startHere: "Abrir la carpeta del curso en Terabox",
+    outcome: "Una ruta de aprendizaje organizada después de validar sus módulos y recursos.",
   })),
 ];
 
