@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { calculateProgress, getContentType, orderedModules, type DriveItem } from "../shared/learning";
-import { courseMeta, learningRoutes } from "../shared/courseMeta";
+import { courseMeta, getCourseSource, learningRoutes } from "../shared/courseMeta";
+import { teraboxCatalog } from "../shared/teraboxCatalog";
 
 const module = (id: string, name: string, mimeType: string, kind: "file" | "folder" = "file"): DriveItem => ({
   id,
@@ -27,10 +28,36 @@ describe("learning catalog helpers", () => {
     expect(calculateProgress(["one", "two", "three"], new Set(["one", "two"]))).toBe(67);
   });
 
+  it("distingue el origen por defecto y permite un metadato Terabox", () => {
+    expect(getCourseSource({ id: "drive-course", routeId: "business", order: 1, title: "Drive", description: "", whatYouLearn: "", startHere: "", outcome: "" })).toBe("google_drive");
+    expect(getCourseSource({ id: "terabox-course", source: "terabox", routeId: "business", order: 2, title: "Terabox", description: "", whatYouLearn: "", startHere: "", outcome: "" })).toBe("terabox");
+  });
+
+  it("incluye la nueva colección de seis cursos Drive", () => {
+    const addedCourses = [
+      "1qyEz3Tq3snDDpW2Co3SmvL3cOfO-sZ-C",
+      "19VBkN0GelCU2Fr_aOg74trWGSKiQB2nM",
+      "1fALqYvE8SuygpVi88NfJtCUg42x-4Z1H",
+      "1dQTdsKNyGrnPlA-KDTRZDS62ZhPzV48o",
+      "1On52JnLs86YPjQdgYhaD1hzXszOYFmzo",
+      "1aAGE6c5xN8FoPgHbqf9FFtcExCB0HBGj",
+    ];
+    expect(addedCourses.every((id) => courseMeta.some((course) => course.id === id))).toBe(true);
+    expect(addedCourses.every((id) => getCourseSource(courseMeta.find((course) => course.id === id)! ) === "google_drive")).toBe(true);
+  });
+
+  it("registra los 20 cursos Terabox confirmados y conserva un enlace compartido verificable", () => {
+    expect(teraboxCatalog).toHaveLength(20);
+    expect(new Set(teraboxCatalog.map((course) => course.id)).size).toBe(20);
+    expect(teraboxCatalog.every((course) => course.webViewLink.includes("1024tera.com/spanish/sharing/link"))).toBe(true);
+    expect(teraboxCatalog.every((course) => course.children.length === 1)).toBe(true);
+    expect(teraboxCatalog.every((course) => courseMeta.some((meta) => meta.id === course.id && getCourseSource(meta) === "terabox"))).toBe(true);
+  });
+
   it("incluye la ruta Salud y Rendimiento y sus seis cursos Kinobody", () => {
     expect(learningRoutes.find((route) => route.id === "fitness")?.label).toBe("Salud y Rendimiento");
     const fitnessCourses = courseMeta.filter((course) => course.routeId === "fitness").sort((left, right) => left.order - right.order);
-    expect(fitnessCourses).toHaveLength(6);
+    expect(fitnessCourses).toHaveLength(8);
     expect(fitnessCourses.map((course) => course.id)).toEqual([
       "1IkRomy3M6h9RfDKSln9NjW-Q4x7FZJ2p",
       "1dxvel2jEarUb7ijNesZULpHQmbpM0bDa",
@@ -38,6 +65,8 @@ describe("learning catalog helpers", () => {
       "1hGCKVpEUdS8H6FefY4Th-_GH1XQT0Evt",
       "16CSfE6f_NUo_AWLobnCwCxbWW4ZWvJwr",
       "14qYxKwwDHMtxXwzExn_ZDQ3v55QAH97k",
+      "terabox-jxcasa-fitness-programs",
+      "terabox-jxcasa-caitlin-hard-as-you-want",
     ]);
   });
 });

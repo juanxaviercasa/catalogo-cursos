@@ -1,4 +1,4 @@
-import type { CourseMeta, LearningRoute } from "@shared/courseMeta";
+import { getCourseSource, type CourseMeta, type LearningRoute } from "@shared/courseMeta";
 import { getContentType, orderedModules, type DriveCourse, type DriveItem, type PdfTranslationSummary } from "@shared/learning";
 import { getSpanishMediaTracks, type MediaTrack } from "@shared/mediaTracks";
 import { AlertTriangle, ArrowLeft, AudioLines, Check, CheckCircle2, ExternalLink, FileArchive, FileText, FolderOpen, Languages, Loader2, Play, PlayCircle, Server } from "lucide-react";
@@ -71,12 +71,14 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
   const pendingPilotVideos = (pilotImport?.videos ?? []).filter((video) => video.processingStatus === "queued" || video.processingStatus === "processing");
   const failedPilotVideos = (pilotImport?.videos ?? []).filter((video) => video.processingStatus === "failed");
   const unpreparedPdfCount = modules.filter((item) => getContentType(item) === "pdf" && !pdfTranslations.some((document) => document.courseId === course.id && document.moduleId === item.id)).length;
+  const isGoogleDrive = getCourseSource(meta) === "google_drive";
+  const sourceLabel = isGoogleDrive ? "Google Drive" : "Terabox";
 
   return (
     <section className="course-detail-shell">
       <header className="detail-topbar">
         <button className="back-button" onClick={onBack}><ArrowLeft size={17} /> Volver al catálogo</button>
-        <a href={course.webViewLink} target="_blank" rel="noreferrer">Carpeta original <ExternalLink size={15} /></a>
+        <a href={course.webViewLink} target="_blank" rel="noreferrer">{sourceLabel} original <ExternalLink size={15} /></a>
       </header>
 
       <div className="detail-intro">
@@ -96,15 +98,15 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
         <article><span>QUÉ APRENDERÁS</span><p>{meta.whatYouLearn}</p></article>
         <article><span>QUÉ VER PRIMERO</span><p>{meta.startHere}</p></article>
         <article><span>RESULTADO PRÁCTICO</span><p>{meta.outcome}</p></article>
-        <article className="drive-brief"><span>ORIGEN DEL CURSO</span><a href={course.webViewLink} target="_blank" rel="noreferrer">Abrir carpeta en Drive <ExternalLink size={15} /></a></article>
+        <article className="drive-brief"><span>ORIGEN DEL CURSO</span><a href={course.webViewLink} target="_blank" rel="noreferrer">Abrir carpeta en {sourceLabel} <ExternalLink size={15} /></a></article>
       </div>
 
       {pilotZip && <section className={`zip-import-hero zip-import-hero--${pilotImport?.status ?? "idle"}`}>
         <div className="zip-import-icon"><FileArchive size={23} /></div>
-        <div className="zip-import-copy"><span>VÍDEOS DENTRO DE ZIP</span><h2>Prepáralos aquí, no en Google Drive.</h2><p>El archivo original se mantiene comprimido en Drive. Esta acción lo lee una sola vez, extrae únicamente los vídeos compatibles y los deja listos para reproducir desde esta plataforma.</p></div>
+        <div className="zip-import-copy"><span>VÍDEOS DENTRO DE ZIP</span><h2>Prepáralos aquí, no en {sourceLabel}.</h2><p>El archivo original se mantiene comprimido en {sourceLabel}. Esta acción lo lee una sola vez, extrae únicamente los vídeos compatibles y los deja listos para reproducir desde esta plataforma.</p></div>
         <div className="zip-import-actions">
           {pilotImport?.status === "ready" && readyPilotVideos.length ? <button className="zip-primary-action" onClick={() => setPreparedVideos(readyPilotVideos)}><Server size={16} /> Ver {readyPilotVideos.length} vídeos listos</button> : pilotImport?.status === "ready" && pendingPilotVideos.length ? <div className="zip-processing"><Loader2 className="animate-spin" size={18} /><span>Convirtiendo {pendingPilotVideos.length} vídeos…<small>{pendingPilotVideos[0]?.processingMessage ?? "El resultado aparecerá aquí al quedar listo."}</small></span></div> : pilotImport?.status === "processing" ? <div className="zip-processing"><Loader2 className="animate-spin" size={18} /><span>Importando vídeos…<small>No cierres esta página.</small></span></div> : canImportZip ? <button className="zip-primary-action" disabled={isImportingZip} onClick={() => onPrepareZip(pilotZip.id)}>{isImportingZip ? <Loader2 className="animate-spin" size={16} /> : <Server size={16} />} {pilotImport?.status === "failed" ? "Reintentar preparación" : "Preparar vídeos en la plataforma"}</button> : <button className="zip-primary-action" onClick={onLogin}><Server size={16} /> Iniciar sesión para preparar</button>}
-          <a href={pilotZip.webViewLink} target="_blank" rel="noreferrer">Ver original en Drive <ExternalLink size={14} /></a>
+          <a href={pilotZip.webViewLink} target="_blank" rel="noreferrer">Ver original en {sourceLabel} <ExternalLink size={14} /></a>
           {pilotImport?.status === "failed" && <p className="zip-import-failure">La última preparación no terminó: {pilotImport.errorMessage}</p>}
           {failedPilotVideos.length > 0 && <p className="zip-import-failure">{failedPilotVideos.length} vídeo(s) requieren revisión: {failedPilotVideos[0]?.processingMessage ?? "La conversión no terminó."}</p>}
         </div>
@@ -121,9 +123,9 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
 
       {activeVideo && (
         <section className="video-player-panel" aria-label={`Reproduciendo ${activeVideo.name}`}>
-          <div className="video-panel-head"><div><span>REPRODUCIENDO EN DRIVE</span><h2>{activeVideo.name.replace(/\.(mp4|ts)$/i, "")}</h2></div><button onClick={() => setActiveVideo(null)}>Cerrar</button></div>
+          <div className="video-panel-head"><div><span>REPRODUCIENDO EN {sourceLabel.toUpperCase()}</span><h2>{activeVideo.name.replace(/\.(mp4|ts)$/i, "")}</h2></div><button onClick={() => setActiveVideo(null)}>Cerrar</button></div>
           <div className="drive-video-frame"><iframe src={`https://drive.google.com/file/d/${activeVideo.id}/preview`} title={`Vídeo: ${activeVideo.name}`} allow="autoplay; fullscreen" allowFullScreen /></div>
-          <div className="video-panel-footer"><p>El vídeo se reproduce desde Google Drive; no se aloja una copia en esta plataforma.</p><a href={activeVideo.webViewLink} target="_blank" rel="noreferrer">Ir al contenido <ExternalLink size={15} /></a></div><div className="audio-availability"><AudioLines size={15} /><span><b>Audio disponible: original.</b> La traducción y la voz española aún no están activas para este vídeo.</span></div>
+          <div className="video-panel-footer"><p>El vídeo se reproduce desde {sourceLabel}; no se aloja una copia en esta plataforma.</p><a href={activeVideo.webViewLink} target="_blank" rel="noreferrer">Ir al contenido <ExternalLink size={15} /></a></div><div className="audio-availability"><AudioLines size={15} /><span><b>Audio disponible: original.</b> La traducción y la voz española aún no están activas para este vídeo.</span></div>
         </section>
       )}
 
@@ -142,9 +144,9 @@ export function CourseDetail({ course, meta, route, completedIds, onBack, onTogg
                 </button>
                 <span className="module-index">{String(index + 1).padStart(2, "0")}</span>
                 <span className="module-type-icon">{moduleIcon(item)}</span>
-                <div className="module-copy"><h3>{item.name.replace(/\.(zip|mp4|ts|pdf)$/i, "")}</h3><p>{contentType === "video" ? "Vídeo disponible para reproducir desde Google Drive." : contentType === "zip" ? "Archivo ZIP con material de curso; ábrelo en Drive para acceder a su contenido." : contentType === "folder" ? "Carpeta de Drive con lecciones o recursos organizados." : contentType === "pdf" ? "Documento PDF disponible en la carpeta original." : "Recurso disponible en Google Drive."}</p></div>
+                <div className="module-copy"><h3>{item.name.replace(/\.(zip|mp4|ts|pdf)$/i, "")}</h3><p>{contentType === "video" ? <>Vídeo disponible para reproducir desde {sourceLabel}.</> : contentType === "zip" ? <>Archivo ZIP con material de curso; ábrelo en {sourceLabel} para acceder a su contenido.</> : contentType === "folder" ? <>Carpeta de {sourceLabel} con lecciones o recursos organizados.</> : contentType === "pdf" ? <>Documento PDF disponible en la carpeta original de {sourceLabel}.</> : <>Recurso disponible en {sourceLabel}.</>}</p></div>
                 <div className="module-actions">
-                  {contentType === "video" && <button className="watch-button" onClick={() => setActiveVideo(item)}><Play size={14} /> Ver aquí</button>}
+                  {contentType === "video" && isGoogleDrive && <button className="watch-button" onClick={() => setActiveVideo(item)}><Play size={14} /> Ver aquí</button>}
                   {contentType === "pdf" && pdfTranslation?.status === "ready" && <button className="pdf-translation-button" onClick={() => setActivePdf(item)}><Languages size={14} /> Leer en español</button>}
                   {contentType === "pdf" && !pdfTranslation && canImportZip && onPreparePdf && <button className="pdf-translation-button" disabled={isPreparingPdf} onClick={() => onPreparePdf(item)}>{isPreparingPdf ? <Loader2 className="animate-spin" size={14} /> : <Languages size={14} />} Preparar español</button>}
                   <a href={item.webViewLink} target="_blank" rel="noreferrer">Ir al contenido <ExternalLink size={15} /></a>

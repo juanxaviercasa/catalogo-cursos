@@ -4,7 +4,7 @@ import { CourseDetail } from "@/components/CourseDetail";
 import { PdfTranslationAdminPanel } from "@/components/PdfTranslationAdminPanel";
 import { ProgressRing } from "@/components/ProgressRing";
 import { startLogin } from "@/const";
-import { courseMetaById, courseMeta, learningRoutes } from "@shared/courseMeta";
+import { courseMetaById, courseMeta, getCourseSource, learningRoutes, type CourseSource } from "@shared/courseMeta";
 import { calculateProgress, getContentType, type ContentType, type DriveCourse } from "@shared/learning";
 import { ArrowUpRight, BookOpen, Check, CheckCircle2, ChevronRight, CircleDot, Filter, FolderOpen, LayoutGrid, Loader2, LogOut, Search, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -14,8 +14,10 @@ import { trpc } from "@/lib/trpc";
 
 type StatusFilter = "all" | "pending" | "active" | "complete";
 type TypeFilter = "all" | ContentType;
+type SourceFilter = "all" | CourseSource;
 
 const contentLabels: Record<TypeFilter, string> = { all: "Todo tipo", video: "Vídeo", zip: "ZIP", pdf: "PDF", folder: "Carpeta", other: "Otros" };
+const sourceLabels: Record<SourceFilter, string> = { all: "Todas las fuentes", google_drive: "Google Drive", terabox: "Terabox" };
 
 export default function Home() {
   const { user, loading: authLoading, isAuthenticated, logout } = useAuth();
@@ -40,6 +42,7 @@ export default function Home() {
   const [routeFilter, setRouteFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>("all");
 
   const completedIds = useMemo(() => new Set((progressQuery.data ?? []).filter((entry) => entry.completed).map((entry) => entry.moduleId)), [progressQuery.data]);
   const courses = useMemo(() => (catalogQuery.data ?? []).map((course) => ({ course, meta: courseMetaById[course.id] })).filter((item): item is { course: DriveCourse; meta: NonNullable<typeof courseMetaById[string]> } => Boolean(item.meta)).sort((a, b) => a.meta.order - b.meta.order), [catalogQuery.data]);
@@ -57,8 +60,9 @@ export default function Home() {
     const matchesSearch = !term || `${meta.title} ${meta.description} ${meta.whatYouLearn} ${course.name}`.toLowerCase().includes(term);
     const matchesRoute = routeFilter === "all" || meta.routeId === routeFilter;
     const matchesType = typeFilter === "all" || course.children.some((item) => getContentType(item) === typeFilter);
+    const matchesSource = sourceFilter === "all" || getCourseSource(meta) === sourceFilter;
     const matchesStatus = statusFilter === "all" || (statusFilter === "pending" && progress === 0) || (statusFilter === "active" && progress > 0 && progress < 100) || (statusFilter === "complete" && progress === 100);
-    return matchesSearch && matchesRoute && matchesType && matchesStatus;
+    return matchesSearch && matchesRoute && matchesType && matchesSource && matchesStatus;
   });
 
   const totalModules = courses.reduce((sum, item) => sum + item.course.children.length, 0);
@@ -98,10 +102,10 @@ export default function Home() {
       </aside>
 
       <main className="learning-main">
-        <header className="app-topbar"><div className="breadcrumbs"><span>Biblioteca</span><span>/</span><b>{routeFilter === "all" ? "Todas las rutas" : learningRoutes.find((route) => route.id === routeFilter)?.label}</b></div><a href={routeFilter === "fitness" ? "https://drive.google.com/drive/folders/1dKjIxzuDxcQZLOKM-DdSUMYQq6S1JFNB?usp=sharing" : "https://drive.google.com/drive/folders/1Rda2HOslYHwJUGK4vMR3MA8wHP19tNfX?usp=sharing"} target="_blank" rel="noreferrer">{routeFilter === "fitness" ? "Abrir Drive de salud" : "Abrir Drive original"} <ArrowUpRight size={15} /></a></header>
-        <section className="catalog-hero"><div><p className="eyebrow"><span /> BIBLIOTECA PERSONAL · DRIVE</p><h1>Aprende con<br /><em>dirección.</em></h1><p>{courseCount} cursos organizados en rutas que convierten una biblioteca extensa en una secuencia concreta: decide qué estudiar, abre el contenido y registra lo aprendido.</p></div><div className="hero-focus-card"><span>ENFOQUE DE HOY</span><h2>{inProgressCourses[0]?.meta.title ?? "Elige tu primera ruta"}</h2><p>{inProgressCourses[0] ? `${courseProgress(inProgressCourses[0].course)}% completado` : "Empieza por una ruta pedagógica para crear impulso."}</p><button onClick={() => inProgressCourses[0] ? setLocation(`/curso/${inProgressCourses[0].course.id}`) : setRouteFilter("business")}>{inProgressCourses[0] ? "Continuar curso" : "Explorar rutas"}<ArrowUpRight size={16} /></button></div></section>
+        <header className="app-topbar"><div className="breadcrumbs"><span>Biblioteca</span><span>/</span><b>{routeFilter === "all" ? "Todas las rutas" : learningRoutes.find((route) => route.id === routeFilter)?.label}</b></div><a href={sourceFilter === "terabox" ? "https://1024terabox.com/s/168IfqGVjoXwH5FzSAbgVXA" : routeFilter === "fitness" ? "https://drive.google.com/drive/folders/1dKjIxzuDxcQZLOKM-DdSUMYQq6S1JFNB?usp=sharing" : "https://drive.google.com/drive/folders/1Rda2HOslYHwJUGK4vMR3MA8wHP19tNfX?usp=sharing"} target="_blank" rel="noreferrer">{sourceFilter === "terabox" ? "Abrir Terabox" : routeFilter === "fitness" ? "Abrir Drive de salud" : "Abrir Drive original"} <ArrowUpRight size={15} /></a></header>
+        <section className="catalog-hero"><div><p className="eyebrow"><span /> BIBLIOTECA PERSONAL · {sourceFilter === "all" ? "DRIVE + TERABOX" : sourceLabels[sourceFilter].toUpperCase()}</p><h1>Aprende con<br /><em>dirección.</em></h1><p>{courseCount} cursos organizados en rutas que convierten una biblioteca extensa en una secuencia concreta: decide qué estudiar, abre el contenido y registra lo aprendido.</p></div><div className="hero-focus-card"><span>ENFOQUE DE HOY</span><h2>{inProgressCourses[0]?.meta.title ?? "Elige tu primera ruta"}</h2><p>{inProgressCourses[0] ? `${courseProgress(inProgressCourses[0].course)}% completado` : "Empieza por una ruta pedagógica para crear impulso."}</p><button onClick={() => inProgressCourses[0] ? setLocation(`/curso/${inProgressCourses[0].course.id}`) : setRouteFilter("business")}>{inProgressCourses[0] ? "Continuar curso" : "Explorar rutas"}<ArrowUpRight size={16} /></button></div></section>
 
-        <section className="catalog-toolbar"><div className="search-field"><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por curso, habilidad o resultado…" /></div><div className="filter-group"><Filter size={15} /><select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value as TypeFilter)} aria-label="Filtrar por tipo de contenido">{Object.entries(contentLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as StatusFilter)} aria-label="Filtrar por estado"><option value="all">Cualquier estado</option><option value="pending">Pendiente</option><option value="active">En curso</option><option value="complete">Completado</option></select></div></section>
+        <section className="catalog-toolbar"><div className="search-field"><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por curso, habilidad o resultado…" /></div><div className="filter-group"><Filter size={15} /><select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value as TypeFilter)} aria-label="Filtrar por tipo de contenido">{Object.entries(contentLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as StatusFilter)} aria-label="Filtrar por estado"><option value="all">Cualquier estado</option><option value="pending">Pendiente</option><option value="active">En curso</option><option value="complete">Completado</option></select><select value={sourceFilter} onChange={(event) => setSourceFilter(event.target.value as SourceFilter)} aria-label="Filtrar por fuente">{Object.entries(sourceLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></div></section>
 
         {user?.role === "admin" && <PdfTranslationAdminPanel documents={pdfAdminEntries} onSetPriority={(id, priority) => setPdfTranslationPriority.mutate({ id, priority })} isSaving={setPdfTranslationPriority.isPending} />}
 

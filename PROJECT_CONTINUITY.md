@@ -2,7 +2,7 @@
 
 ## Propósito y estado actual
 
-La plataforma convierte las bibliotecas compartidas de Google Drive en una biblioteca de **25 cursos** agrupados en siete rutas pedagógicas. El contenido fuente permanece en Drive, mientras que el catálogo, las rutas, el avance del usuario y la preparación de medios se gestionan desde la aplicación.
+La plataforma convierte las bibliotecas compartidas de Google Drive y Terabox en una biblioteca de **51 cursos registrados** agrupados en siete rutas pedagógicas: 31 de Google Drive y 20 de Terabox. En Terabox, la primera importación conserva un acceso a la carpeta original mientras se completa la inspección profunda de cada curso. El contenido fuente permanece en Drive, mientras que el catálogo, las rutas, el avance del usuario y la preparación de medios se gestionan desde la aplicación.
 
 | Área | Estado actual | Decisión principal |
 |---|---|---|
@@ -29,6 +29,7 @@ La aplicación usa React y TypeScript en el cliente, procedimientos tipados en e
 | `pdf_translation_segments` | Texto fuente y traducción por página. | Base de datos. |
 | `/manus-storage/` | Entrega mediante redirección firmada. | Almacenamiento de objetos. |
 | Google Drive | Fuente original, carpeta y archivos de curso. | Externo. |
+| Terabox | Fuente original, carpetas de curso y archivos compartidos. | Externo; puede requerir sesión y permisos de la cuenta. |
 
 > **Regla de almacenamiento:** no guardar vídeos en Local Storage, IndexedDB ni archivos públicos de la aplicación. El navegador solo consume una URL de reproducción; los archivos viven fuera de él.
 
@@ -126,3 +127,16 @@ La cola del curso **Aggressive Fat Loss 2.0** quedó cerrada con **12 PDFs dispo
 | Repositorio | Continuidad en `https://github.com/juanxaviercasa/catalogo-cursos.git`; el checkpoint `9ba533aa` contiene estos avances. |
 
 La única tarea abierta es crear y aprobar la nueva variante visual de Drinking Guide cuando se restablezca la cuota gratuita o se habilite capacidad adicional. No se publicó una imagen parcial ni se modificó el original. Al retomarla, se debe registrar la variante como `review`, comprobar ortografía, cifras, marca y composición, y cambiarla a `ready` solo tras la revisión humana.
+
+
+## Actualización — catálogo separado por Google Drive y Terabox
+
+El 24 de agosto de 2026 se inspeccionó la carpeta pública de Google Drive asociada por el usuario al correo `cursosgo235@gmail.com`: `https://drive.google.com/drive/folders/1nZ6lw8z-lNbV7kDGM2ifsOwzq0l0-YJm?usp=sharing`. Se identificaron seis carpetas de curso con módulos reales y se incorporaron al inventario combinado publicado en `/manus-storage/drive_courses_inventory_with_kinobody_and_cursosgo235_81d1c762.json`. El catálogo de Google Drive pasa de 25 a **31 cursos**; posteriormente se añadieron 20 cursos Terabox registrados en el catálogo combinado, que alcanza **51 cursos**.
+
+Los seis cursos son Chat GPT Marketing para Ventas Exitosas, IA para Investigar tu Mercado, Copywriting: Mensajes que Venden, Creación y Planeación de Contenido para Instagram, Entendiendo el Marketing Digital y Tu Agencia de Expertos en IA. Sus módulos conservan los IDs y enlaces individuales de Drive. La aplicación los clasifica con el origen `google_drive` y mantiene la acción **«Ir al contenido»**.
+
+El catálogo ahora admite el tipo extensible `google_drive | terabox`, muestra el proveedor en cada tarjeta y ficha, y ofrece un filtro global por fuente. Para Terabox, la ficha no intentará usar un iframe de Google Drive: abrirá el enlace original mediante «Ir al contenido». Esto evita mezclar proveedores aunque se utilice el mismo correo.
+
+Se inspeccionó `https://www.1024tera.com/spanish/sharing/link?surl=68IfqGVjoXwH5FzSAbgVXA` con la cuenta autorizada del usuario. La carpeta compartida `jxcasa` expuso 20 carpetas de cursos: AI-Powered Digital Marketing Guide, AI Automation Agency, KCPQHDFCC, Robert Richards — OnlyFans Agency, Millionaire Speakers Leadership Influence Mastery, How to Use AI to Make Money, ChatGPT Complete Course, Bob Proctor — Thinking into Results, MindValley — Mystic Brain, Facebook Monetization, Saad Automation, Fitness Programs, Russell Brunson — Secrets, Kamal CPM Full Course, Brandon Timothy — Digital Freedom Academy, JK Molina — Cash Creators, Caitlin V — Hard As You Want, Growing Your Craft — Etsy Academy 2.0, Matt Par — Tube AI System y David Tian — Social Circle Mastery. Se incorporaron con origen `terabox`, enlaces originales conservados y una acción de acceso a la carpeta compartida. Todavía no se inventaron módulos ni enlaces profundos: cada ficha muestra un acceso provisional a la carpeta original hasta inspeccionar sus archivos internos. El inventario de evidencia se conserva en `/home/ubuntu/curso_drive_analysis/terabox_inventory_2026-08-24.md`. Si el propietario cambia Terabox a privado, los estudiantes necesitarán una sesión autorizada o una futura integración segura del servidor; la aplicación no puede eludir permisos.
+
+La validación de esta iteración completó `pnpm test -- --run` y `pnpm exec tsc --noEmit`: **22 pruebas unitarias pasan** y no quedan errores TypeScript. El catálogo Terabox se fusiona desde `shared/teraboxCatalog.ts` en el procedimiento público sin modificar el inventario JSON original de Drive.

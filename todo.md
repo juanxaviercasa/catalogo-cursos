@@ -139,3 +139,22 @@
 - [x] Documentar el estado actual de los avances para la continuidad del proyecto.
 - [x] Crear y enviar el commit de los avances al repositorio GitHub de continuidad.
 - [ ] Crear y aprobar nuevas localizaciones visuales para documentos del bloque final cuando se restablezca la cuota de generación.
+
+- [x] Inventariar la nueva carpeta de Google Drive del correo cursosgo235@gmail.com y clasificar sus cursos y módulos reales.
+- [x] Añadir una fuente persistente `google_drive`/`terabox` para que ningún curso se mezcle por correo o proveedor.
+- [x] Mostrar etiquetas y filtros de origen Drive y Terabox en el catálogo y las fichas de curso.
+- [x] Integrar los cursos válidos de la nueva carpeta de Drive conservando sus enlaces originales.
+- [x] Preparar la incorporación futura de enlaces Terabox sin inventar cursos ni descargar contenido no autorizado.
+- [x] Validar enlaces, filtros, navegación por fuente y documentación de continuidad.
+
+- [x] Analizar el enlace de Terabox `https://1024terabox.com/s/168IfqGVjoXwH5FzSAbgVXA` y documentar el único contenido visible sin inventar cursos internos.
+- [x] Registrar el proveedor `terabox` separado de `google_drive`, aunque compartan correo de acceso.
+- [x] Asociar cada curso Terabox con el enlace compartido original y una etiqueta de origen visible.
+- [x] Validar que la búsqueda y los filtros distingan Drive y Terabox sin duplicar cursos.
+
+- [x] Inspeccionar el contenido visible del enlace Terabox sin descargar ni modificar archivos.
+- [x] Clasificar las 20 carpetas accesibles de Terabox como cursos preliminares con acceso a su carpeta original.
+- [x] Integrar los 20 cursos Terabox verificables con origen y enlace original separados de Drive.
+- [x] Validar etiquetas, filtros, enlaces y requisitos de inicio de sesión para Terabox.
+- [x] Documentar la organización Terabox y la separación de fuentes en la guía de continuidad.
+- [ ] Inspeccionar cada carpeta de curso Terabox para sustituir el acceso provisional por módulos y enlaces internos verificables.

@@ -8,8 +8,9 @@ import { DubbingSetupSchema, dubbingSetup, DriveCatalogSchema, getContentType, o
 import { extractPublicDriveZip } from "./zipImport";
 import { dispatchQueuedVideos, isProcessorConfigured, type VideoProcessorMode } from "./videoProcessorDispatch";
 import { generateImage } from "./_core/imageGeneration";
+import { teraboxCatalog } from "../shared/teraboxCatalog";
 
-const CATALOG_PATH = "/manus-storage/drive_courses_inventory_with_kinobody_d70d6ad9.json";
+const CATALOG_PATH = "/manus-storage/drive_courses_inventory_with_kinobody_and_cursosgo235_81d1c762.json";
 let catalogCache: DriveCourse[] | null = null;
 const extractedVideoSchema = z.object({ id: z.number(), title: z.string(), storageUrl: z.string().nullable(), sourceMimeType: z.string(), mimeType: z.string().nullable(), sizeBytes: z.number().nullable(), sortOrder: z.number(), processingStatus: z.enum(["queued", "processing", "ready", "failed"]), processingMessage: z.string().nullable(), wasTranscoded: z.boolean() });
 const zipImportSchema = z.object({ id: z.number(), zipId: z.string(), courseId: z.string(), sourceName: z.string(), sourceBytes: z.number().nullable(), status: z.enum(["processing", "ready", "failed"]), errorMessage: z.string().nullable(), videos: z.array(extractedVideoSchema) });
@@ -72,7 +73,7 @@ async function loadCatalog(origin: string): Promise<DriveCourse[]> {
   if (!response.ok) throw new Error("No se pudo cargar el catálogo de cursos.");
   const payload = DriveCatalogSchema.safeParse(await response.json());
   if (!payload.success) throw new Error("El catálogo de cursos tiene un formato no válido.");
-  catalogCache = payload.data;
+  catalogCache = [...payload.data, ...teraboxCatalog];
   return catalogCache;
 }
 
