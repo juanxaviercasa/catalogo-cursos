@@ -173,3 +173,8 @@
 - [x] Revalidar la raíz Terabox sin la carpeta jxcasa y actualizar las rutas del inventario plano.
 - [x] Confirmar en sesión autenticada que los 79 cursos siguen visibles y conservar la atribución juanxaviercasa@gmail.com.
 - [x] Actualizar documentación, pruebas y catálogo para reflejar la eliminación de la doble anidación.
+
+- [x] Inventariar los cursos visibles en la raíz Terabox de cabellosalirrosas@gmail.com.
+- [x] Mantener la nueva cuenta separada de juanxaviercasa@gmail.com y de las cuentas Google Drive.
+- [x] Clasificar pedagógicamente e integrar los cursos de la nueva cuenta con rutas y enlaces de origen.
+- [x] Documentar, probar, publicar y sincronizar la ampliación del catálogo Terabox.

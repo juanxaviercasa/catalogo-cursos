@@ -176,3 +176,10 @@ La integración está cubierta por una prueba de catálogo que verifica la URL d
 En la sesión autenticada del 24 de agosto de 2026, la cuenta de Terabox mostró los cursos directamente en «Todos los archivos» de `https://1024tera.com/spanish/main`. La carpeta intermedia `jxcasa` ya no aparece. El inventario mantiene sus 79 IDs históricos para no romper progreso ni referencias, pero cada curso declara `rootPath: "/"` y su enlace operativo apunta a la raíz autenticada.
 
 El enlace compartido anterior `surl=68IfqGVjoXwH5FzSAbgVXA` continúa mostrando «este contenido ha sido eliminado» y, por ello, no se reutiliza como destino operativo. La plataforma no inventa enlaces profundos: abre la raíz actual y requiere la sesión autorizada de `juanxaviercasa@gmail.com` para que el usuario localice el curso. La separación de origen frente a Google Drive permanece intacta.
+
+
+## Nueva cuenta Terabox — cabellosalirrosas@gmail.com
+
+Se incorporó una colección inicial de 20 cursos observados en el enlace compartido `https://www.1024terabox.com/s/1lIWzeZq4WLlA-4-wz_HtIg`. La cuenta se mantiene separada de `juanxaviercasa@gmail.com` mediante IDs `terabox-cabellosalirrosas-*`, metadatos `sourceAccountEmail` independientes y un enlace de origen propio. La raíz compartida fue clasificada en las rutas de IA, Negocio, Contenido, Ventas, Salud y Rendimiento según el propósito aparente de cada curso, sin convertir esa clasificación inicial en una afirmación sobre los módulos internos.
+
+La carpeta `CHATGPT` fue inspeccionada y contiene cinco archivos: una hoja XLSX de 750 prompts, dos PDFs de prompts/herramientas, otro PDF de más de 1000 prompts y un ZIP de curso práctico de 664.9 MB. El ZIP permanece en Terabox y no se descargó. Las otras 19 carpetas quedan con acceso provisional al enlace compartido hasta completar su inspección interna. La etiqueta de procedencia visible en Terabox está anonimizada como `US***B`; la atribución al correo `cabellosalirrosas@gmail.com` se basa en la indicación del usuario y queda documentada como tal.

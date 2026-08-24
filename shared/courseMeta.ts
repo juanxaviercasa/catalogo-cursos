@@ -1,4 +1,4 @@
-import { expandedTeraboxNames, teraboxSlug } from "./teraboxCatalog";
+import { expandedTeraboxNames, teraboxCabellosalirrosasNames, teraboxSlug, TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL } from "./teraboxCatalog";
 
 export type LearningRoute = {
   id: string;
@@ -100,6 +100,18 @@ export const courseMeta: CourseMeta[] = [
     whatYouLearn: "Revisar el contenido original y ordenar sus módulos cuando se disponga de la navegación interna.",
     startHere: "Abrir la carpeta del curso en Terabox",
     outcome: "Una ruta pedagógica confirmada después de inspeccionar sus archivos.",
+  })),
+  ...teraboxCabellosalirrosasNames.map((title, index) => ({
+    id: `terabox-cabellosalirrosas-${teraboxSlug(title)}`,
+    source: "terabox" as const,
+    sourceAccountEmail: TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL,
+    routeId: /chatgpt|ai|transcribe|prompt|curso con ia|manychat|codigo/i.test(title) ? "ai" : /marketing|ventas|million|profit|formula|nichos|paraiso|social media/i.test(title) ? "business" : /amigurumis|yoga|merengue|nitrofit/i.test(title) ? "fitness" : /seduccion/i.test(title) ? "sales" : "content",
+    order: 30 + index,
+    title,
+    description: "Curso Terabox incorporado desde el enlace compartido de cabellosalirrosas; la ficha conserva el acceso original y queda pendiente de inspección interna detallada.",
+    whatYouLearn: "Recorrer el contenido original y convertir sus archivos en una secuencia práctica de aprendizaje.",
+    startHere: "Abrir la carpeta del curso en Terabox",
+    outcome: "Una ruta pedagógica organizada después de revisar sus módulos y recursos.",
   })),
 ];
 

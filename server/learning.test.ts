@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { calculateProgress, getContentType, orderedModules, type DriveItem } from "../shared/learning";
 import { courseMeta, getCourseSource, learningRoutes, TERABOX_SOURCE_ACCOUNT_EMAIL } from "../shared/courseMeta";
-import { TERABOX_ROOT_PATH, TERABOX_ROOT_URL, teraboxCatalog } from "../shared/teraboxCatalog";
+import { TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL, TERABOX_CABELLOSALIRROSAS_SHARED_LINK, TERABOX_ROOT_PATH, TERABOX_ROOT_URL, teraboxCabellosalirrosasCatalog, teraboxCatalog } from "../shared/teraboxCatalog";
 
 const module = (id: string, name: string, mimeType: string, kind: "file" | "folder" = "file"): DriveItem => ({
   id,
@@ -60,9 +60,19 @@ describe("learning catalog helpers", () => {
     expect(teraboxCatalog.filter((course) => !["terabox-jxcasa-ai-digital-marketing-guide", "terabox-jxcasa-ai-automation-agency", "terabox-jxcasa-kcpqhdfcc", "terabox-jxcasa-onlyfans-agency"].includes(course.id)).every((course) => course.children.length === 1)).toBe(true);
     expect(teraboxCatalog.some((course) => course.name === "A.I. Ads Machine + 10 Profitable Sales Funnels + The Digital Marketer's Guide To ChatGPT")).toBe(true);
     expect(teraboxCatalog.every((course) => courseMeta.some((meta) => meta.id === course.id && getCourseSource(meta) === "terabox"))).toBe(true);
-    expect(courseMeta.filter((meta) => getCourseSource(meta) === "terabox")).toHaveLength(79);
-    expect(courseMeta.filter((meta) => getCourseSource(meta) === "terabox").every((meta) => meta.sourceAccountEmail === TERABOX_SOURCE_ACCOUNT_EMAIL)).toBe(true);
+    expect(courseMeta.filter((meta) => getCourseSource(meta) === "terabox" && meta.sourceAccountEmail === TERABOX_SOURCE_ACCOUNT_EMAIL)).toHaveLength(79);
+    expect(courseMeta.filter((meta) => getCourseSource(meta) === "terabox" && meta.sourceAccountEmail === TERABOX_SOURCE_ACCOUNT_EMAIL).every((meta) => meta.sourceAccountEmail === TERABOX_SOURCE_ACCOUNT_EMAIL)).toBe(true);
     expect(courseMeta.filter((meta) => getCourseSource(meta) === "google_drive").every((meta) => !meta.sourceAccountEmail)).toBe(true);
+  });
+
+  it("registra la colección Terabox de cabellosalirrosas como una cuenta separada", () => {
+    expect(teraboxCabellosalirrosasCatalog).toHaveLength(20);
+    expect(new Set(teraboxCabellosalirrosasCatalog.map((course) => course.id)).size).toBe(20);
+    expect(teraboxCabellosalirrosasCatalog.every((course) => course.webViewLink === TERABOX_CABELLOSALIRROSAS_SHARED_LINK && course.rootPath === "/")).toBe(true);
+    expect(teraboxCabellosalirrosasCatalog.every((course) => course.id.startsWith("terabox-cabellosalirrosas-") && courseMeta.some((meta) => meta.id === course.id && meta.sourceAccountEmail === TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL))).toBe(true);
+    expect(courseMeta.filter((meta) => meta.sourceAccountEmail === TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL)).toHaveLength(20);
+    expect(courseMeta.filter((meta) => meta.sourceAccountEmail === TERABOX_SOURCE_ACCOUNT_EMAIL)).toHaveLength(79);
+    expect(teraboxCatalog.every((course) => !course.id.startsWith("terabox-cabellosalirrosas-"))).toBe(true);
   });
 
   it("registra la portada conceptual de Drinking Guide sin presentarla como original", () => {
@@ -74,7 +84,7 @@ describe("learning catalog helpers", () => {
   it("incluye la ruta Salud y Rendimiento y sus seis cursos Kinobody", () => {
     expect(learningRoutes.find((route) => route.id === "fitness")?.label).toBe("Salud y Rendimiento");
     const fitnessCourses = courseMeta.filter((course) => course.routeId === "fitness").sort((left, right) => left.order - right.order);
-    expect(fitnessCourses).toHaveLength(8);
+    expect(fitnessCourses).toHaveLength(12);
     expect(fitnessCourses.map((course) => course.id)).toEqual([
       "1IkRomy3M6h9RfDKSln9NjW-Q4x7FZJ2p",
       "1dxvel2jEarUb7ijNesZULpHQmbpM0bDa",
@@ -84,6 +94,10 @@ describe("learning catalog helpers", () => {
       "14qYxKwwDHMtxXwzExn_ZDQ3v55QAH97k",
       "terabox-jxcasa-fitness-programs",
       "terabox-jxcasa-caitlin-hard-as-you-want",
+      "terabox-cabellosalirrosas-telegram-cursosp0rmega-3923-amigurumis-personas-tejidas-a-crochet",
+      "terabox-cabellosalirrosas-nitrofit",
+      "terabox-cabellosalirrosas-mi-diario-de-yoga-xuan-lan",
+      "terabox-cabellosalirrosas-merengue-a-lo-maco-en-el-bajo-electrico",
     ]);
   });
 });

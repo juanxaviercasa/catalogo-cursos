@@ -8,7 +8,7 @@ import { DubbingSetupSchema, dubbingSetup, DriveCatalogSchema, getContentType, o
 import { extractPublicDriveZip } from "./zipImport";
 import { dispatchQueuedVideos, isProcessorConfigured, type VideoProcessorMode } from "./videoProcessorDispatch";
 import { generateImage } from "./_core/imageGeneration";
-import { teraboxCatalog } from "../shared/teraboxCatalog";
+import { teraboxCabellosalirrosasCatalog, teraboxCatalog } from "../shared/teraboxCatalog";
 
 const CATALOG_PATH = "/manus-storage/drive_courses_inventory_with_kinobody_and_cursosgo235_81d1c762.json";
 let catalogCache: DriveCourse[] | null = null;
@@ -73,7 +73,7 @@ async function loadCatalog(origin: string): Promise<DriveCourse[]> {
   if (!response.ok) throw new Error("No se pudo cargar el catálogo de cursos.");
   const payload = DriveCatalogSchema.safeParse(await response.json());
   if (!payload.success) throw new Error("El catálogo de cursos tiene un formato no válido.");
-  catalogCache = [...payload.data, ...teraboxCatalog];
+  catalogCache = [...payload.data, ...teraboxCatalog, ...teraboxCabellosalirrosasCatalog];
   return catalogCache;
 }
 

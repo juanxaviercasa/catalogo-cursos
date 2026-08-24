@@ -116,6 +116,30 @@ export const expandedTeraboxNames = [
   "Cursos",
 ] as const;
 
+type TeraboxAccountConfig = { idPrefix: string; sharedLink: string; rootPath: string };
+
+const teraboxCourseForAccount = (config: TeraboxAccountConfig, id: string, name: string): DriveCourse => ({
+  id: `${config.idPrefix}-${id}`,
+  name,
+  webViewLink: config.sharedLink,
+  rootPath: config.rootPath,
+  children: [{
+    id: `${config.idPrefix}-${id}-folder`,
+    name: `01 · Abrir carpeta del curso en Terabox`,
+    mimeType: "application/vnd.terabox.folder",
+    kind: "folder",
+    webViewLink: config.sharedLink,
+  }],
+});
+
+export const TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL = "cabellosalirrosas@gmail.com";
+export const TERABOX_CABELLOSALIRROSAS_SHARED_LINK = "https://www.1024terabox.com/s/1lIWzeZq4WLlA-4-wz_HtIg";
+const CABELLOSALIRROSAS_CONFIG: TeraboxAccountConfig = {
+  idPrefix: "terabox-cabellosalirrosas",
+  sharedLink: TERABOX_CABELLOSALIRROSAS_SHARED_LINK,
+  rootPath: "/",
+};
+
 export const teraboxCatalog: DriveCourse[] = [
   teraboxCourseWithFolders("ai-digital-marketing-guide", "The AI-Powered Digital Marketing & Digital Advertising Guide", [
     "01. Digital Marketing Essentials",
@@ -201,3 +225,34 @@ export const teraboxCatalog: DriveCourse[] = [
   teraboxCourse("david-tian-social-circle", "David Tian — Social Circle Mastery"),
   ...expandedTeraboxNames.map((name) => teraboxCourse(teraboxSlug(name), name)),
 ];
+
+/**
+ * Inventario inicial observado en el enlace compartido de cabellosalirrosas@gmail.com.
+ * Se conserva como colección separada hasta confirmar enlaces profundos individuales.
+ */
+export const teraboxCabellosalirrosasNames = [
+  "CHATGPT",
+  "Otros Zu",
+  "From: AI Transcribe",
+  "Telegram - @cursosp0rmega - 3923 - Amigurumis: personas tejidas a crochet",
+  "Crea tu Curso con IA",
+  "PDF",
+  "Codigo Million",
+  "IA Profit Academy",
+  "Formula 100k",
+  "Nitrofit",
+  "DEVIN JATHO - 13 Video Templates Pre-Structured for Social Media",
+  "Manychat",
+  "Seduccion Subliminal PRO",
+  "Inmersión Low2High",
+  "Nichos con IA - Dani Llamazares",
+  "Sin Ventas no hay Paraiso",
+  "Kit Super Coach - Conviértete en un COACH",
+  "ESCUELA DE SEDUCCION",
+  "Mi diario de Yoga - Xuan Lan",
+  "Merengue a lo Maco en el Bajo Eléctrico",
+] as const;
+
+export const teraboxCabellosalirrosasCatalog: DriveCourse[] = teraboxCabellosalirrosasNames.map((name) =>
+  teraboxCourseForAccount(CABELLOSALIRROSAS_CONFIG, teraboxSlug(name), name),
+);
