@@ -15,14 +15,56 @@ const teraboxCourse = (id: string, name: string): DriveCourse => ({
   }],
 });
 
+const teraboxCourseWithFolders = (id: string, name: string, folders: string[]): DriveCourse => ({
+  id: `terabox-jxcasa-${id}`,
+  name,
+  webViewLink: TERABOX_SHARED_LINK,
+  children: folders.map((folder, index) => ({
+    id: `terabox-jxcasa-${id}-${index + 1}`,
+    name: folder,
+    mimeType: "application/vnd.terabox.folder",
+    kind: "folder" as const,
+    webViewLink: TERABOX_SHARED_LINK,
+  })),
+});
+
 /**
  * Inventario confirmado en la carpeta compartida jxcasa.
  * Los hijos son un acceso honesto a la carpeta original: aún no se han creado
  * copias ni se han supuesto módulos que no hayan sido inspeccionados.
  */
 export const teraboxCatalog: DriveCourse[] = [
-  teraboxCourse("ai-digital-marketing-guide", "The AI-Powered Digital Marketing & Digital Advertising Guide"),
-  teraboxCourse("ai-automation-agency", "AI Automation Agency"),
+  teraboxCourseWithFolders("ai-digital-marketing-guide", "The AI-Powered Digital Marketing & Digital Advertising Guide", [
+    "01. Digital Marketing Essentials",
+    "02. ChatGPT [Free Version]",
+    "10. Google Analytics 4",
+    "12. Psychology of Persuasion [On-Page SEO]",
+    "13. Structured Data for YouTube Video [On-Page SEO]",
+    "15. WooCommerce Products, Attributes, Categories, Smart Filters, Uploads",
+    "16. WooCommerce Checkout Experience & Elementor Pro",
+    "17. WooCommerce Marketing, Google Free Listings",
+    "18. Plugins, Translations, SMTP, Multi-Currency, DKIM, Heat Maps, Reviews",
+    "19. WordPress Security, CloudFlare Turnstile, Database Optimization, Backups",
+    "20. Wikipedia Link Building [Off-Page SEO]",
+    "21. Email Marketing & Mailchimp",
+    "22. Google Advertising [AI Google Max Performance]",
+    "23. Meta for Business [Business Manager, Facebook Page, Meta Suite]",
+    "24. Meta Data Sources [Pixel, Conversion API]",
+    "25. Meta Ads Objectives & Ads Guide",
+    "26. Meta Ads Manager & Campaign Structure",
+    "27. Meta Audiences, Meta AI+ Targeting, Meta+ AI Functions",
+    "28. Meta Advertising for Local Business",
+    "29. Meta Broad Targeting & Special Ad Categories",
+  ]),
+  teraboxCourseWithFolders("ai-automation-agency", "AI Automation Agency", [
+    "00- START HERE",
+    "01- AI AUTOMATION DEMO BUILD",
+    "02- AI AUTOMATION OUTREACH",
+    "03- AI AUTOMATION SERVICE DELIVERY",
+    "04- NO CODE AI AUTOMATION",
+    "05- AI AUTOMATION WORKSHOPS",
+    "SALES TRAINING",
+  ]),
   teraboxCourse("kcpqhdfcc", "KCPQHDFCC"),
   teraboxCourse("onlyfans-agency", "Robert Richards — How to Create a Successful OnlyFans Agency"),
   teraboxCourse("millionaire-speakers", "Millionaire Speakers Leadership Influence Mastery"),

@@ -50,7 +50,9 @@ describe("learning catalog helpers", () => {
     expect(teraboxCatalog).toHaveLength(20);
     expect(new Set(teraboxCatalog.map((course) => course.id)).size).toBe(20);
     expect(teraboxCatalog.every((course) => course.webViewLink.includes("1024tera.com/spanish/sharing/link"))).toBe(true);
-    expect(teraboxCatalog.every((course) => course.children.length === 1)).toBe(true);
+    expect(teraboxCatalog.find((course) => course.id === "terabox-jxcasa-ai-digital-marketing-guide")?.children).toHaveLength(20);
+    expect(teraboxCatalog.find((course) => course.id === "terabox-jxcasa-ai-automation-agency")?.children).toHaveLength(7);
+    expect(teraboxCatalog.filter((course) => !["terabox-jxcasa-ai-digital-marketing-guide", "terabox-jxcasa-ai-automation-agency"].includes(course.id)).every((course) => course.children.length === 1)).toBe(true);
     expect(teraboxCatalog.every((course) => courseMeta.some((meta) => meta.id === course.id && getCourseSource(meta) === "terabox"))).toBe(true);
   });
 
