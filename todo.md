@@ -183,3 +183,8 @@
 - [x] Inventariar sus cursos y archivos visibles sin descargar ni modificar originales.
 - [x] Integrar esta colección con IDs y cuenta separados de la primera colección cabellosalirrosas.
 - [x] Documentar, probar, publicar y sincronizar la ampliación del segundo enlace.
+
+- [x] Inspeccionar el enlace Terabox `1ak41wq0adRZ3hfiTtJQwVQ` mediante acceso Google de jxaviercabellos@gmail.com.
+- [x] Inventariar sus cursos y archivos visibles sin descargar ni modificar originales.
+- [x] Integrar esta colección con IDs, enlace y cuenta separados de las colecciones anteriores.
+- [x] Documentar, probar, publicar y sincronizar la ampliación del tercer enlace.

@@ -292,3 +292,40 @@ export const teraboxCabellosalirrosasSecondNames = [
 export const teraboxCabellosalirrosasSecondCatalog: DriveCourse[] = teraboxCabellosalirrosasSecondNames.map((name) =>
   teraboxCourseForAccount(CABELLOSALIRROSAS_SECOND_CONFIG, teraboxSlug(name), name),
 );
+
+
+export const TERABOX_JXAVIERCABELLOS_ACCOUNT_EMAIL = "jxaviercabellos@gmail.com";
+export const TERABOX_JXAVIERCABELLOS_SHARED_LINK = "https://1024terabox.com/s/1ak41wq0adRZ3hfiTtJQwVQ";
+const JXAVIERCABELLOS_CONFIG: TeraboxAccountConfig = {
+  idPrefix: "terabox-jxaviercabellos",
+  sharedLink: TERABOX_JXAVIERCABELLOS_SHARED_LINK,
+  rootPath: "/",
+};
+
+/** Inventario inicial observado en el tercer enlace compartido de jxaviercabellos. */
+export const teraboxJxaviercabellosNames = [
+  "Cursos",
+  "Yasin Mammeri – Viral Video Course",
+  "Jeremy Miner And Matthew Rider – 7th Level Communications – Hunter Gatherer",
+  "Viralish Creator – The Stcky Videos Course",
+  "Daniel Foley Carter - SEO Webinar Bundle Course",
+  "HOW I MAKE 500 DAY - USING INSTAGRAM GLITCH - A METHOD IS FOR BEGINNERS",
+  "Zita - Viral Content Creator AI Automation 2024",
+  "Jon Dykstra - Local Riches",
+  "Jennifer Hoffman – Core 4 Karma & Energy Healing",
+  "Erica Scheider and Rob Lennon - Content Editing 101 - AI Learning Guides and Editors",
+  "April and Eric Perry - Steps to Everyday Productivity",
+  "Peter Diamandis - Fund Your Purpose",
+  "Yoyao Hsueh - Topical Maps Unlocked 2.0",
+  "Brandon Mulrenin (ReverseSelling) - Listing Agent Certification",
+  "Philosophaire - Viral Video - Social Media Guide - COPY OF AI VOICE",
+  "CapitalTycoon - Ecom Explosive Bootcamp",
+  "Kate McKibbin - Instaatm eCourse Launch Lab",
+  "Anvar Jabirov - Ecom Creative Powerhouse",
+  "Phoebe Khun – The Content Emporium Complete Library",
+  "Justing Phillips - The Last eCom Course",
+] as const;
+
+export const teraboxJxaviercabellosCatalog: DriveCourse[] = teraboxJxaviercabellosNames.map((name) =>
+  teraboxCourseForAccount(JXAVIERCABELLOS_CONFIG, teraboxSlug(name), name),
+);

@@ -1,4 +1,4 @@
-import { expandedTeraboxNames, teraboxCabellosalirrosasNames, teraboxCabellosalirrosasSecondNames, teraboxSlug, TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL } from "./teraboxCatalog";
+import { expandedTeraboxNames, teraboxCabellosalirrosasNames, teraboxCabellosalirrosasSecondNames, teraboxJxaviercabellosNames, teraboxSlug, TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL, TERABOX_JXAVIERCABELLOS_ACCOUNT_EMAIL } from "./teraboxCatalog";
 
 export type LearningRoute = {
   id: string;
@@ -124,6 +124,18 @@ export const courseMeta: CourseMeta[] = [
     whatYouLearn: "Recorrer el material original y transformarlo en una secuencia de estudio con objetivos y prácticas concretas.",
     startHere: "Abrir la carpeta del curso en Terabox",
     outcome: "Una ruta de aprendizaje organizada después de validar sus módulos y recursos.",
+  })),
+  ...teraboxJxaviercabellosNames.map((title, index) => ({
+    id: `terabox-jxaviercabellos-${teraboxSlug(title)}`,
+    source: "terabox" as const,
+    sourceAccountEmail: TERABOX_JXAVIERCABELLOS_ACCOUNT_EMAIL,
+    routeId: /viral|content|video|instagram|social|editing|tiktok|voice|seo|topical|youtube/i.test(title) ? "content" : /sales|selling|listing|local riches|ecom|infoproducto|fund your purpose/i.test(title) ? "business" : /karma|energy|productivity|english|libros/i.test(title) ? "ai" : "business",
+    order: 90 + index,
+    title,
+    description: "Curso Terabox del tercer enlace compartido de jxaviercabellos; incorporado con acceso de origen y pendiente de inspección interna detallada.",
+    whatYouLearn: "Recorrer el material original y convertirlo en una ruta de estudio práctica, con ejercicios y recursos de apoyo.",
+    startHere: "Abrir la carpeta del curso en Terabox",
+    outcome: "Una secuencia de aprendizaje organizada después de validar sus módulos y archivos.",
   })),
 ];
 

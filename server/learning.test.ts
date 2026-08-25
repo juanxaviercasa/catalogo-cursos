@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { calculateProgress, getContentType, orderedModules, type DriveItem } from "../shared/learning";
 import { courseMeta, getCourseSource, learningRoutes, TERABOX_SOURCE_ACCOUNT_EMAIL } from "../shared/courseMeta";
-import { TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL, TERABOX_CABELLOSALIRROSAS_SECOND_SHARED_LINK, TERABOX_CABELLOSALIRROSAS_SHARED_LINK, TERABOX_ROOT_PATH, TERABOX_ROOT_URL, teraboxCabellosalirrosasCatalog, teraboxCabellosalirrosasSecondCatalog, teraboxCatalog } from "../shared/teraboxCatalog";
+import { TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL, TERABOX_CABELLOSALIRROSAS_SECOND_SHARED_LINK, TERABOX_CABELLOSALIRROSAS_SHARED_LINK, TERABOX_JXAVIERCABELLOS_ACCOUNT_EMAIL, TERABOX_JXAVIERCABELLOS_SHARED_LINK, TERABOX_ROOT_PATH, TERABOX_ROOT_URL, teraboxCabellosalirrosasCatalog, teraboxCabellosalirrosasSecondCatalog, teraboxJxaviercabellosCatalog, teraboxCatalog } from "../shared/teraboxCatalog";
 
 const module = (id: string, name: string, mimeType: string, kind: "file" | "folder" = "file"): DriveItem => ({
   id,
@@ -81,6 +81,16 @@ describe("learning catalog helpers", () => {
     expect(teraboxCabellosalirrosasSecondCatalog.every((course) => course.webViewLink === TERABOX_CABELLOSALIRROSAS_SECOND_SHARED_LINK && course.rootPath === "/" && course.id.startsWith("terabox-cabellosalirrosas-second-"))).toBe(true);
     expect(courseMeta.filter((meta) => meta.sourceAccountEmail === TERABOX_CABELLOSALIRROSAS_ACCOUNT_EMAIL && meta.id.startsWith("terabox-cabellosalirrosas-second-")).length).toBe(20);
     expect(teraboxCabellosalirrosasCatalog.every((course) => !teraboxCabellosalirrosasSecondCatalog.some((second) => second.id === course.id))).toBe(true);
+  });
+
+  it("registra la colección de jxaviercabellos como una cuenta Terabox independiente", () => {
+    expect(teraboxJxaviercabellosCatalog).toHaveLength(20);
+    expect(new Set(teraboxJxaviercabellosCatalog.map((course) => course.id)).size).toBe(20);
+    expect(teraboxJxaviercabellosCatalog.every((course) => course.webViewLink === TERABOX_JXAVIERCABELLOS_SHARED_LINK && course.rootPath === "/" && course.id.startsWith("terabox-jxaviercabellos-"))).toBe(true);
+    expect(courseMeta.filter((meta) => meta.sourceAccountEmail === TERABOX_JXAVIERCABELLOS_ACCOUNT_EMAIL)).toHaveLength(20);
+    expect(courseMeta.filter((meta) => meta.sourceAccountEmail === TERABOX_JXAVIERCABELLOS_ACCOUNT_EMAIL).every((meta) => meta.id.startsWith("terabox-jxaviercabellos-"))).toBe(true);
+    expect(teraboxJxaviercabellosCatalog.some((course) => course.name === "Yasin Mammeri – Viral Video Course")).toBe(true);
+    expect(teraboxJxaviercabellosCatalog.some((course) => course.name === "CapitalTycoon - Ecom Explosive Bootcamp")).toBe(true);
   });
 
   it("registra la portada conceptual de Drinking Guide sin presentarla como original", () => {
