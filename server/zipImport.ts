@@ -1,8 +1,11 @@
 import { createWriteStream, promises as fs } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import yauzl, { type Entry, type ZipFile } from "yauzl";
 import { storagePut } from "./storage";
+
 
 const MAX_ZIP_BYTES = 350 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 150 * 1024 * 1024;
@@ -82,6 +85,42 @@ function openEntryStream(archive: ZipFile, entry: Entry): Promise<Readable> {
   });
 }
 
+export async function extractEntryBufferFromZip(zipPath: string, targetPath: string): Promise<Buffer> {
+
+  const archive = await openArchive(zipPath);
+  return new Promise<Buffer>((resolve, reject) => {
+    let resolved = false;
+    archive.on("error", (err) => {
+      archive.close();
+      if (!resolved) reject(err);
+    });
+    archive.readEntry();
+    archive.on("entry", async (entry: Entry) => {
+      const normalized = archiveEntryName(entry.fileName);
+      if (normalized === targetPath || entry.fileName === targetPath) {
+        resolved = true;
+        try {
+          const stream = await openEntryStream(archive, entry);
+          const buffer = await readEntryBuffer(stream, MAX_VIDEO_BYTES);
+          archive.close();
+          resolve(buffer);
+        } catch (err) {
+          archive.close();
+          reject(err);
+        }
+      } else {
+        archive.readEntry();
+      }
+    });
+    archive.on("end", () => {
+      if (!resolved) {
+        archive.close();
+        reject(new Error(`No se encontró la entrada ${targetPath} en el ZIP.`));
+      }
+    });
+  });
+}
+
 export async function extractPublicDriveZip(input: { zipId: string; sourceName: string; importId: number }) {
   const downloadUrl = `https://drive.usercontent.google.com/download?id=${encodeURIComponent(input.zipId)}&export=download&confirm=t`;
   const response = await fetch(downloadUrl, { redirect: "follow" });
@@ -92,7 +131,8 @@ export async function extractPublicDriveZip(input: { zipId: string; sourceName: 
     throw new Error("El ZIP supera el límite de importación segura de 350 MB.");
   }
 
-  const temporaryFile = `/tmp/drive-zip-${input.importId}-${crypto.randomUUID()}.zip`;
+  const temporaryFile = join(tmpdir(), `drive-zip-${input.importId}-${crypto.randomUUID()}.zip`);
+
   let downloadedBytes = 0;
 
   try {

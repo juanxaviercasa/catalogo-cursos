@@ -1,12 +1,14 @@
 import { createWriteStream } from "node:fs";
-import { mkdir, readFile, rm, stat } from "node:fs/promises";
+import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { basename, extname, join } from "node:path";
 import { pipeline } from "node:stream/promises";
 import { Readable } from "node:stream";
-import { spawn } from "node:child_process";
 import { getExtractedVideoById, getZipImportById, setExtractedVideoProcessingStatus } from "../server/db";
 import { storagePut } from "../server/storage";
+import { extractEntryBufferFromZip } from "../server/zipImport";
 import { convertToBrowserMp4 } from "./local_video_processor.mjs";
+
 
 const MAX_ZIP_BYTES = 350 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 150 * 1024 * 1024;
@@ -54,14 +56,9 @@ async function extractQueuedSource(input: { zipId: string; sourcePath: string; v
   if (declaredSize && declaredSize > MAX_ZIP_BYTES) throw new Error("El ZIP supera el límite seguro de conversión local.");
   await pipeline(Readable.fromWeb(response.body as never), createWriteStream(zipPath));
 
-  await new Promise<void>((resolve, reject) => {
-    const child = spawn("unzip", ["-p", zipPath, input.sourcePath]);
-    const output = createWriteStream(sourcePath, { flags: "wx" });
-    child.on("error", reject);
-    output.on("error", reject);
-    child.stdout.pipe(output);
-    child.on("close", (code) => code === 0 ? resolve() : reject(new Error("No se pudo extraer el vídeo indicado del ZIP.")));
-  });
+  const buffer = await extractEntryBufferFromZip(zipPath, input.sourcePath);
+  await writeFile(sourcePath, buffer);
+
   const sourceStats = await stat(sourcePath);
   if (!sourceStats.size || sourceStats.size > MAX_VIDEO_BYTES) throw new Error("El vídeo incompatible supera el límite seguro de conversión local.");
   return { sourcePath, zipPath };
@@ -70,7 +67,8 @@ async function extractQueuedSource(input: { zipId: string; sourcePath: string; v
 async function main() {
   const videoId = Number(argument("--video-id"));
   const inputPath = argument("--input");
-  const outputDirectory = argument("--output-dir") ?? "/tmp/curso-drive-conversion";
+  const outputDirectory = argument("--output-dir") ?? join(tmpdir(), "curso-drive-conversion");
+
   if (!Number.isInteger(videoId) || videoId <= 0) throw new Error("Uso: pnpm tsx workers/process_queued_video.ts --video-id <id> [--input <archivo.mkv>] [--output-dir <directorio>]");
 
   const video = await getExtractedVideoById(videoId);

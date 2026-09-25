@@ -8,6 +8,7 @@ import { DubbingSetupSchema, dubbingSetup, DriveCatalogSchema, getContentType, o
 import { extractPublicDriveZip } from "./zipImport";
 import { dispatchQueuedVideos, isProcessorConfigured, type VideoProcessorMode } from "./videoProcessorDispatch";
 import { generateImage } from "./_core/imageGeneration";
+import { driveCatalogFallback } from "../shared/driveCatalogFallback";
 import { teraboxCabellosalirrosasCatalog, teraboxCabellosalirrosasSecondCatalog, teraboxJxaviercabellosCatalog, teraboxCatalog } from "../shared/teraboxCatalog";
 
 const CATALOG_PATH = "/manus-storage/drive_courses_inventory_with_kinobody_and_cursosgo235_81d1c762.json";
@@ -69,13 +70,22 @@ async function getCurrentVideoProcessingSetup() {
 
 async function loadCatalog(origin: string): Promise<DriveCourse[]> {
   if (catalogCache) return catalogCache;
-  const response = await fetch(`${origin}${CATALOG_PATH}`);
-  if (!response.ok) throw new Error("No se pudo cargar el catálogo de cursos.");
-  const payload = DriveCatalogSchema.safeParse(await response.json());
-  if (!payload.success) throw new Error("El catálogo de cursos tiene un formato no válido.");
-  catalogCache = [...payload.data, ...teraboxCatalog, ...teraboxCabellosalirrosasCatalog, ...teraboxCabellosalirrosasSecondCatalog, ...teraboxJxaviercabellosCatalog];
+  let driveCourses: DriveCourse[] = driveCatalogFallback;
+  try {
+    const response = await fetch(`${origin}${CATALOG_PATH}`);
+    if (response.ok) {
+      const payload = DriveCatalogSchema.safeParse(await response.json());
+      if (payload.success && payload.data.length > 0) {
+        driveCourses = payload.data;
+      }
+    }
+  } catch (error) {
+    console.warn("[Catalog] Usando catálogo local predeterminado de Google Drive:", error);
+  }
+  catalogCache = [...driveCourses, ...teraboxCatalog, ...teraboxCabellosalirrosasCatalog, ...teraboxCabellosalirrosasSecondCatalog, ...teraboxJxaviercabellosCatalog];
   return catalogCache;
 }
+
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly

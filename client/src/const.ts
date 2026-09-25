@@ -14,7 +14,11 @@ export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 // stash across renders.
 export const startLogin = () => {
   const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
-  const appId = import.meta.env.VITE_APP_ID;
+  if (!oauthPortalUrl) {
+    window.location.href = "/api/auth/dev-login";
+    return;
+  }
+  const appId = import.meta.env.VITE_APP_ID ?? "catalogo-cursos";
   const redirectUri = `${window.location.origin}/api/oauth/callback`;
 
   const nonce = crypto.randomUUID();
@@ -29,3 +33,4 @@ export const startLogin = () => {
 
   window.location.href = url.toString();
 };
+

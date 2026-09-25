@@ -125,6 +125,32 @@ export async function getMediaTracks() {
   return db.select().from(mediaTracks);
 }
 
+export async function saveMediaTrack(input: {
+  extractedVideoId: number;
+  language: string;
+  kind: "dubbed_video" | "captions";
+  label: string;
+  storageKey: string;
+  storageUrl: string;
+  mimeType: string;
+  provider: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("La base de datos no está disponible.");
+
+  await db.insert(mediaTracks).values(input).onDuplicateKeyUpdate({
+    set: {
+      label: input.label,
+      storageKey: input.storageKey,
+      storageUrl: input.storageUrl,
+      mimeType: input.mimeType,
+      provider: input.provider,
+    },
+  });
+  return input;
+}
+
+
 export async function getZipImportByZipId(zipId: string) {
   const db = await getDb();
   if (!db) return undefined;
