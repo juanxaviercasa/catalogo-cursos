@@ -14,6 +14,10 @@ function getQueryParam(req: Request, key: string): string | undefined {
 export function registerOAuthRoutes(app: Express) {
   // Direct developer / local administrator login
   app.get("/api/auth/dev-login", async (req: Request, res: Response) => {
+    if (ENV.isProduction) {
+      res.sendStatus(404);
+      return;
+    }
     try {
       const openId = ENV.ownerOpenId || "admin";
       const name = "Administrador";

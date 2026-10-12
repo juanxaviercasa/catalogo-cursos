@@ -1,18 +1,26 @@
 import { asc, desc, eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import * as schema from "../drizzle/schema";
 import { extractedVideos, InsertUser, mediaTracks, moduleProgress, pdfTranslationSegments, pdfTranslations, pdfVisualLocalizations, users, videoProcessingEvents, videoProcessingPreferences, zipImports } from "../drizzle/schema";
 import type { ExtractedVideo as ImportedVideo } from "./zipImport";
 import { ENV } from './_core/env';
 
-let _db: ReturnType<typeof drizzle> | null = null;
+type AppDatabase = NodePgDatabase<typeof schema>;
+let _db: AppDatabase | null = null;
+let _pool: Pool | null = null;
 
 // Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      _pool = new Pool({ connectionString: process.env.DATABASE_URL });
+      await _pool.query("select 1");
+      _db = drizzle(_pool, { schema });
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
+      await _pool?.end().catch(() => undefined);
+      _pool = null;
       _db = null;
     }
   }
@@ -69,7 +77,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       updateSet.lastSignedIn = new Date();
     }
 
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
+    await db.insert(users).values(values).onConflictDoUpdate({
+      target: users.openId,
       set: updateSet,
     });
   } catch (error) {
@@ -106,7 +115,8 @@ export async function setModuleProgress(input: {
   if (!db) throw new Error("La base de datos no está disponible.");
 
   const completedAt = input.completed ? new Date() : null;
-  await db.insert(moduleProgress).values({ ...input, completedAt }).onDuplicateKeyUpdate({
+  await db.insert(moduleProgress).values({ ...input, completedAt }).onConflictDoUpdate({
+    target: [moduleProgress.userId, moduleProgress.moduleId],
     set: { courseId: input.courseId, completed: input.completed, completedAt },
   });
 }
@@ -138,7 +148,8 @@ export async function saveMediaTrack(input: {
   const db = await getDb();
   if (!db) throw new Error("La base de datos no está disponible.");
 
-  await db.insert(mediaTracks).values(input).onDuplicateKeyUpdate({
+  await db.insert(mediaTracks).values(input).onConflictDoUpdate({
+    target: [mediaTracks.extractedVideoId, mediaTracks.language, mediaTracks.kind],
     set: {
       label: input.label,
       storageKey: input.storageKey,
