@@ -156,4 +156,14 @@ CREATE UNIQUE INDEX "module_progress_user_module_unique" ON "module_progress" US
 CREATE UNIQUE INDEX "pdf_translation_segment_unique" ON "pdf_translation_segments" USING btree ("pdfTranslationId","pageNumber","segmentOrder");--> statement-breakpoint
 CREATE UNIQUE INDEX "pdf_translations_course_module_unique" ON "pdf_translations" USING btree ("courseId","moduleId");--> statement-breakpoint
 CREATE UNIQUE INDEX "pdf_visual_localization_page_unique" ON "pdf_visual_localizations" USING btree ("pdfTranslationId","pageNumber");--> statement-breakpoint
-CREATE UNIQUE INDEX "zip_imports_zip_unique" ON "zip_imports" USING btree ("zipId");
+CREATE UNIQUE INDEX "zip_imports_zip_unique" ON "zip_imports" USING btree ("zipId");--> statement-breakpoint
+ALTER TABLE "extracted_videos" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "media_tracks" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "module_progress" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "pdf_translation_segments" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "pdf_translations" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "pdf_visual_localizations" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "users" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "video_processing_events" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "video_processing_preferences" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "zip_imports" ENABLE ROW LEVEL SECURITY;

@@ -3,7 +3,7 @@
 ## Estado
 
 - El esquema Drizzle activo está migrado a PostgreSQL en `drizzle/schema.ts`.
-- La migración inicial generada está en `drizzle/postgres/` y crea las 10 tablas, enums, claves foráneas e índices del esquema actual.
+- La migración inicial generada está en `drizzle/postgres/` y crea las 10 tablas, enums, claves foráneas e índices del esquema actual; además habilita RLS en las tablas públicas, sin políticas para acceso directo desde el navegador.
 - El historial de migraciones MySQL previo se conserva en `drizzle/`; no se ejecuta contra Supabase.
 - **La migración creada solo inicializa el esquema; no copia datos de una base MySQL existente.** No se ha conectado ni escrito en el proyecto Supabase desde este cambio.
 
